@@ -1,3 +1,6 @@
+/**
+ * Small summary pill used across the web workspace for counts and status.
+ */
 type MetricPillProps = {
   label: string;
   value: string;
