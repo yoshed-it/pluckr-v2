@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { listClients } from "./clients";
 import type {
   ChartEntryRecord,
   ClientRecord,
@@ -153,20 +154,7 @@ export async function listOrganizationClients(
   client: SupabaseClient,
   organizationId: string
 ) {
-  const { data, error } = await client
-    .from("clients")
-    .select("*")
-    .eq("organization_id", organizationId)
-    .is("archived_at", null)
-    .order("last_seen_at", { ascending: false, nullsFirst: false })
-    .order("created_at", { ascending: false })
-    .limit(12);
-
-  if (error) {
-    throw error;
-  }
-
-  return (data ?? []) as ClientRecord[];
+  return (await listClients(client, organizationId)).slice(0, 12) as ClientRecord[];
 }
 
 /**

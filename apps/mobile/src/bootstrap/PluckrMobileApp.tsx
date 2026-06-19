@@ -10,6 +10,7 @@ import { SafeAreaView, ScrollView, StatusBar, StyleSheet } from "react-native";
 import {
   createOrganizationSelectionStorage,
   useAuthController,
+  useClientListController,
   useOrganizationController,
   useSessionController,
   useWorkspaceController
@@ -17,12 +18,17 @@ import {
 import { getSupabaseNativeClient } from "@pluckr/supabase";
 
 import { MobileAuthStage } from "../components/MobileAuthStage";
+import { MobileClientListStage } from "../components/MobileClientListStage";
 import { MobileOrganizationStage } from "../components/MobileOrganizationStage";
 import { MobileWorkspaceStage } from "../components/MobileWorkspaceStage";
 import { mobileTheme } from "../theme";
 
+type ActiveWorkspaceScreen = "workspace" | "clients";
+
 export function PluckrMobileApp() {
   const supabase = useState(() => getSupabaseNativeClient(AsyncStorage))[0];
+  const [activeWorkspaceScreen, setActiveWorkspaceScreen] =
+    useState<ActiveWorkspaceScreen>("workspace");
   const selectionStorage = useState(() =>
     createOrganizationSelectionStorage(AsyncStorage)
   )[0];
@@ -39,6 +45,10 @@ export function PluckrMobileApp() {
     organizationController.memberships,
     organizationController.selectedOrganizationId
   );
+  const clientListController = useClientListController(
+    supabase,
+    organizationController.selectedOrganizationId
+  );
 
   const selectedMembership = organizationController.memberships.find(
     (record) =>
@@ -48,6 +58,7 @@ export function PluckrMobileApp() {
   async function handleLogout() {
     await selectionStorage.clearSelectedOrganizationId();
     await supabase.auth.signOut();
+    setActiveWorkspaceScreen("workspace");
     authController.resetAfterLogout();
     organizationController.resetAfterLogout();
     workspaceController.resetWorkspaceView();
@@ -122,6 +133,30 @@ export function PluckrMobileApp() {
             onShowJoinMessage={organizationController.showJoinMessage}
             onLogout={() => void handleLogout()}
           />
+        ) : activeWorkspaceScreen === "clients" ? (
+          <MobileClientListStage
+            clients={clientListController.filteredClients}
+            searchText={clientListController.searchText}
+            isLoading={clientListController.isLoadingClients}
+            error={clientListController.clientListError}
+            notice={clientListController.clientListNotice}
+            isCreatingClient={clientListController.isCreatingClient}
+            isSavingClient={clientListController.isSavingClient}
+            clientForm={clientListController.clientForm}
+            onBack={() => setActiveWorkspaceScreen("workspace")}
+            onLogout={() => void handleLogout()}
+            onSearchChange={clientListController.setSearchText}
+            onStartCreate={clientListController.startCreatingClient}
+            onCancelCreate={clientListController.cancelCreatingClient}
+            onFormChange={clientListController.updateClientForm}
+            onSubmitClient={() =>
+              void clientListController.submitClient().then((saved) => {
+                if (saved) {
+                  void workspaceController.refreshWorkspace();
+                }
+              })
+            }
+          />
         ) : (
           <MobileWorkspaceStage
             organization={selectedMembership.organization}
@@ -134,9 +169,11 @@ export function PluckrMobileApp() {
             error={workspaceController.workspaceError}
             notice={workspaceController.workspaceNotice}
             onBack={() => {
+              setActiveWorkspaceScreen("workspace");
               organizationController.setSelectedOrganizationId(null);
               workspaceController.resetWorkspaceView();
             }}
+            onOpenClients={() => setActiveWorkspaceScreen("clients")}
             onSeedDemoData={() =>
               void workspaceController.seedWorkspaceDemoData()
             }

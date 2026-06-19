@@ -26,6 +26,7 @@ type MobileWorkspaceStageProps = {
   error: string | null;
   notice: string | null;
   onBack: () => void;
+  onOpenClients: () => void;
   onSeedDemoData: () => void;
   onLogout: () => void;
 };
@@ -52,6 +53,7 @@ export function MobileWorkspaceStage({
   error,
   notice,
   onBack,
+  onOpenClients,
   onSeedDemoData,
   onLogout
 }: MobileWorkspaceStageProps) {
@@ -91,6 +93,11 @@ export function MobileWorkspaceStage({
         </View>
 
         <View style={styles.heroActions}>
+          <PluckrButton
+            label="Open Client List"
+            variant="secondary"
+            onPress={() => onOpenClients()}
+          />
           <Text style={styles.heroBadge}>
             {clients.length === 0 ? "Ready for demo seeding" : "Live demo data"}
           </Text>

@@ -8,6 +8,7 @@ import { useState } from "react";
 import {
   createOrganizationSelectionStorage,
   useAuthController,
+  useClientListController,
   useOrganizationController,
   useSessionController,
   useWorkspaceController
@@ -15,11 +16,16 @@ import {
 import { getSupabaseBrowserClient } from "@pluckr/supabase";
 
 import { AuthStage } from "./AuthStage";
+import { ClientListStage } from "./ClientListStage";
 import { OrganizationStage } from "./OrganizationStage";
 import { WorkspaceStage } from "./WorkspaceStage";
 
+type ActiveWorkspaceScreen = "workspace" | "clients";
+
 export function PluckrWebApp() {
   const supabase = useState(() => getSupabaseBrowserClient())[0];
+  const [activeWorkspaceScreen, setActiveWorkspaceScreen] =
+    useState<ActiveWorkspaceScreen>("workspace");
   const selectionStorage = useState(() =>
     createOrganizationSelectionStorage({
       getItem: (key) =>
@@ -49,6 +55,10 @@ export function PluckrWebApp() {
     organizationController.memberships,
     organizationController.selectedOrganizationId
   );
+  const clientListController = useClientListController(
+    supabase,
+    organizationController.selectedOrganizationId
+  );
 
   const selectedMembership = organizationController.memberships.find(
     (record) =>
@@ -58,6 +68,7 @@ export function PluckrWebApp() {
   async function handleLogout() {
     await selectionStorage.clearSelectedOrganizationId();
     await supabase.auth.signOut();
+    setActiveWorkspaceScreen("workspace");
     authController.resetAfterLogout();
     organizationController.resetAfterLogout();
     workspaceController.resetWorkspaceView();
@@ -136,6 +147,34 @@ export function PluckrWebApp() {
     );
   }
 
+  if (activeWorkspaceScreen === "clients") {
+    return (
+      <ClientListStage
+        clients={clientListController.filteredClients}
+        searchText={clientListController.searchText}
+        isLoading={clientListController.isLoadingClients}
+        error={clientListController.clientListError}
+        notice={clientListController.clientListNotice}
+        isCreatingClient={clientListController.isCreatingClient}
+        isSavingClient={clientListController.isSavingClient}
+        clientForm={clientListController.clientForm}
+        onBack={() => setActiveWorkspaceScreen("workspace")}
+        onLogout={() => void handleLogout()}
+        onSearchChange={clientListController.setSearchText}
+        onStartCreate={clientListController.startCreatingClient}
+        onCancelCreate={clientListController.cancelCreatingClient}
+        onFormChange={clientListController.updateClientForm}
+        onSubmitClient={() =>
+          void clientListController.submitClient().then((saved) => {
+            if (saved) {
+              void workspaceController.refreshWorkspace();
+            }
+          })
+        }
+      />
+    );
+  }
+
   return (
     <WorkspaceStage
       organization={selectedMembership.organization}
@@ -148,9 +187,11 @@ export function PluckrWebApp() {
       error={workspaceController.workspaceError}
       notice={workspaceController.workspaceNotice}
       onBack={() => {
+        setActiveWorkspaceScreen("workspace");
         organizationController.setSelectedOrganizationId(null);
         workspaceController.resetWorkspaceView();
       }}
+      onOpenClients={() => setActiveWorkspaceScreen("clients")}
       onSeedDemoData={() => void workspaceController.seedWorkspaceDemoData()}
       onLogout={() => void handleLogout()}
     />

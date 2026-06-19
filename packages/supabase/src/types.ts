@@ -74,6 +74,19 @@ export type ClientRecord = {
 };
 
 /**
+ * Input payload for creating a client record in the v2 app.
+ */
+export type ClientInput = {
+  organizationId: string;
+  firstName: string;
+  lastName: string;
+  pronouns?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  notes?: string | null;
+};
+
+/**
  * Represents a chart entry row displayed in recent activity summaries.
  */
 export type ChartEntryRecord = {

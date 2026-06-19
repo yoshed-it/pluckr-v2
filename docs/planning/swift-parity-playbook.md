@@ -12,6 +12,8 @@ The current v2 slice is implemented in both apps:
 
 - web: auth -> organization selection -> workspace
 - mobile: auth -> organization selection -> workspace
+- web: dedicated client list screen with search and add-client flow
+- mobile: dedicated client list screen with search and add-client flow
 
 Shared data behavior now lives in Supabase:
 
@@ -59,12 +61,26 @@ V2 implementation:
 - `apps/mobile/src/components/MobileWorkspaceStage.tsx`
 - `packages/supabase/src/organization.ts`
 
+### Client List
+
+Swift reference:
+
+- `Views/Clients/ClientListView.swift`
+- `Views/ClientEdit/AddClientView.swift`
+
+V2 implementation:
+
+- `apps/web/src/components/ClientListStage.tsx`
+- `apps/mobile/src/components/MobileClientListStage.tsx`
+- `packages/app-core/src/useClientListController.ts`
+- `packages/supabase/src/clients.ts`
+
 ## Next Work, In Order
 
-1. add invite-based organization joining so the secondary org action is real
-2. add client detail and client creation flows
-3. add chart entry creation so the workspace is no longer read-only
-4. port image and consent workflows
+1. add client journal/detail flow
+2. add chart entry creation so the workspace is no longer read-only
+3. port image and consent workflows
+4. add invite-based organization joining so the secondary org action is real
 5. port provider/admin management
 
 ## How To Verify This Slice

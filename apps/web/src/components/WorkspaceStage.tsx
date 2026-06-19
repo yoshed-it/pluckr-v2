@@ -27,6 +27,7 @@ type WorkspaceStageProps = {
   error: string | null;
   notice: string | null;
   onBack: () => void;
+  onOpenClients: () => void;
   onSeedDemoData: () => void;
   onLogout: () => void;
 };
@@ -53,6 +54,7 @@ export function WorkspaceStage({
   error,
   notice,
   onBack,
+  onOpenClients,
   onSeedDemoData,
   onLogout
 }: WorkspaceStageProps) {
@@ -98,14 +100,23 @@ export function WorkspaceStage({
               <span className="hero-badge">
                 {clients.length === 0 ? "Ready for demo seeding" : "Live demo data"}
               </span>
-              <button
-                className="swift-button swift-button-secondary"
-                type="button"
-                disabled={isSeeding}
-                onClick={onSeedDemoData}
-              >
-                {isSeeding ? "Seeding..." : "Seed Demo Data"}
-              </button>
+              <div className="client-form-actions">
+                <button
+                  className="swift-button swift-button-secondary"
+                  type="button"
+                  onClick={onOpenClients}
+                >
+                  Open Client List
+                </button>
+                <button
+                  className="swift-button swift-button-secondary"
+                  type="button"
+                  disabled={isSeeding}
+                  onClick={onSeedDemoData}
+                >
+                  {isSeeding ? "Seeding..." : "Seed Demo Data"}
+                </button>
+              </div>
             </div>
           </PaperPanel>
         </section>

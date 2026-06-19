@@ -11,6 +11,7 @@
 - ship Supabase auth across web and mobile
 - recreate organization selection and inline organization creation
 - surface provider/client/chart workspace summaries
+- add searchable client list and add-client workflow
 - keep chart entry creation and editing as the next major workflow
 
 ## Phase 3

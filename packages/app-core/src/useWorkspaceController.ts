@@ -117,6 +117,10 @@ export function useWorkspaceController(
     workspaceSummary,
     workspaceClients,
     workspaceCharts,
+    refreshWorkspace: () =>
+      selectedOrganizationId
+        ? loadWorkspace(selectedOrganizationId)
+        : Promise.resolve(),
     seedWorkspaceDemoData,
     resetWorkspaceView
   };
