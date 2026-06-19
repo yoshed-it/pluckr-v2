@@ -1,19 +1,47 @@
-# Supabase Notes
+# Supabase Backend
 
-This folder contains the first prototype schema for Pluckr v2.
+This folder contains the database foundation for Pluckr v2.
 
-## Current Intent
+## What Lives Here
 
-- model organizations, memberships, providers, clients, and chart entries in Postgres
-- keep the schema easy to understand while we build the prototype quickly
-- leave room to harden RLS and storage policies later
+- SQL migrations
+- backend structure notes
+- the shared organization, membership, client, chart, and storage model
 
-## Prototype Caveat
+## Current Backend Shape
 
-The initial policies are intentionally lightweight for speed. Before anything real or sensitive ships, tighten:
+The first migration creates:
 
-- row-level policies
-- storage policies
-- audit trails
-- invite handling
-- server-only admin access
+- `organizations`
+- `organization_memberships`
+- `providers`
+- `clients`
+- `chart_entries`
+- `chart_images`
+- `invite_links`
+
+It also creates a private `client-media` storage bucket and baseline row-level policies.
+
+## Team Rule
+
+Treat the repository migration files as the source of truth for schema changes.
+
+- If you change schema in the Supabase dashboard, pull that change back into the repo
+- Prefer schema changes through migrations once the team is in motion
+
+## Setup
+
+Use the docs in:
+
+- `docs/setup/supabase.md`
+- `docs/setup/team-onboarding.md`
+
+## Key Security Rule
+
+Only server code should ever use `SUPABASE_SECRET_KEY`.
+
+Never put secret keys in:
+
+- `NEXT_PUBLIC_*`
+- `EXPO_PUBLIC_*`
+- committed `.env` files

@@ -2,47 +2,79 @@
 
 Fresh workspace for the React Native + Vercel + Supabase rebuild.
 
-## What is here
+## Repo Shape
 
-- `apps/mobile`: Expo-flavored React Native shell for the provider-facing experience
-- `apps/web`: Next.js App Router shell for investor, admin, and clinic ops surfaces
-- `packages/design-system`: Shared Pluckr visual tokens translated from the current Swift theme
-- `packages/supabase`: Lazy client helpers for web and mobile
-- `supabase`: Prototype schema and migration notes
-- `docs`: Design continuity and rebuild planning notes
+- `apps/mobile`: Expo-based React Native app for provider-facing workflows
+- `apps/web`: Next.js app for investor demos, admin, and clinic ops
+- `packages/design-system`: shared Pluckr brand tokens and theme helpers
+- `packages/supabase`: shared Supabase client helpers for web and mobile
+- `supabase`: schema, migration, and backend notes
+- `docs`: onboarding, setup, planning, design, and legacy archive
 
 ## Design Intent
 
-This scaffold intentionally preserves the existing visual language:
+This workspace intentionally preserves the existing Pluckr feel:
 
-- warm paper backgrounds
-- sage and forest green accents
-- journal-like sectioning
-- rounded clinical cards
-- soft paper shadows
+- warm paper-like surfaces
+- sage and forest accents
+- journal-inspired spacing and typography
+- soft rounded cards instead of generic dashboard chrome
 
-We can evolve the design later without losing the current product feel for investor demos.
+That keeps the investor story visually continuous while the product architecture gets rebuilt.
 
-## Install Later
+## Team Docs
 
-This machine session did not have `npm` or `pnpm` on the shell path, so the repo was scaffolded by hand instead of generated with a CLI.
+Start here:
 
-Once your package manager is available, install from the repo root:
+- [Docs Index](./docs/README.md)
+- [Supabase Setup](./docs/setup/supabase.md)
+- [Vercel Setup](./docs/setup/vercel.md)
+- [Local Development](./docs/setup/local-development.md)
+- [Team Onboarding](./docs/setup/team-onboarding.md)
+
+## Local Development
+
+Prerequisites:
+
+- Node.js 20+ and npm
+- a Supabase project
+- Vercel access for web deployments
+
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Then use:
+Run the web app:
 
 ```bash
 npm run dev:web
+```
+
+Run the mobile app:
+
+```bash
 npm run start:mobile
 ```
 
-## First Build Targets
+## Environment Variables
 
-1. Investor-facing web prototype in `apps/web`
-2. Provider mobile prototype in `apps/mobile`
-3. Shared auth and data access through Supabase
-4. Incremental migration of the current feature set instead of a one-shot port
+This repo now uses one shared root `.env.local` as the source of truth for local development.
+
+- `apps/web/.env.local` points to the root file
+- `apps/mobile/.env.local` points to the root file
+
+Use current Supabase keys:
+
+- client-side: publishable key
+- server-side: secret key
+
+The exact contract is documented in [Supabase Setup](./docs/setup/supabase.md).
+
+## Current Priorities
+
+1. Establish the shared backend foundation in Supabase
+2. Build auth and organization context
+3. Recreate the core client and chart flows
+4. Keep the current visual language while the product grows
