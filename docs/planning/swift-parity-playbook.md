@@ -14,6 +14,8 @@ The current v2 slice is implemented in both apps:
 - mobile: auth -> organization selection -> workspace
 - web: dedicated client list screen with search and add-client flow
 - mobile: dedicated client list screen with search and add-client flow
+- web: dedicated client journal screen with chart list and chart-entry editing
+- mobile: dedicated client journal screen with chart list and chart-entry editing
 
 Shared data behavior now lives in Supabase:
 
@@ -75,13 +77,27 @@ V2 implementation:
 - `packages/app-core/src/useClientListController.ts`
 - `packages/supabase/src/clients.ts`
 
+### Client Journal
+
+Swift reference:
+
+- `Views/Clients/ClientJournalView.swift`
+- `Views/Charts/ChartEntryFormView.swift`
+
+V2 implementation:
+
+- `apps/web/src/components/ClientJournalStage.tsx`
+- `apps/mobile/src/components/MobileClientJournalStage.tsx`
+- `packages/app-core/src/useClientJournalController.ts`
+- `packages/supabase/src/charts.ts`
+
 ## Next Work, In Order
 
-1. add client journal/detail flow
-2. add chart entry creation so the workspace is no longer read-only
-3. port image and consent workflows
-4. add invite-based organization joining so the secondary org action is real
-5. port provider/admin management
+1. port client editing and deletion flows
+2. port image and consent workflows
+3. add invite-based organization joining so the secondary org action is real
+4. port provider/admin management
+5. harden auth once the parity-first flows are stable
 
 ## How To Verify This Slice
 
@@ -93,3 +109,5 @@ V2 implementation:
 6. create an organization
 7. seed demo data
 8. confirm clients and recent charts render in both apps
+9. open a client from the client list
+10. create, edit, and delete a chart entry in both apps

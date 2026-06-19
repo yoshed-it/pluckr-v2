@@ -13,6 +13,7 @@
 - [Migration Roadmap](./planning/migration-roadmap.md)
 - [Swift Parity Playbook](./planning/swift-parity-playbook.md)
 - [Architecture Rules](./planning/architecture-rules.md)
+- [TODO / Future / Ideas](./planning/todo-future-ideas.md)
 
 ## Legacy Reference
 
