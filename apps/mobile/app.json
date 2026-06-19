@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Pluckr",
+    "slug": "pluckr-v2",
+    "scheme": "pluckr",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pluckr.prototype"
+    },
+    "android": {
+      "package": "com.pluckr.prototype"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
