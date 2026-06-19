@@ -2,7 +2,7 @@
  * Mobile Swift-parity client list screen with search and add-client flow.
  */
 import React from "react";
-import { Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import type { ClientRecord } from "@pluckr/supabase";
 
 import { PaperCard } from "./PaperCard";
@@ -29,6 +29,7 @@ type MobileClientListStageProps = {
   };
   onBack: () => void;
   onLogout: () => void;
+  onSelectClient: (client: ClientRecord) => void;
   onSearchChange: (value: string) => void;
   onStartCreate: () => void;
   onCancelCreate: () => void;
@@ -61,6 +62,7 @@ export function MobileClientListStage({
   clientForm,
   onBack,
   onLogout,
+  onSelectClient,
   onSearchChange,
   onStartCreate,
   onCancelCreate,
@@ -170,7 +172,13 @@ export function MobileClientListStage({
         ) : (
           <View style={styles.listStack}>
             {clients.map((client) => (
-              <PaperCard key={client.id} compact>
+              <Pressable
+                key={client.id}
+                accessibilityRole="button"
+                style={styles.cardButton}
+                onPress={() => onSelectClient(client)}
+              >
+                <PaperCard compact>
                 <Text style={styles.cardTitle}>
                   {client.first_name} {client.last_name}
                 </Text>
@@ -180,7 +188,8 @@ export function MobileClientListStage({
                 <Text style={styles.cardMeta}>
                   Last seen {formatDateLabel(client.last_seen_at)}
                 </Text>
-              </PaperCard>
+                </PaperCard>
+              </Pressable>
             ))}
           </View>
         )}

@@ -104,6 +104,22 @@ export type ChartEntryRecord = {
 };
 
 /**
+ * Input payload for creating or updating a chart entry.
+ *
+ * The fields mirror the first chart-entry rebuild slice rather than every
+ * legacy Swift field so we can translate the workflow in stable steps.
+ */
+export type ChartEntryInput = {
+  organizationId: string;
+  clientId: string;
+  treatmentArea?: string | null;
+  modality?: string | null;
+  treatmentSummary?: string | null;
+  notes?: string | null;
+  tags?: string[];
+};
+
+/**
  * Represents a recent chart entry with the client name joined in for
  * workspace lists on both web and mobile.
  */

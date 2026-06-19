@@ -8,24 +8,27 @@ import { useState } from "react";
 import {
   createOrganizationSelectionStorage,
   useAuthController,
+  useClientJournalController,
   useClientListController,
   useOrganizationController,
   useSessionController,
   useWorkspaceController
 } from "@pluckr/app-core";
-import { getSupabaseBrowserClient } from "@pluckr/supabase";
+import { getSupabaseBrowserClient, type ClientRecord } from "@pluckr/supabase";
 
 import { AuthStage } from "./AuthStage";
+import { ClientJournalStage } from "./ClientJournalStage";
 import { ClientListStage } from "./ClientListStage";
 import { OrganizationStage } from "./OrganizationStage";
 import { WorkspaceStage } from "./WorkspaceStage";
 
-type ActiveWorkspaceScreen = "workspace" | "clients";
+type ActiveWorkspaceScreen = "workspace" | "clients" | "journal";
 
 export function PluckrWebApp() {
   const supabase = useState(() => getSupabaseBrowserClient())[0];
   const [activeWorkspaceScreen, setActiveWorkspaceScreen] =
     useState<ActiveWorkspaceScreen>("workspace");
+  const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
   const selectionStorage = useState(() =>
     createOrganizationSelectionStorage({
       getItem: (key) =>
@@ -59,6 +62,11 @@ export function PluckrWebApp() {
     supabase,
     organizationController.selectedOrganizationId
   );
+  const clientJournalController = useClientJournalController(
+    supabase,
+    organizationController.selectedOrganizationId,
+    selectedClient
+  );
 
   const selectedMembership = organizationController.memberships.find(
     (record) =>
@@ -69,6 +77,7 @@ export function PluckrWebApp() {
     await selectionStorage.clearSelectedOrganizationId();
     await supabase.auth.signOut();
     setActiveWorkspaceScreen("workspace");
+    setSelectedClient(null);
     authController.resetAfterLogout();
     organizationController.resetAfterLogout();
     workspaceController.resetWorkspaceView();
@@ -160,6 +169,10 @@ export function PluckrWebApp() {
         clientForm={clientListController.clientForm}
         onBack={() => setActiveWorkspaceScreen("workspace")}
         onLogout={() => void handleLogout()}
+        onSelectClient={(client) => {
+          setSelectedClient(client);
+          setActiveWorkspaceScreen("journal");
+        }}
         onSearchChange={clientListController.setSearchText}
         onStartCreate={clientListController.startCreatingClient}
         onCancelCreate={clientListController.cancelCreatingClient}
@@ -168,6 +181,38 @@ export function PluckrWebApp() {
           void clientListController.submitClient().then((saved) => {
             if (saved) {
               void workspaceController.refreshWorkspace();
+            }
+          })
+        }
+      />
+    );
+  }
+
+  if (activeWorkspaceScreen === "journal" && selectedClient) {
+    return (
+      <ClientJournalStage
+        client={selectedClient}
+        charts={clientJournalController.charts}
+        isLoading={clientJournalController.isLoadingCharts}
+        error={clientJournalController.journalError}
+        notice={clientJournalController.journalNotice}
+        isEditingChart={clientJournalController.isEditingChart}
+        isSavingChart={clientJournalController.isSavingChart}
+        chartForm={clientJournalController.chartForm}
+        onBack={() => setActiveWorkspaceScreen("clients")}
+        onLogout={() => void handleLogout()}
+        onStartChart={clientJournalController.startCreatingChart}
+        onCancelChart={clientJournalController.cancelEditingChart}
+        onEditChart={clientJournalController.startEditingChart}
+        onDeleteChart={(chart) => void clientJournalController.removeChart(chart)}
+        onChartFormChange={clientJournalController.updateChartForm}
+        onSubmitChart={() =>
+          void clientJournalController.submitChart().then((saved) => {
+            if (saved) {
+              void Promise.all([
+                clientListController.refreshClients(),
+                workspaceController.refreshWorkspace()
+              ]);
             }
           })
         }
@@ -188,6 +233,7 @@ export function PluckrWebApp() {
       notice={workspaceController.workspaceNotice}
       onBack={() => {
         setActiveWorkspaceScreen("workspace");
+        setSelectedClient(null);
         organizationController.setSelectedOrganizationId(null);
         workspaceController.resetWorkspaceView();
       }}

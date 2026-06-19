@@ -28,6 +28,7 @@ type ClientListStageProps = {
   };
   onBack: () => void;
   onLogout: () => void;
+  onSelectClient: (client: ClientRecord) => void;
   onSearchChange: (value: string) => void;
   onStartCreate: () => void;
   onCancelCreate: () => void;
@@ -60,6 +61,7 @@ export function ClientListStage({
   clientForm,
   onBack,
   onLogout,
+  onSelectClient,
   onSearchChange,
   onStartCreate,
   onCancelCreate,
@@ -192,7 +194,12 @@ export function ClientListStage({
           ) : (
             <div className="workspace-list">
               {clients.map((client) => (
-                <article key={client.id} className="workspace-list-card">
+                <button
+                  key={client.id}
+                  className="workspace-list-card workspace-list-button"
+                  type="button"
+                  onClick={() => onSelectClient(client)}
+                >
                   <div className="workspace-list-header">
                     <strong>
                       {client.first_name} {client.last_name}
@@ -207,7 +214,7 @@ export function ClientListStage({
                   <span className="workspace-list-meta">
                     Last seen {formatDateLabel(client.last_seen_at)}
                   </span>
-                </article>
+                </button>
               ))}
             </div>
           )}

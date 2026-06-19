@@ -1,5 +1,5 @@
 /**
- * Shared styles for the mobile client list screen.
+ * Shared styles for the mobile client journal screen.
  */
 import { StyleSheet } from "react-native";
 
@@ -45,27 +45,12 @@ export const styles = StyleSheet.create({
     lineHeight: 24,
     marginTop: mobileTheme.spacing.sm
   },
-  heroActions: {
-    marginTop: mobileTheme.spacing.lg
-  },
-  searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
+  metaRow: {
     gap: mobileTheme.spacing.sm,
-    marginTop: mobileTheme.spacing.lg
+    marginTop: mobileTheme.spacing.md
   },
-  searchField: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: mobileTheme.colors.border,
-    borderRadius: mobileTheme.radii.sm,
-    backgroundColor: mobileTheme.colors.surface,
-    color: mobileTheme.colors.textPrimary,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: mobileTheme.typography.body
-  },
-  countChip: {
+  metaChip: {
+    alignSelf: "flex-start",
     color: mobileTheme.colors.sageStrong,
     backgroundColor: "rgba(127, 183, 133, 0.16)",
     paddingHorizontal: 10,
@@ -74,6 +59,14 @@ export const styles = StyleSheet.create({
     overflow: "hidden",
     fontSize: mobileTheme.typography.caption,
     fontWeight: "700"
+  },
+  metaCopy: {
+    color: mobileTheme.colors.textSecondary,
+    fontSize: 14,
+    lineHeight: 20
+  },
+  heroActions: {
+    marginTop: mobileTheme.spacing.lg
   },
   message: {
     textAlign: "center",
@@ -103,9 +96,6 @@ export const styles = StyleSheet.create({
   listStack: {
     gap: mobileTheme.spacing.sm
   },
-  cardButton: {
-    borderRadius: mobileTheme.radii.lg
-  },
   cardTitle: {
     color: mobileTheme.colors.textPrimary,
     fontSize: 18,
@@ -123,5 +113,17 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     marginTop: mobileTheme.spacing.sm
+  },
+  tagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: mobileTheme.spacing.xs,
+    marginTop: mobileTheme.spacing.sm
+  },
+  entryActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: mobileTheme.spacing.md
   }
 });
