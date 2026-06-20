@@ -5,6 +5,7 @@ import type { ClientRecord } from "@pluckr/supabase";
 import { PluckrButton } from "./PluckrButton";
 import { PluckrCard } from "./PluckrCard";
 import { PluckrNoticeBanner } from "./PluckrNoticeBanner";
+import { PluckrSectionHeader } from "./PluckrSectionHeader";
 import { PluckrTextField } from "./PluckrTextField";
 import { pluckrClientListStageStyles as styles } from "./PluckrClientListStage.styles";
 import { pluckrAppTheme } from "./pluckrAppTheme";
@@ -17,6 +18,7 @@ type PluckrClientListStageProps = {
   notice: string | null;
   isCreatingClient: boolean;
   isSavingClient: boolean;
+  hideToolbar?: boolean;
   clientForm: {
     firstName: string;
     lastName: string;
@@ -57,6 +59,7 @@ export function PluckrClientListStage({
   notice,
   isCreatingClient,
   isSavingClient,
+  hideToolbar = false,
   clientForm,
   onBack,
   onLogout,
@@ -69,25 +72,19 @@ export function PluckrClientListStage({
 }: PluckrClientListStageProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.toolbar}>
-        <Text style={styles.link} onPress={onBack}>
-          ← Provider Home
-        </Text>
-        <Text style={styles.logoutLink} onPress={onLogout}>
-          Log Out
-        </Text>
-      </View>
+      {!hideToolbar ? (
+        <View style={styles.toolbar}>
+          <Text style={styles.link} onPress={onBack}>
+            ← Dashboard
+          </Text>
+          <Text style={styles.logoutLink} onPress={onLogout}>
+            Log Out
+          </Text>
+        </View>
+      ) : null}
 
       <PluckrCard>
-        <Text style={styles.eyebrow}>All Clients</Text>
-        <Text style={styles.title}>Client List</Text>
-        <Text style={styles.subtitle}>
-          Search clients, review recent activity, or add a new record to the
-          journal.
-        </Text>
-        <View style={styles.heroActions}>
-          <PluckrButton label="Add Client" onPress={() => onStartCreate()} />
-        </View>
+        <PluckrSectionHeader title="Directory" count={clients.length} />
         <View style={styles.searchRow}>
           <TextInput
             placeholder="Search clients..."
@@ -96,7 +93,9 @@ export function PluckrClientListStage({
             value={searchText}
             onChangeText={onSearchChange}
           />
-          <Text style={styles.countChip}>{clients.length}</Text>
+        </View>
+        <View style={styles.heroActions}>
+          <PluckrButton label="Add Client" onPress={() => onStartCreate()} />
         </View>
       </PluckrCard>
 
@@ -106,7 +105,7 @@ export function PluckrClientListStage({
       {isCreatingClient ? (
         <PluckrCard>
           <View style={styles.formStack}>
-            <Text style={styles.sectionTitle}>Add New Client</Text>
+            <PluckrSectionHeader title="New Client" />
             <Text style={styles.formCopy}>
               Create a new clinical record with the same essentials the Swift
               app asked for first.
@@ -164,10 +163,7 @@ export function PluckrClientListStage({
       ) : null}
 
       <PluckrCard>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Clients</Text>
-          <Text style={styles.countChip}>{clients.length}</Text>
-        </View>
+        <PluckrSectionHeader title="Results" count={clients.length} />
         {isLoading ? (
           <Text style={styles.emptyState}>Loading clients...</Text>
         ) : clients.length === 0 ? (

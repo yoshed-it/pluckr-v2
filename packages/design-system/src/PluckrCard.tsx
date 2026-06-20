@@ -29,25 +29,23 @@ export function PluckrCard({
 const styles = StyleSheet.create({
   card: {
     borderRadius: pluckrAppTheme.radii.lg,
-    borderWidth: 1,
-    borderColor: pluckrAppTheme.colors.border,
     backgroundColor: pluckrAppTheme.colors.surface,
-    shadowColor: "#2C3E50",
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
+    shadowColor: "#1C1C1C",
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
     shadowOffset: {
       width: 0,
-      height: 10
+      height: 3
     },
-    elevation: 3
+    elevation: 1
   },
   regular: {
-    padding: pluckrAppTheme.spacing.lg
+    padding: 20
   },
   compact: {
-    padding: pluckrAppTheme.spacing.md
+    padding: 14
   },
   accent: {
-    backgroundColor: pluckrAppTheme.colors.surfaceAccent
+    backgroundColor: "#F2F7F2"
   }
 });

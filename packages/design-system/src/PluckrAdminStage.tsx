@@ -25,6 +25,7 @@ type Props = {
   isSaving: boolean;
   error: string | null;
   notice: string | null;
+  hideToolbar?: boolean;
   onBack: () => void;
   onInviteFormChange: (key: "email" | "role", value: string) => void;
   onCreateInvite: () => void;
@@ -47,6 +48,7 @@ export function PluckrAdminStage({
   isSaving,
   error,
   notice,
+  hideToolbar = false,
   onBack,
   onInviteFormChange,
   onCreateInvite,
@@ -56,12 +58,14 @@ export function PluckrAdminStage({
 }: Props) {
   return (
     <View style={styles.container}>
-      <View style={styles.toolbar}>
-        <Text style={styles.link} onPress={onBack}>
-          ← Provider Home
-        </Text>
-        <Text style={styles.kicker}>Admin</Text>
-      </View>
+      {!hideToolbar ? (
+        <View style={styles.toolbar}>
+          <Text style={styles.link} onPress={onBack}>
+            ← Dashboard
+          </Text>
+          <Text style={styles.kicker}>Admin</Text>
+        </View>
+      ) : null}
 
       <PluckrCard>
         <Text style={styles.eyebrow}>Admin Dashboard</Text>

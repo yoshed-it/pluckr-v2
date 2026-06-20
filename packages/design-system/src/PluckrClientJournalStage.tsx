@@ -13,6 +13,7 @@ import { PluckrChartDetailPanel } from "./PluckrChartDetailPanel";
 import { PluckrChartEntryEditor } from "./PluckrChartEntryEditor";
 import { PluckrConfirmDialog } from "./PluckrConfirmDialog";
 import { PluckrFullScreenImageModal } from "./PluckrFullScreenImageModal";
+import { PluckrIconButton } from "./PluckrIconButton";
 import { PluckrNoticeBanner } from "./PluckrNoticeBanner";
 import { PluckrTagPickerDrawer } from "./PluckrTagPickerDrawer";
 import { PluckrTextField } from "./PluckrTextField";
@@ -57,6 +58,7 @@ type PluckrClientJournalStageProps = {
     images: ChartImageDraft[];
   };
   availableChartTags: string[];
+  hideToolbar?: boolean;
   onBack: () => void;
   onLogout: () => void;
   onOpenConsent: () => void;
@@ -128,6 +130,7 @@ export function PluckrClientJournalStage({
   availableClientTags,
   chartForm,
   availableChartTags,
+  hideToolbar = false,
   onBack,
   onLogout,
   onOpenConsent,
@@ -171,32 +174,34 @@ export function PluckrClientJournalStage({
 
   return (
     <View style={styles.container}>
-      <View style={styles.toolbar}>
-        <Text style={styles.link} onPress={onBack}>
-          ← Client List
-        </Text>
-        <View style={styles.toolbarActions}>
-          <Pressable
-            accessibilityRole="button"
-            style={styles.contextButton}
-            onPress={onStartEditClient}
-          >
-            <Text style={styles.contextButtonLabel}>Edit Client</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            style={styles.contextButton}
-            onPress={onOpenConsent}
-          >
-            <Text style={styles.contextButtonLabel}>
-              {client.consent_signed_at ? "View Consent" : "Sign Consent"}
-            </Text>
-          </Pressable>
-          <Text style={styles.logoutLink} onPress={onLogout}>
-            Log Out
+      {!hideToolbar ? (
+        <View style={styles.toolbar}>
+          <Text style={styles.link} onPress={onBack}>
+            ← Back
           </Text>
+          <View style={styles.toolbarActions}>
+            <Pressable
+              accessibilityRole="button"
+              style={styles.contextButton}
+              onPress={onStartEditClient}
+            >
+              <Text style={styles.contextButtonLabel}>Edit Client</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              style={styles.contextButton}
+              onPress={onOpenConsent}
+            >
+              <Text style={styles.contextButtonLabel}>
+                {client.consent_signed_at ? "View Consent" : "Sign Consent"}
+              </Text>
+            </Pressable>
+            <Text style={styles.logoutLink} onPress={onLogout}>
+              Log Out
+            </Text>
+          </View>
         </View>
-      </View>
+      ) : null}
 
       <PluckrCard>
         <Text style={styles.eyebrow}>Client Journal</Text>
@@ -223,6 +228,19 @@ export function PluckrClientJournalStage({
         <View style={styles.heroActions}>
           <View style={styles.primaryActionWrap}>
             <PluckrButton label="New Chart Entry" onPress={() => onStartChart()} />
+          </View>
+          <View style={styles.heroIconActions}>
+            <PluckrIconButton
+              icon="settings"
+              accessibilityLabel="Edit client settings"
+              onPress={onStartEditClient}
+            />
+            <PluckrIconButton
+              icon="archive"
+              accessibilityLabel="Archive client"
+              tone="critical"
+              onPress={() => setShowArchiveConfirm(true)}
+            />
           </View>
         </View>
       </PluckrCard>

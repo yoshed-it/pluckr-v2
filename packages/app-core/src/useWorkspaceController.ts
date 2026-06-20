@@ -37,6 +37,18 @@ export function useWorkspaceController(
   const [dailyFolioClients, setDailyFolioClients] = useState<ClientRecord[]>([]);
 
   useEffect(() => {
+    if (!workspaceNotice) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setWorkspaceNotice(null);
+    }, 4200);
+
+    return () => clearTimeout(timer);
+  }, [workspaceNotice]);
+
+  useEffect(() => {
     if (!selectedOrganizationId || memberships.length === 0) {
       setWorkspaceSummary(emptySummary);
       setWorkspaceClients([]);

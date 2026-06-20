@@ -41,21 +41,19 @@ const styles = StyleSheet.create({
     gap: pluckrAppTheme.spacing.xs
   },
   label: {
-    color: pluckrAppTheme.colors.sageStrong,
-    fontSize: pluckrAppTheme.typography.caption,
-    fontWeight: "700",
-    letterSpacing: 1.1,
-    textTransform: "uppercase"
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "600"
   },
   input: {
-    borderWidth: 1,
-    borderColor: pluckrAppTheme.colors.border,
-    borderRadius: pluckrAppTheme.radii.sm,
-    backgroundColor: pluckrAppTheme.colors.surface,
+    borderRadius: 12,
+    backgroundColor: pluckrAppTheme.colors.backgroundSoft,
     color: pluckrAppTheme.colors.textPrimary,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: pluckrAppTheme.typography.body
+    paddingVertical: 13,
+    fontSize: 17,
+    lineHeight: 22
   },
   multilineInput: {
     minHeight: 104,

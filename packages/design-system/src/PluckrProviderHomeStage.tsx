@@ -9,7 +9,9 @@ import type {
 
 import { PluckrButton } from "./PluckrButton";
 import { PluckrCard } from "./PluckrCard";
+import { PluckrFolioPanel } from "./PluckrFolioPanel";
 import { PluckrFolioPickerDrawer } from "./PluckrFolioPickerDrawer";
+import { PluckrSectionHeader } from "./PluckrSectionHeader";
 import { pluckrProviderHomeStageStyles as styles } from "./PluckrProviderHomeStage.styles";
 
 type PluckrProviderHomeStageProps = {
@@ -23,14 +25,12 @@ type PluckrProviderHomeStageProps = {
   isSeeding: boolean;
   error: string | null;
   notice: string | null;
-  isUpdatingPrivacy: boolean;
+  hideToolbar?: boolean;
   onOpenClients: () => void;
   onSeedDemoData: () => void;
   onOpenClient: (client: ClientRecord) => void;
   onAddFolioClient: (client: ClientRecord) => void;
   onRemoveFolioClient: (client: ClientRecord) => void;
-  onOpenAdmin: () => void;
-  onToggleProtectSensitiveScreens: (nextValue: boolean) => void;
   onLogout: () => void;
 };
 
@@ -56,111 +56,43 @@ export function PluckrProviderHomeStage({
   isSeeding,
   error,
   notice,
-  isUpdatingPrivacy,
+  hideToolbar = false,
   onOpenClients,
   onSeedDemoData,
   onOpenClient,
   onAddFolioClient,
   onRemoveFolioClient,
-  onOpenAdmin,
-  onToggleProtectSensitiveScreens,
   onLogout
 }: PluckrProviderHomeStageProps) {
   const [showFolioPicker, setShowFolioPicker] = useState(false);
   const recentClients = clients.slice(0, 8);
-  const canManagePrivacy =
-    membership.role === "owner" || membership.role === "admin";
 
   return (
     <View style={styles.container}>
-      <View style={styles.toolbar}>
-        <Text style={styles.infoCopy}>Provider Home</Text>
-        <Text style={styles.logoutLink} onPress={onLogout}>
-          Log Out
-        </Text>
-      </View>
-
       <View style={styles.header}>
         <Text style={styles.title}>
           Welcome{membership.display_name ? `, ${membership.display_name}` : ""}
         </Text>
         <Text style={styles.organizationName}>{organization.name}</Text>
-        <Text style={styles.subtitle}>Your clinical journal awaits</Text>
+        <Text style={styles.subtitle}>Today&apos;s work starts in folio.</Text>
       </View>
-
-      {canManagePrivacy ? (
-        <View style={styles.adminWrap}>
-          <PluckrButton
-            label="Admin Dashboard"
-            variant="secondary"
-            onPress={() => onOpenAdmin()}
-          />
-        </View>
-      ) : null}
 
       {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
       {notice ? <Text style={[styles.message, styles.success]}>{notice}</Text> : null}
 
-      <PluckrCard accent>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Daily Folio</Text>
-          <Pressable
-            accessibilityRole="button"
-            style={styles.addPill}
-            onPress={() => setShowFolioPicker(true)}
-          >
-            <Text style={styles.addPillLabel}>Add</Text>
-          </Pressable>
-        </View>
-        {isLoading ? (
-          <Text style={styles.emptyState}>Loading today's focus...</Text>
-        ) : dailyFolioClients.length === 0 ? (
-          <View style={styles.actionStack}>
-            <Text style={styles.emptyState}>
-              No clients in your folio yet. Add clients for today's workflow.
-            </Text>
-            <PluckrButton
-              label={isSeeding ? "Seeding..." : "Seed Demo Data"}
-              variant="secondary"
-              disabled={isSeeding}
-              onPress={() => onSeedDemoData()}
-            />
-          </View>
-        ) : (
-          <View style={styles.cardStack}>
-            {dailyFolioClients.map((client) => (
-              <View key={client.id} style={styles.clientRow}>
-                <Pressable
-                  accessibilityRole="button"
-                  style={styles.clientRowCopy}
-                  onPress={() => onOpenClient(client)}
-                >
-                  <Text style={styles.clientName}>
-                    {client.first_name} {client.last_name}
-                  </Text>
-                  <Text style={styles.clientMeta}>
-                    {client.pronouns || "Client"} • Last seen{" "}
-                    {formatDateLabel(client.last_seen_at)}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  style={styles.removePill}
-                  onPress={() => onRemoveFolioClient(client)}
-                >
-                  <Text style={styles.removePillLabel}>Remove</Text>
-                </Pressable>
-              </View>
-            ))}
-          </View>
-        )}
-      </PluckrCard>
+      <PluckrFolioPanel
+        dailyFolioClients={dailyFolioClients}
+        totalClients={clients.length}
+        isLoading={isLoading}
+        isSeeding={isSeeding}
+        onOpenPicker={() => setShowFolioPicker(true)}
+        onOpenClient={onOpenClient}
+        onRemoveClient={onRemoveFolioClient}
+        onSeedDemoData={onSeedDemoData}
+      />
 
       <PluckrCard>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Clients</Text>
-          <Text style={styles.countChip}>{summary.clients}</Text>
-        </View>
+        <PluckrSectionHeader title="Recent Clients" count={summary.clients} />
         {isLoading ? (
           <Text style={styles.emptyState}>Loading recent clients...</Text>
         ) : recentClients.length === 0 ? (
@@ -197,61 +129,7 @@ export function PluckrProviderHomeStage({
       </PluckrCard>
 
       <PluckrCard>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Privacy</Text>
-          <Text style={styles.countChip}>Org</Text>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          disabled={!canManagePrivacy || isUpdatingPrivacy}
-          style={[
-            styles.privacyRow,
-            !canManagePrivacy ? styles.privacyRowDisabled : null
-          ]}
-          onPress={() =>
-            onToggleProtectSensitiveScreens(
-              !organization.protect_sensitive_screens
-            )
-          }
-        >
-          <View style={styles.privacyCopyStack}>
-            <Text style={styles.clientName}>Protect sensitive screens</Text>
-            <Text style={styles.clientMeta}>
-              Block captures on Android and hide clinical screens during iOS
-              screenshots and app switching.
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.privacyPill,
-              organization.protect_sensitive_screens
-                ? styles.privacyPillActive
-                : styles.privacyPillInactive
-            ]}
-          >
-            <Text
-              style={[
-                styles.privacyPillLabel,
-                organization.protect_sensitive_screens
-                  ? styles.privacyPillLabelActive
-                  : null
-              ]}
-            >
-              {isUpdatingPrivacy
-                ? "Saving..."
-                : organization.protect_sensitive_screens
-                  ? "On"
-                  : "Off"}
-            </Text>
-          </View>
-        </Pressable>
-      </PluckrCard>
-
-      <PluckrCard>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Chart Activity</Text>
-          <Text style={styles.countChip}>{summary.charts}</Text>
-        </View>
+        <PluckrSectionHeader title="Recent Chart Activity" count={summary.charts} />
         {isLoading ? (
           <Text style={styles.emptyState}>Loading chart activity...</Text>
         ) : charts.length === 0 ? (

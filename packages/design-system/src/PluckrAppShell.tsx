@@ -35,9 +35,12 @@ import { PluckrClientListStage } from "./PluckrClientListStage";
 import { PluckrImageConsentStage } from "./PluckrImageConsentStage";
 import { PluckrJournalLoadingStage } from "./PluckrJournalLoadingStage";
 import { PluckrLaunchStage } from "./PluckrLaunchStage";
+import { PluckrNavigationBar } from "./PluckrNavigationBar";
 import { PluckrOrganizationStage } from "./PluckrOrganizationStage";
 import { PluckrProviderHomeStage } from "./PluckrProviderHomeStage";
 import { PluckrProviderSetupStage } from "./PluckrProviderSetupStage";
+import { PluckrSettingsStage } from "./PluckrSettingsStage";
+import { PluckrUtilityBar } from "./PluckrUtilityBar";
 import { pluckrAppTheme } from "./pluckrAppTheme";
 
 type ActiveWorkspaceScreen =
@@ -45,7 +48,10 @@ type ActiveWorkspaceScreen =
   | "clients"
   | "journal"
   | "consent"
+  | "settings"
   | "admin";
+
+type JournalOrigin = "workspace" | "clients";
 
 type PluckrAppShellProps = {
   supabase: SupabaseClient;
@@ -81,6 +87,7 @@ export function PluckrAppShell({
   const [activeWorkspaceScreen, setActiveWorkspaceScreen] =
     useState<ActiveWorkspaceScreen>("workspace");
   const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
+  const [journalOrigin, setJournalOrigin] = useState<JournalOrigin>("workspace");
   const [consentSignerName, setConsentSignerName] = useState("");
   const [consentSignature, setConsentSignature] = useState<string | null>(null);
   const [consentError, setConsentError] = useState<string | null>(null);
@@ -168,7 +175,24 @@ export function PluckrAppShell({
       activeWorkspaceScreen === "clients" ||
       activeWorkspaceScreen === "journal" ||
       activeWorkspaceScreen === "consent" ||
+      activeWorkspaceScreen === "settings" ||
       activeWorkspaceScreen === "admin");
+  const clientFullName = selectedClient
+    ? `${selectedClient.first_name} ${selectedClient.last_name}`.trim()
+    : null;
+  const shouldShowShellNavigationBar =
+    !showLaunchStage &&
+    !sessionController.isBooting &&
+    !!selectedMembership &&
+    activeWorkspaceScreen !== "workspace" &&
+    !shouldShowOrganizationGate &&
+    !shouldShowProviderSetupGate;
+  const shouldShowUtilityBar =
+    !showLaunchStage &&
+    !sessionController.isBooting &&
+    !!selectedMembership &&
+    !shouldShowOrganizationGate &&
+    !shouldShowProviderSetupGate;
 
   useEffect(() => {
     onPrivacyStateChange?.({
@@ -182,6 +206,7 @@ export function PluckrAppShell({
     await supabase.auth.signOut();
     setActiveWorkspaceScreen("workspace");
     setSelectedClient(null);
+    setJournalOrigin("workspace");
     setConsentSignerName("");
     setConsentSignature(null);
     setConsentError(null);
@@ -194,8 +219,104 @@ export function PluckrAppShell({
   function handleBackToOrganizations() {
     setSelectedClient(null);
     setActiveWorkspaceScreen("workspace");
+    setJournalOrigin("workspace");
     organizationController.setSelectedOrganizationId(null);
   }
+
+  function openClientJournal(nextClient: ClientRecord, origin: JournalOrigin) {
+    setSelectedClient(nextClient);
+    setJournalOrigin(origin);
+    setActiveWorkspaceScreen("journal");
+  }
+
+  function handleBackFromJournal() {
+    setSelectedClient(null);
+    setActiveWorkspaceScreen(journalOrigin);
+  }
+
+  function handleBackFromConsent() {
+    setActiveWorkspaceScreen("journal");
+    setConsentError(null);
+    setConsentNotice(null);
+  }
+
+  const previousScreenLabel =
+    activeWorkspaceScreen === "clients"
+      ? "Dashboard"
+      : activeWorkspaceScreen === "journal"
+        ? journalOrigin === "clients"
+          ? "Clients"
+          : "Dashboard"
+        : activeWorkspaceScreen === "consent"
+          ? "Journal"
+          : activeWorkspaceScreen === "settings"
+            ? "Dashboard"
+          : activeWorkspaceScreen === "admin"
+            ? "Settings"
+            : null;
+
+  const navigationBackAction =
+    activeWorkspaceScreen === "clients"
+      ? () => setActiveWorkspaceScreen("workspace")
+      : activeWorkspaceScreen === "journal"
+        ? handleBackFromJournal
+        : activeWorkspaceScreen === "consent"
+          ? handleBackFromConsent
+          : activeWorkspaceScreen === "settings"
+            ? () => setActiveWorkspaceScreen("workspace")
+          : activeWorkspaceScreen === "admin"
+            ? () => setActiveWorkspaceScreen("settings")
+            : null;
+
+  const navigationTitle =
+    activeWorkspaceScreen === "workspace"
+      ? "Dashboard"
+      : activeWorkspaceScreen === "clients"
+      ? "Clients"
+      : activeWorkspaceScreen === "journal"
+        ? "Client"
+        : activeWorkspaceScreen === "consent"
+          ? "Image Consent"
+          : activeWorkspaceScreen === "settings"
+            ? "Settings"
+          : activeWorkspaceScreen === "admin"
+            ? "Team"
+            : "Dashboard";
+
+  const navigationSubtitle =
+    activeWorkspaceScreen === "workspace"
+      ? selectedMembership?.organization.name ?? null
+      : activeWorkspaceScreen === "clients"
+      ? selectedMembership?.organization.name ?? null
+      : activeWorkspaceScreen === "journal"
+        ? null
+        : activeWorkspaceScreen === "consent"
+          ? clientFullName ?? null
+          : activeWorkspaceScreen === "settings"
+            ? selectedMembership?.organization.name ?? null
+          : activeWorkspaceScreen === "admin"
+            ? selectedMembership?.organization.name ?? null
+            : null;
+  const utilityActions = [
+    ...(activeWorkspaceScreen !== "journal" &&
+    activeWorkspaceScreen !== "settings"
+      ? [
+          {
+            label: "Settings",
+            icon: "settings" as const,
+            iconOnly: true,
+            onPress: () => setActiveWorkspaceScreen("settings")
+          }
+        ]
+      : []),
+    {
+      label: "Log Out",
+      icon: "logout" as const,
+      iconOnly: true,
+      onPress: () => void handleLogout(),
+      tone: "critical" as const
+    }
+  ];
 
   async function handleConsentSave() {
     if (!selectedClient || !organizationController.selectedOrganizationId) {
@@ -268,6 +389,19 @@ export function PluckrAppShell({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {shouldShowUtilityBar && selectedMembership ? (
+          <PluckrUtilityBar
+            backLabel={previousScreenLabel}
+            onBack={navigationBackAction}
+            actions={utilityActions}
+          />
+        ) : null}
+        {shouldShowShellNavigationBar && selectedMembership ? (
+          <PluckrNavigationBar
+            title={navigationTitle}
+            subtitle={navigationSubtitle}
+          />
+        ) : null}
         {showLaunchStage ? (
           <PluckrLaunchStage logoSource={logoSource} />
         ) : sessionController.isBooting ? (
@@ -366,7 +500,8 @@ export function PluckrAppShell({
             isSaving={adminController.isSavingAdmin}
             error={adminController.adminError}
             notice={adminController.adminNotice}
-            onBack={() => setActiveWorkspaceScreen("workspace")}
+            hideToolbar
+            onBack={() => setActiveWorkspaceScreen("settings")}
             onInviteFormChange={(key, value) =>
               adminController.updateInviteForm(key, value)
             }
@@ -390,12 +525,12 @@ export function PluckrAppShell({
             notice={clientListController.clientListNotice}
             isCreatingClient={clientListController.isCreatingClient}
             isSavingClient={clientListController.isSavingClient}
+            hideToolbar
             clientForm={clientListController.clientForm}
             onBack={() => setActiveWorkspaceScreen("workspace")}
             onLogout={() => void handleLogout()}
             onSelectClient={(client) => {
-              setSelectedClient(client);
-              setActiveWorkspaceScreen("journal");
+              openClientJournal(client, "clients");
             }}
             onSearchChange={clientListController.setSearchText}
             onStartCreate={clientListController.startCreatingClient}
@@ -417,11 +552,8 @@ export function PluckrAppShell({
             isSaving={isSavingConsent}
             error={consentError}
             notice={consentNotice}
-            onBack={() => {
-              setActiveWorkspaceScreen("journal");
-              setConsentError(null);
-              setConsentNotice(null);
-            }}
+            hideToolbar
+            onBack={handleBackFromConsent}
             onLogout={() => void handleLogout()}
             onSignerNameChange={setConsentSignerName}
             onSignatureChange={setConsentSignature}
@@ -436,9 +568,10 @@ export function PluckrAppShell({
             notice={clientJournalController.journalNotice}
             isEditingChart={clientJournalController.isEditingChart}
             isSavingChart={clientJournalController.isSavingChart}
+            hideToolbar
             chartForm={clientJournalController.chartForm}
             availableChartTags={clientJournalController.availableChartTags}
-            onBack={() => setActiveWorkspaceScreen("clients")}
+            onBack={handleBackFromJournal}
             onLogout={() => void handleLogout()}
             onOpenConsent={() => {
               setConsentSignerName(
@@ -515,6 +648,21 @@ export function PluckrAppShell({
               })
             }
           />
+        ) : activeWorkspaceScreen === "settings" && selectedMembership ? (
+          <PluckrSettingsStage
+            organization={selectedMembership.organization}
+            membership={selectedMembership.membership}
+            provider={providerProfileController.provider}
+            membershipsCount={organizationController.memberships.length}
+            isUpdatingPrivacy={organizationController.organizationSettingsSubmitting}
+            error={organizationController.organizationError}
+            notice={organizationController.organizationNotice}
+            onOpenAdmin={() => setActiveWorkspaceScreen("admin")}
+            onBackToOrganizations={handleBackToOrganizations}
+            onToggleProtectSensitiveScreens={(nextValue) =>
+              void organizationController.updateSelectedOrganizationPrivacy(nextValue)
+            }
+          />
         ) : selectedMembership ? (
           <PluckrProviderHomeStage
             organization={selectedMembership.organization}
@@ -533,12 +681,11 @@ export function PluckrAppShell({
               organizationController.organizationNotice ??
               workspaceController.workspaceNotice
             }
-            isUpdatingPrivacy={organizationController.organizationSettingsSubmitting}
+            hideToolbar
             onOpenClients={() => setActiveWorkspaceScreen("clients")}
             onSeedDemoData={() => void workspaceController.seedWorkspaceDemoData()}
             onOpenClient={(client) => {
-              setSelectedClient(client);
-              setActiveWorkspaceScreen("journal");
+              openClientJournal(client, "workspace");
             }}
             onAddFolioClient={(client) => {
               void workspaceController.addFolioClient(client);
@@ -546,10 +693,6 @@ export function PluckrAppShell({
             onRemoveFolioClient={(client) => {
               void workspaceController.removeFolioClient(client);
             }}
-            onOpenAdmin={() => setActiveWorkspaceScreen("admin")}
-            onToggleProtectSensitiveScreens={(nextValue) =>
-              void organizationController.updateSelectedOrganizationPrivacy(nextValue)
-            }
             onLogout={() => void handleLogout()}
           />
         ) : (

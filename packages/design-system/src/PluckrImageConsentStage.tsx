@@ -18,6 +18,7 @@ type PluckrImageConsentStageProps = {
   isSaving: boolean;
   error: string | null;
   notice: string | null;
+  hideToolbar?: boolean;
   onBack: () => void;
   onLogout: () => void;
   onSignerNameChange: (value: string) => void;
@@ -43,6 +44,7 @@ export function PluckrImageConsentStage({
   isSaving,
   error,
   notice,
+  hideToolbar = false,
   onBack,
   onLogout,
   onSignerNameChange,
@@ -55,14 +57,16 @@ export function PluckrImageConsentStage({
 
   return (
     <View style={styles.container}>
-      <View style={styles.toolbar}>
-        <Text style={styles.link} onPress={onBack}>
-          ← Client Journal
-        </Text>
-        <Text style={styles.logoutLink} onPress={onLogout}>
-          Log Out
-        </Text>
-      </View>
+      {!hideToolbar ? (
+        <View style={styles.toolbar}>
+          <Text style={styles.link} onPress={onBack}>
+            ← Client Journal
+          </Text>
+          <Text style={styles.logoutLink} onPress={onLogout}>
+            Log Out
+          </Text>
+        </View>
+      ) : null}
 
       <PluckrCard>
         <Text style={styles.eyebrow}>Image Consent</Text>

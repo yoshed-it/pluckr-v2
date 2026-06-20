@@ -48,34 +48,33 @@ export function PluckrButton({
 const styles = StyleSheet.create({
   base: {
     width: "100%",
-    paddingVertical: 14,
+    minHeight: 50,
+    paddingVertical: 13,
     paddingHorizontal: 18,
-    borderRadius: pluckrAppTheme.radii.md,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center"
   },
   primary: {
-    backgroundColor: pluckrAppTheme.colors.sage
+    backgroundColor: pluckrAppTheme.colors.sageStrong
   },
   secondary: {
-    backgroundColor: "rgba(127, 183, 133, 0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(127, 183, 133, 0.24)"
+    backgroundColor: "rgba(44, 62, 80, 0.06)"
   },
   disabled: {
-    opacity: 0.6
+    opacity: 0.45
   },
   pressed: {
-    transform: [{ scale: 0.99 }]
+    opacity: 0.82
   },
   label: {
-    fontSize: pluckrAppTheme.typography.body,
+    fontSize: 17,
     fontWeight: "700"
   },
   primaryLabel: {
     color: "#FFFFFF"
   },
   secondaryLabel: {
-    color: pluckrAppTheme.colors.sageStrong
+    color: pluckrAppTheme.colors.textPrimary
   }
 });

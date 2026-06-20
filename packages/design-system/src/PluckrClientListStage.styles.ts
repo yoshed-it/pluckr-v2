@@ -22,72 +22,24 @@ export const pluckrClientListStageStyles = StyleSheet.create({
     fontSize: pluckrAppTheme.typography.body,
     fontWeight: "600"
   },
-  eyebrow: {
-    color: pluckrAppTheme.colors.sageStrong,
-    fontSize: pluckrAppTheme.typography.caption,
-    fontWeight: "700",
-    letterSpacing: 1.1,
-    textTransform: "uppercase",
-    marginBottom: pluckrAppTheme.spacing.xs
-  },
-  title: {
-    color: pluckrAppTheme.colors.textPrimary,
-    fontSize: 34,
-    lineHeight: 40,
-    fontWeight: "700"
-  },
-  subtitle: {
-    color: pluckrAppTheme.colors.textSecondary,
-    fontSize: pluckrAppTheme.typography.body,
-    lineHeight: 24,
-    marginTop: pluckrAppTheme.spacing.sm
-  },
   heroActions: {
-    marginTop: pluckrAppTheme.spacing.lg
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: pluckrAppTheme.spacing.md
+    marginTop: pluckrAppTheme.spacing.md
   },
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: pluckrAppTheme.spacing.sm,
-    marginTop: pluckrAppTheme.spacing.lg
+    marginTop: pluckrAppTheme.spacing.md
   },
   searchField: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: pluckrAppTheme.colors.border,
-    borderRadius: pluckrAppTheme.radii.sm,
-    backgroundColor: pluckrAppTheme.colors.surface,
+    borderRadius: 12,
+    backgroundColor: pluckrAppTheme.colors.backgroundSoft,
     color: pluckrAppTheme.colors.textPrimary,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: pluckrAppTheme.typography.body
-  },
-  countChip: {
-    color: pluckrAppTheme.colors.sageStrong,
-    backgroundColor: "rgba(127, 183, 133, 0.16)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: pluckrAppTheme.radii.full,
-    overflow: "hidden",
-    fontSize: pluckrAppTheme.typography.caption,
-    fontWeight: "700"
-  },
-  message: {
-    textAlign: "center",
-    fontSize: 14,
-    lineHeight: 20
-  },
-  error: {
-    color: pluckrAppTheme.colors.critical
-  },
-  success: {
-    color: pluckrAppTheme.colors.success
+    paddingVertical: 13,
+    fontSize: 17,
+    lineHeight: 22
   },
   formStack: {
     gap: pluckrAppTheme.spacing.md
@@ -96,12 +48,6 @@ export const pluckrClientListStageStyles = StyleSheet.create({
     color: pluckrAppTheme.colors.textSecondary,
     fontSize: 14,
     lineHeight: 20
-  },
-  sectionTitle: {
-    color: pluckrAppTheme.colors.textPrimary,
-    fontSize: pluckrAppTheme.typography.subheading,
-    lineHeight: 26,
-    fontWeight: "700"
   },
   emptyStateStack: {
     gap: pluckrAppTheme.spacing.md

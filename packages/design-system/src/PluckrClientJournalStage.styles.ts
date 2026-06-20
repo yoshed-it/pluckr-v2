@@ -91,10 +91,18 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
     lineHeight: 20
   },
   heroActions: {
-    marginTop: pluckrAppTheme.spacing.md
+    marginTop: pluckrAppTheme.spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: pluckrAppTheme.spacing.sm
   },
   primaryActionWrap: {
     maxWidth: 176
+  },
+  heroIconActions: {
+    flexDirection: "row",
+    gap: pluckrAppTheme.spacing.xs
   },
   message: {
     textAlign: "center",
