@@ -10,7 +10,10 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pluckr.prototype"
+      "bundleIdentifier": "com.pluckr.prototype",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Pluckr uses the camera to capture treatment photos for clinical charting."
+      }
     },
     "android": {
       "package": "com.pluckr.prototype"

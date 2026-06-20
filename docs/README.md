@@ -12,6 +12,7 @@
 - [Theme Continuity](./design/theme-continuity.md)
 - [Migration Roadmap](./planning/migration-roadmap.md)
 - [Swift Parity Playbook](./planning/swift-parity-playbook.md)
+- [Swift Parity Checklist](./planning/swift-parity-checklist.md)
 - [Product Backlog](./planning/product-backlog.md)
 - [Architecture Rules](./planning/architecture-rules.md)
 - [TODO / Future / Ideas](./planning/todo-future-ideas.md)

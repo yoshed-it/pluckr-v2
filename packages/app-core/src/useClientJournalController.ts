@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   createChartEntry,
+  deleteChartImage,
   deleteChartEntry,
   listClientCharts,
+  uploadChartImage,
   updateChartEntry,
   type ChartEntryRecord,
   type ClientRecord
@@ -24,6 +26,8 @@ import {
 import {
   emptyChartForm,
   parseSetting,
+  type ChartImageDraft,
+  type ChartUploadAsset,
   type ChartFormState
 } from "./chartFormState";
 
@@ -121,7 +125,11 @@ export function useClientJournalController(
       probeMaterial: parseProbeName(chart.probe).material,
       treatmentSummary: chart.treatment_summary ?? "",
       notes: chart.notes ?? "",
-      tags: chart.tags
+      tags: chart.tags,
+      images: (chart.image_paths ?? chart.image_urls).map((value, index) => ({
+        storagePath: chart.image_paths?.[index] ?? value,
+        previewUrl: chart.image_urls[index] ?? value
+      }))
     });
     setIsEditingChart(true);
   }
@@ -184,7 +192,8 @@ export function useClientJournalController(
       treatmentArea,
       treatmentSummary: chartForm.treatmentSummary,
       notes: chartForm.notes,
-      tags: dedupeTagLabels(chartForm.tags)
+      tags: dedupeTagLabels(chartForm.tags),
+      imagePaths: chartForm.images.map((image) => image.storagePath)
     };
 
     try {
@@ -192,10 +201,18 @@ export function useClientJournalController(
         ? await updateChartEntry(client, editingChartId, input)
         : await createChartEntry(client, input);
 
+      const hydratedChart: ChartEntryRecord = {
+        ...savedChart,
+        image_paths: chartForm.images.map((image) => image.storagePath),
+        image_urls: chartForm.images.map((image) => image.previewUrl)
+      };
+
       setCharts((current) => {
         const nextCharts = editingChartId
-          ? current.map((chart) => (chart.id === savedChart.id ? savedChart : chart))
-          : [savedChart, ...current];
+          ? current.map((chart) =>
+              chart.id === hydratedChart.id ? hydratedChart : chart
+            )
+          : [hydratedChart, ...current];
 
         return nextCharts.sort(
           (left, right) =>
@@ -281,6 +298,82 @@ export function useClientJournalController(
     }));
   }
 
+  async function uploadChartAssets(assets: ChartUploadAsset[]) {
+    if (!organizationId || !selectedClient) {
+      return false;
+    }
+
+    if (!selectedClient.consent_signed_at) {
+      setJournalError("Image consent is required before photos can be added.");
+      return false;
+    }
+
+    setJournalError(null);
+    setJournalNotice(null);
+    setIsSavingChart(true);
+
+    try {
+      const uploadedImages = await Promise.all(
+        assets.map((asset) =>
+          uploadChartImage(client, {
+            organizationId,
+            clientId: selectedClient.id,
+            fileName: asset.fileName,
+            mimeType: asset.mimeType,
+            bytes: asset.bytes
+          })
+        )
+      );
+
+      setChartForm((current) => ({
+        ...current,
+        images: dedupeImages([
+          ...current.images,
+          ...uploadedImages.map((image) => ({
+            storagePath: image.storagePath,
+            previewUrl: image.signedUrl
+          }))
+        ])
+      }));
+      return true;
+    } catch (error) {
+      setJournalError(
+        error instanceof Error
+          ? error.message
+          : "Unable to upload treatment images right now."
+      );
+      return false;
+    } finally {
+      setIsSavingChart(false);
+    }
+  }
+
+  async function removeChartImageDraft(image: ChartImageDraft) {
+    setJournalError(null);
+
+    try {
+      if (image.storagePath && !/^https?:\/\//.test(image.storagePath)) {
+        await deleteChartImage(client, image.storagePath);
+      }
+    } catch (error) {
+      setJournalError(
+        error instanceof Error
+          ? error.message
+          : "Unable to remove the image right now."
+      );
+      return false;
+    }
+
+    setChartForm((current) => ({
+      ...current,
+      images: current.images.filter(
+        (draft) => draft.storagePath !== image.storagePath
+      )
+    }));
+
+    return true;
+  }
+
   return {
     charts,
     isLoadingCharts,
@@ -294,6 +387,8 @@ export function useClientJournalController(
     availableChartTags: mergeTagLibrary(defaultChartTags, chartForm.tags),
     toggleChartTag,
     addCustomChartTag,
+    uploadChartAssets,
+    removeChartImageDraft,
     setProbeStyle,
     startCreatingChart,
     startEditingChart,
@@ -305,4 +400,20 @@ export function useClientJournalController(
         ? loadCharts(organizationId, selectedClient.id)
         : Promise.resolve()
   };
+}
+
+function dedupeImages(images: ChartImageDraft[]) {
+  const seen = new Set<string>();
+  const deduped: ChartImageDraft[] = [];
+
+  for (const image of images) {
+    if (!image.storagePath || seen.has(image.storagePath)) {
+      continue;
+    }
+
+    seen.add(image.storagePath);
+    deduped.push(image);
+  }
+
+  return deduped;
 }

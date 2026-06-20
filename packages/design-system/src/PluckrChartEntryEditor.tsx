@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 import {
   chartModalities,
   modalityUsesDc,
   modalityUsesRf,
   formatProbeName,
   treatmentAreaOptions,
+  type ChartImageDraft
 } from "@pluckr/app-core";
 import type { ClientRecord } from "@pluckr/supabase";
 
@@ -34,6 +35,7 @@ type ChartEditorProps = {
     treatmentAreaOther: string;
     notes: string;
     tags: string[];
+    images: ChartImageDraft[];
   };
   availableChartTags: string[];
   onChartFormChange: (
@@ -52,6 +54,8 @@ type ChartEditorProps = {
   ) => void;
   onToggleChartTag: (tagLabel: string) => void;
   onAddCustomChartTag: (tagLabel: string) => void;
+  onPickImages: () => void;
+  onRemoveImage: (image: ChartImageDraft) => void;
   onProbeStyleChange: (usingOnePiece: boolean) => void;
   onSubmitChart: () => void;
   onCancelChart: () => void;
@@ -71,6 +75,8 @@ export function PluckrChartEntryEditor({
   onChartFormChange,
   onToggleChartTag,
   onAddCustomChartTag,
+  onPickImages,
+  onRemoveImage,
   onProbeStyleChange,
   onSubmitChart,
   onCancelChart
@@ -234,9 +240,37 @@ export function PluckrChartEntryEditor({
             <Text style={styles.imageTitle}>Treatment Photos</Text>
             <Text style={styles.imageCopy}>
               {client.consent_signed_at
-                ? "Consent is on file. Camera support is next."
+                ? "Consent is on file. Add and review treatment photos here."
                 : "Image consent is required before photos can be added."}
             </Text>
+            <View style={styles.imageActionRow}>
+              <PluckrButton
+                label={client.consent_signed_at ? "Add Photos" : "Open Consent"}
+                variant="secondary"
+                disabled={isSavingChart}
+                onPress={onPickImages}
+              />
+            </View>
+            {chartForm.images.length > 0 ? (
+              <View style={styles.imagePreviewGrid}>
+                {chartForm.images.map((image) => (
+                  <View key={image.storagePath} style={styles.imagePreviewCard}>
+                    <Image
+                      source={{ uri: image.previewUrl }}
+                      style={styles.imagePreview}
+                      resizeMode="cover"
+                    />
+                    <Pressable
+                      accessibilityRole="button"
+                      style={styles.imageRemoveButton}
+                      onPress={() => onRemoveImage(image)}
+                    >
+                      <Text style={styles.imageRemoveLabel}>Remove</Text>
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            ) : null}
           </View>
         </View>
 

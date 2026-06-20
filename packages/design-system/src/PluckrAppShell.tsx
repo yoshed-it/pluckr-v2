@@ -16,6 +16,7 @@ import {
   useOrganizationController,
   useSessionController,
   useWorkspaceController,
+  type ChartUploadAsset,
   type KeyValueStorage
 } from "@pluckr/app-core";
 import {
@@ -39,6 +40,7 @@ type PluckrAppShellProps = {
   supabase: SupabaseClient;
   storage: KeyValueStorage;
   logoSource: ImageSourcePropType;
+  onRequestChartImages: () => Promise<ChartUploadAsset[]>;
 };
 
 /**
@@ -50,7 +52,8 @@ type PluckrAppShellProps = {
 export function PluckrAppShell({
   supabase,
   storage,
-  logoSource
+  logoSource,
+  onRequestChartImages
 }: PluckrAppShellProps) {
   const [activeWorkspaceScreen, setActiveWorkspaceScreen] =
     useState<ActiveWorkspaceScreen>("workspace");
@@ -173,6 +176,22 @@ export function PluckrAppShell({
     } finally {
       setIsSavingConsent(false);
     }
+  }
+
+  function handleRequestChartImages() {
+    if (!selectedClient?.consent_signed_at) {
+      if (selectedClient) {
+        setConsentSignerName(
+          `${selectedClient.first_name} ${selectedClient.last_name}`.trim()
+        );
+      }
+      setConsentError(null);
+      setConsentNotice(null);
+      setActiveWorkspaceScreen("consent");
+      return Promise.resolve([] as ChartUploadAsset[]);
+    }
+
+    return onRequestChartImages();
   }
 
   return (
@@ -355,6 +374,16 @@ export function PluckrAppShell({
             onChartFormChange={clientJournalController.updateChartForm}
             onToggleChartTag={clientJournalController.toggleChartTag}
             onAddCustomChartTag={clientJournalController.addCustomChartTag}
+            onPickChartImages={() =>
+              void handleRequestChartImages().then((assets) => {
+                if (assets.length > 0) {
+                  void clientJournalController.uploadChartAssets(assets);
+                }
+              })
+            }
+            onRemoveChartImage={(image) =>
+              void clientJournalController.removeChartImageDraft(image)
+            }
             onProbeStyleChange={clientJournalController.setProbeStyle}
             onSubmitChart={() =>
               void clientJournalController.submitChart().then((saved) => {

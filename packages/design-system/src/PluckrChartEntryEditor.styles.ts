@@ -242,6 +242,37 @@ export const pluckrChartEntryEditorStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18
   },
+  imageActionRow: {
+    paddingTop: pluckrAppTheme.spacing.xs
+  },
+  imagePreviewGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: pluckrAppTheme.spacing.sm,
+    paddingTop: pluckrAppTheme.spacing.xs
+  },
+  imagePreviewCard: {
+    gap: 6
+  },
+  imagePreview: {
+    width: 88,
+    height: 88,
+    borderRadius: pluckrAppTheme.radii.md,
+    backgroundColor: "rgba(44, 62, 80, 0.06)"
+  },
+  imageRemoveButton: {
+    minHeight: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: pluckrAppTheme.radii.full,
+    backgroundColor: "rgba(184, 61, 61, 0.08)"
+  },
+  imageRemoveLabel: {
+    color: pluckrAppTheme.colors.critical,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: "700"
+  },
   actionRow: {
     gap: pluckrAppTheme.spacing.sm,
     paddingTop: pluckrAppTheme.spacing.xs

@@ -1,5 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import {
+  listChartImagePaths,
+  resolveChartImageUrls,
+  syncChartImages
+} from "./media";
 import type { ChartEntryInput, ChartEntryRecord } from "./types";
 
 /**
@@ -22,7 +27,28 @@ export async function listClientCharts(
     throw error;
   }
 
-  return (data ?? []) as ChartEntryRecord[];
+  const rows = (data ?? []) as ChartEntryRecord[];
+  const imagePathsByChartId = await listChartImagePaths(client, {
+    organizationId,
+    chartEntryIds: rows.map((row) => row.id)
+  });
+
+  const resolvedCharts = await Promise.all(
+    rows.map(async (row) => {
+      const imagePaths =
+        imagePathsByChartId.get(row.id) ??
+        row.image_urls.filter((value) => Boolean(value));
+      const imageUrls = await resolveChartImageUrls(client, imagePaths);
+
+      return {
+        ...row,
+        image_paths: imagePaths,
+        image_urls: imageUrls
+      };
+    })
+  );
+
+  return resolvedCharts;
 }
 
 function sanitizeChartInput(input: ChartEntryInput) {
@@ -49,7 +75,7 @@ function sanitizeChartInput(input: ChartEntryInput) {
     treatment_summary: input.treatmentSummary?.trim() || null,
     notes: input.notes?.trim() || null,
     tags: input.tags ?? [],
-    image_urls: input.imageUrls ?? []
+    image_urls: input.imagePaths ?? []
   };
 }
 
@@ -69,6 +95,13 @@ export async function createChartEntry(
   if (error) {
     throw error;
   }
+
+  await syncChartImages(client, {
+    organizationId: input.organizationId,
+    clientId: input.clientId,
+    chartEntryId: data.id,
+    storagePaths: input.imagePaths ?? []
+  });
 
   return data as ChartEntryRecord;
 }
@@ -94,6 +127,13 @@ export async function updateChartEntry(
   if (error) {
     throw error;
   }
+
+  await syncChartImages(client, {
+    organizationId: input.organizationId,
+    clientId: input.clientId,
+    chartEntryId: chartId,
+    storagePaths: input.imagePaths ?? []
+  });
 
   return data as ChartEntryRecord;
 }

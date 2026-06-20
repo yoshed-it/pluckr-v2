@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
-import { modalityUsesDc, modalityUsesRf } from "@pluckr/app-core";
+import {
+  modalityUsesDc,
+  modalityUsesRf,
+  type ChartImageDraft
+} from "@pluckr/app-core";
 import type { ChartEntryRecord, ClientRecord } from "@pluckr/supabase";
 
 import { PluckrButton } from "./PluckrButton";
@@ -46,6 +50,7 @@ type PluckrClientJournalStageProps = {
     treatmentSummary: string;
     notes: string;
     tags: string[];
+    images: ChartImageDraft[];
   };
   availableChartTags: string[];
   onBack: () => void;
@@ -88,6 +93,8 @@ type PluckrClientJournalStageProps = {
   ) => void;
   onToggleChartTag: (tagLabel: string) => void;
   onAddCustomChartTag: (tagLabel: string) => void;
+  onPickChartImages: () => void;
+  onRemoveChartImage: (image: ChartImageDraft) => void;
   onProbeStyleChange: (usingOnePiece: boolean) => void;
   onSubmitChart: () => void;
 };
@@ -134,6 +141,8 @@ export function PluckrClientJournalStage({
   onChartFormChange,
   onToggleChartTag,
   onAddCustomChartTag,
+  onPickChartImages,
+  onRemoveChartImage,
   onProbeStyleChange,
   onSubmitChart
 }: PluckrClientJournalStageProps) {
@@ -312,6 +321,8 @@ export function PluckrClientJournalStage({
           onChartFormChange={onChartFormChange}
           onToggleChartTag={onToggleChartTag}
           onAddCustomChartTag={onAddCustomChartTag}
+          onPickImages={onPickChartImages}
+          onRemoveImage={onRemoveChartImage}
           onProbeStyleChange={onProbeStyleChange}
           onSubmitChart={onSubmitChart}
           onCancelChart={onCancelChart}

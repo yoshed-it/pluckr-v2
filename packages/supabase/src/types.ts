@@ -119,6 +119,7 @@ export type ChartEntryRecord = {
   treatment_summary: string | null;
   tags: string[];
   image_urls: string[];
+  image_paths?: string[];
   created_at: string;
   updated_at: string;
 };
@@ -142,7 +143,7 @@ export type ChartEntryInput = {
   treatmentSummary?: string | null;
   notes?: string | null;
   tags?: string[];
-  imageUrls?: string[];
+  imagePaths?: string[];
 };
 
 /**

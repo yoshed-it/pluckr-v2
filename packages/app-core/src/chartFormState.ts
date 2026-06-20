@@ -1,3 +1,14 @@
+export type ChartImageDraft = {
+  storagePath: string;
+  previewUrl: string;
+};
+
+export type ChartUploadAsset = {
+  fileName: string;
+  mimeType: string;
+  bytes: ArrayBuffer;
+};
+
 export type ChartFormState = {
   modality: string;
   rfLevel: string;
@@ -12,6 +23,7 @@ export type ChartFormState = {
   treatmentSummary: string;
   notes: string;
   tags: string[];
+  images: ChartImageDraft[];
 };
 
 export const emptyChartForm: ChartFormState = {
@@ -27,7 +39,8 @@ export const emptyChartForm: ChartFormState = {
   treatmentAreaOther: "",
   treatmentSummary: "",
   notes: "",
-  tags: []
+  tags: [],
+  images: []
 };
 
 export function parseSetting(value: string) {
