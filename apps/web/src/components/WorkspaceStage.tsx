@@ -83,7 +83,7 @@ export function WorkspaceStage({
             <h1 className="hero-title">{organization.name}</h1>
             <p className="hero-copy">
               {organization.description ||
-                "Clinical journal flow ready for provider notes, client tracking, and a calm investor demo."}
+                "Provider workspace."}
             </p>
 
             <div className="metric-grid">
@@ -106,7 +106,7 @@ export function WorkspaceStage({
                   type="button"
                   onClick={onOpenClients}
                 >
-                  Open Client List
+                  Clients
                 </button>
                 <button
                   className="swift-button swift-button-secondary"
@@ -135,8 +135,7 @@ export function WorkspaceStage({
               <p className="empty-state">Loading clients...</p>
             ) : clients.length === 0 ? (
               <p className="empty-state">
-                Seed demo data to create the first three investor-ready client
-                records.
+                Seed demo data to create the first client records.
               </p>
             ) : (
               <div className="workspace-list">
@@ -172,8 +171,7 @@ export function WorkspaceStage({
               <p className="empty-state">Loading chart activity...</p>
             ) : charts.length === 0 ? (
               <p className="empty-state">
-                Chart activity will appear here after the first session notes are
-                created.
+                No chart entries yet.
               </p>
             ) : (
               <div className="workspace-list">

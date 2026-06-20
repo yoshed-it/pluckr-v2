@@ -31,9 +31,25 @@ function sanitizeChartInput(input: ChartEntryInput) {
     client_id: input.clientId,
     treatment_area: input.treatmentArea?.trim() || null,
     modality: input.modality?.trim() || null,
+    rf_level:
+      typeof input.rfLevel === "number" && Number.isFinite(input.rfLevel)
+        ? input.rfLevel
+        : null,
+    dc_level:
+      typeof input.dcLevel === "number" && Number.isFinite(input.dcLevel)
+        ? input.dcLevel
+        : null,
+    treatment_seconds:
+      typeof input.treatmentSeconds === "number" &&
+      Number.isFinite(input.treatmentSeconds)
+        ? input.treatmentSeconds
+        : null,
+    probe: input.probe?.trim() || null,
+    probe_is_one_piece: input.probeIsOnePiece ?? true,
     treatment_summary: input.treatmentSummary?.trim() || null,
     notes: input.notes?.trim() || null,
-    tags: input.tags ?? []
+    tags: input.tags ?? [],
+    image_urls: input.imageUrls ?? []
   };
 }
 

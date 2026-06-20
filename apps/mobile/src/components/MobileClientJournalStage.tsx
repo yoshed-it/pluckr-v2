@@ -82,7 +82,7 @@ export function MobileClientJournalStage({
           {client.first_name} {client.last_name}
         </Text>
         <Text style={styles.subtitle}>
-          {client.notes || "No care summary yet. Start the first chart entry below."}
+          {client.notes || "No notes yet."}
         </Text>
         <View style={styles.metaRow}>
           <Text style={styles.metaChip}>{client.pronouns || "Client"}</Text>
@@ -118,7 +118,7 @@ export function MobileClientJournalStage({
             />
             <PluckrTextField
               label="Treatment Summary"
-              placeholder="Treatment Summary"
+              placeholder="Summary"
               multiline
               value={chartForm.treatmentSummary}
               onChangeText={(value) =>
@@ -126,8 +126,8 @@ export function MobileClientJournalStage({
               }
             />
             <PluckrTextField
-              label="Clinical Notes"
-              placeholder="Clinical Notes"
+              label="Notes"
+              placeholder="Notes"
               multiline
               value={chartForm.notes}
               onChangeText={(value) => onChartFormChange("notes", value)}
@@ -158,7 +158,7 @@ export function MobileClientJournalStage({
           <Text style={styles.emptyState}>Loading journal...</Text>
         ) : charts.length === 0 ? (
           <Text style={styles.emptyState}>
-            No chart entries yet. Create the first one to start this client's history.
+            No chart entries yet.
           </Text>
         ) : (
           <View style={styles.listStack}>

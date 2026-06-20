@@ -23,6 +23,8 @@ This package owns shared app-flow behavior for web and mobile:
 - auth form state and auth actions
 - organization selection and creation
 - workspace loading and demo seeding
+- client list loading, search, and add-client flow
+- client journal loading and chart entry editing
 
 This is the MVVM-ish middle layer.
 
@@ -44,13 +46,28 @@ UI components should not contain raw Supabase queries if the logic can live here
 
 - `apps/web`
 - `apps/mobile`
+- `packages/design-system`
 
 These apps should mainly:
 
 - compose controller hooks
 - pass props into components
-- render platform-specific UI
+- render thin platform wrappers around shared product UI
 - hold platform-specific storage or navigation glue
+
+The shared product UI should mainly live in `packages/design-system` using Expo
+React Native components:
+
+- `View`
+- `Text`
+- `Pressable`
+- `ScrollView`
+- `TextInput`
+- `Image`
+- `StyleSheet`
+
+Next should host and route the web app, but it should not become the default
+place where product screens are rebuilt with DOM elements.
 
 ## Rules We’re Following
 
@@ -61,14 +78,17 @@ These apps should mainly:
 5. Comment files and non-obvious logic, but do not narrate obvious code.
 6. Build reusable components only when they remove real duplication.
 7. Preserve stable ids and list item boundaries so drag-and-drop can be added later without rewriting the tree shape.
+8. Do not build DOM-based product screens unless the screen is truly web-only.
+9. Keep Supabase, auth, storage, and server logic outside screen files.
 
 ## What Counts As Superfluous Code
 
 We should avoid:
 
-- duplicate auth or workspace logic across web and mobile
+- duplicate auth, workspace, or screen UI across web and mobile
 - one-off helper components used once with no clarity benefit
 - raw backend calls inside visual components
+- DOM-only product implementations that should be shared Expo UI
 - giant multipurpose screens with unrelated responsibilities
 - premature abstractions for features we do not have yet
 
@@ -80,16 +100,18 @@ We should allow:
 
 ## Next Swift Parity Slice
 
-The current first slice covers:
+The current implemented slice covers:
 
 - auth
 - organization selection and creation
 - first workspace summary
+- client list with search and add-client flow
+- client journal with lightweight chart creation, editing, and deletion
 
-The next slice should port, in order:
+The next slice should deepen, in order:
 
-1. `Views/Clients/ClientListView.swift`
-2. `Views/Clients/ClientJournalView.swift`
-3. `Views/Charts/ChartEntryFormView.swift`
+1. `Views/Charts/ChartEntryFormView.swift` machine settings, probe selection, and stronger validation
+2. image and consent workflow parity
+3. client editing and richer journal detail parity
 
-That path recreates the core provider workflow instead of jumping to admin or polish features too early.
+That path finishes the core provider workflow instead of jumping to admin or polish features too early.

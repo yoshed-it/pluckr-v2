@@ -65,6 +65,7 @@ export type ClientRecord = {
   email: string | null;
   birth_date: string | null;
   notes: string | null;
+  client_tags: string[];
   consent_signed_at: string | null;
   consent_signature_path: string | null;
   last_seen_at: string | null;
@@ -84,6 +85,19 @@ export type ClientInput = {
   phone?: string | null;
   email?: string | null;
   notes?: string | null;
+  clientTags?: string[];
+};
+
+export type ClientUpdateInput = {
+  organizationId: string;
+  clientId: string;
+  firstName: string;
+  lastName: string;
+  pronouns?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  notes?: string | null;
+  clientTags?: string[];
 };
 
 /**
@@ -96,9 +110,15 @@ export type ChartEntryRecord = {
   provider_id: string | null;
   treatment_area: string | null;
   modality: string | null;
+  rf_level: number | null;
+  dc_level: number | null;
+  treatment_seconds: number | null;
+  probe: string | null;
+  probe_is_one_piece: boolean;
   notes: string | null;
   treatment_summary: string | null;
   tags: string[];
+  image_urls: string[];
   created_at: string;
   updated_at: string;
 };
@@ -114,9 +134,15 @@ export type ChartEntryInput = {
   clientId: string;
   treatmentArea?: string | null;
   modality?: string | null;
+  rfLevel?: number | null;
+  dcLevel?: number | null;
+  treatmentSeconds?: number | null;
+  probe?: string | null;
+  probeIsOnePiece?: boolean;
   treatmentSummary?: string | null;
   notes?: string | null;
   tags?: string[];
+  imageUrls?: string[];
 };
 
 /**

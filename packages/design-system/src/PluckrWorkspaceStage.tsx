@@ -1,7 +1,3 @@
-/**
- * Mobile workspace slice that surfaces the same first-use story as the
- * Swift prototype: choose an org, see clients, and review recent charting.
- */
 import React from "react";
 import { Text, View } from "react-native";
 import type {
@@ -11,11 +7,11 @@ import type {
   WorkspaceSummary
 } from "@pluckr/supabase";
 
-import { PaperCard } from "./PaperCard";
 import { PluckrButton } from "./PluckrButton";
-import { styles } from "./mobileWorkspaceStyles";
+import { PluckrCard } from "./PluckrCard";
+import { pluckrWorkspaceStageStyles as styles } from "./PluckrWorkspaceStage.styles";
 
-type MobileWorkspaceStageProps = {
+type PluckrWorkspaceStageProps = {
   organization: MembershipWithOrganization["organization"];
   membership: MembershipWithOrganization["membership"];
   summary: WorkspaceSummary;
@@ -42,7 +38,7 @@ function formatDateLabel(value: string | null) {
   }).format(new Date(value));
 }
 
-export function MobileWorkspaceStage({
+export function PluckrWorkspaceStage({
   organization,
   membership,
   summary,
@@ -56,7 +52,7 @@ export function MobileWorkspaceStage({
   onOpenClients,
   onSeedDemoData,
   onLogout
-}: MobileWorkspaceStageProps) {
+}: PluckrWorkspaceStageProps) {
   const metrics = [
     ["Organizations", String(summary.organizations)],
     ["Clients", String(summary.clients)],
@@ -75,26 +71,26 @@ export function MobileWorkspaceStage({
         </Text>
       </View>
 
-      <PaperCard>
+      <PluckrCard>
         <Text style={styles.eyebrow}>Current Organization</Text>
         <Text style={styles.title}>{organization.name}</Text>
         <Text style={styles.subtitle}>
           {organization.description ||
-            "Provider workspace."}
+            "Clinical journal flow ready for provider notes, client tracking, and a calm investor demo."}
         </Text>
 
         <View style={styles.metricGrid}>
           {metrics.map(([label, value]) => (
-            <PaperCard key={label} compact accent>
+            <PluckrCard key={label} compact accent>
               <Text style={styles.metricLabel}>{label}</Text>
               <Text style={styles.metricValue}>{value}</Text>
-            </PaperCard>
+            </PluckrCard>
           ))}
         </View>
 
         <View style={styles.heroActions}>
           <PluckrButton
-            label="Clients"
+            label="Open Client List"
             variant="secondary"
             onPress={() => onOpenClients()}
           />
@@ -108,14 +104,12 @@ export function MobileWorkspaceStage({
             onPress={() => onSeedDemoData()}
           />
         </View>
-      </PaperCard>
+      </PluckrCard>
 
       {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
-      {notice ? (
-        <Text style={[styles.message, styles.success]}>{notice}</Text>
-      ) : null}
+      {notice ? <Text style={[styles.message, styles.success]}>{notice}</Text> : null}
 
-      <PaperCard>
+      <PluckrCard>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Client List</Text>
           <Text style={styles.countChip}>{clients.length}</Text>
@@ -124,12 +118,12 @@ export function MobileWorkspaceStage({
           <Text style={styles.emptyState}>Loading clients...</Text>
         ) : clients.length === 0 ? (
           <Text style={styles.emptyState}>
-            Seed demo data to create the first client records.
+            Seed demo data to create the first three investor-ready client records.
           </Text>
         ) : (
           <View style={styles.listStack}>
             {clients.map((client) => (
-              <PaperCard key={client.id} compact>
+              <PluckrCard key={client.id} compact>
                 <Text style={styles.cardTitle}>
                   {client.first_name} {client.last_name}
                 </Text>
@@ -139,13 +133,13 @@ export function MobileWorkspaceStage({
                 <Text style={styles.cardMeta}>
                   Last seen {formatDateLabel(client.last_seen_at)}
                 </Text>
-              </PaperCard>
+              </PluckrCard>
             ))}
           </View>
         )}
-      </PaperCard>
+      </PluckrCard>
 
-      <PaperCard>
+      <PluckrCard>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Recent Charts</Text>
           <Text style={styles.countChip}>{charts.length}</Text>
@@ -154,12 +148,12 @@ export function MobileWorkspaceStage({
           <Text style={styles.emptyState}>Loading chart activity...</Text>
         ) : charts.length === 0 ? (
           <Text style={styles.emptyState}>
-            No chart entries yet.
+            Chart activity will appear here after the first session notes are created.
           </Text>
         ) : (
           <View style={styles.listStack}>
             {charts.map((chart) => (
-              <PaperCard key={chart.id} compact>
+              <PluckrCard key={chart.id} compact>
                 <Text style={styles.cardTitle}>
                   {chart.client
                     ? `${chart.client.first_name} ${chart.client.last_name}`
@@ -174,11 +168,11 @@ export function MobileWorkspaceStage({
                   {chart.treatment_area || "Treatment"} on{" "}
                   {formatDateLabel(chart.created_at)}
                 </Text>
-              </PaperCard>
+              </PluckrCard>
             ))}
           </View>
         )}
-      </PaperCard>
+      </PluckrCard>
     </View>
   );
 }

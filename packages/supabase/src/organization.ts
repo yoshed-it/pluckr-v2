@@ -102,24 +102,43 @@ export async function createOrganization(
   input: { name: string; description?: string | null }
 ): Promise<OrganizationRecord> {
   const candidates = createSlugCandidates(input.name);
+  let lastError: Error | null = null;
 
   for (const candidate of candidates) {
-    const { data, error } = await client
+    const { error: insertError } = await client
       .from("organizations")
       .insert({
         name: input.name.trim(),
         description: input.description?.trim() || null,
         slug: candidate
-      })
+      });
+
+    if (insertError) {
+      lastError = insertError;
+      continue;
+    }
+
+    const { data, error: selectError } = await client
+      .from("organizations")
       .select("*")
+      .eq("slug", candidate)
       .single();
 
-    if (!error && data) {
+    if (selectError) {
+      lastError = selectError;
+      continue;
+    }
+
+    if (data) {
       return data as OrganizationRecord;
     }
   }
 
-  throw new Error("Failed to create organization. Please try a different name.");
+  if (lastError) {
+    throw lastError;
+  }
+
+  throw new Error("Failed to create organization right now.");
 }
 
 /**

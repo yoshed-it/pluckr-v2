@@ -1,17 +1,14 @@
-/**
- * Mobile Swift-parity client list screen with search and add-client flow.
- */
 import React from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import type { ClientRecord } from "@pluckr/supabase";
 
-import { PaperCard } from "./PaperCard";
 import { PluckrButton } from "./PluckrButton";
+import { PluckrCard } from "./PluckrCard";
 import { PluckrTextField } from "./PluckrTextField";
-import { styles } from "./mobileClientListStyles";
-import { mobileTheme } from "../theme";
+import { pluckrClientListStageStyles as styles } from "./PluckrClientListStage.styles";
+import { pluckrAppTheme } from "./pluckrAppTheme";
 
-type MobileClientListStageProps = {
+type PluckrClientListStageProps = {
   clients: ClientRecord[];
   searchText: string;
   isLoading: boolean;
@@ -51,7 +48,7 @@ function formatDateLabel(value: string | null) {
   }).format(new Date(value));
 }
 
-export function MobileClientListStage({
+export function PluckrClientListStage({
   clients,
   searchText,
   isLoading,
@@ -68,46 +65,51 @@ export function MobileClientListStage({
   onCancelCreate,
   onFormChange,
   onSubmitClient
-}: MobileClientListStageProps) {
+}: PluckrClientListStageProps) {
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
         <Text style={styles.link} onPress={onBack}>
-          ← Workspace
+          ← Provider Home
         </Text>
         <Text style={styles.logoutLink} onPress={onLogout}>
           Log Out
         </Text>
       </View>
 
-      <PaperCard>
+      <PluckrCard>
         <Text style={styles.eyebrow}>All Clients</Text>
         <Text style={styles.title}>Client List</Text>
-        <Text style={styles.subtitle}>Search or add clients.</Text>
+        <Text style={styles.subtitle}>
+          Search clients, review recent activity, or add a new record to the
+          journal.
+        </Text>
         <View style={styles.heroActions}>
           <PluckrButton label="Add Client" onPress={() => onStartCreate()} />
         </View>
         <View style={styles.searchRow}>
           <TextInput
             placeholder="Search clients..."
-            placeholderTextColor={mobileTheme.colors.textSecondary}
+            placeholderTextColor={pluckrAppTheme.colors.textSecondary}
             style={styles.searchField}
             value={searchText}
             onChangeText={onSearchChange}
           />
           <Text style={styles.countChip}>{clients.length}</Text>
         </View>
-      </PaperCard>
+      </PluckrCard>
 
       {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
-      {notice ? (
-        <Text style={[styles.message, styles.success]}>{notice}</Text>
-      ) : null}
+      {notice ? <Text style={[styles.message, styles.success]}>{notice}</Text> : null}
 
       {isCreatingClient ? (
-        <PaperCard>
+        <PluckrCard>
           <View style={styles.formStack}>
             <Text style={styles.sectionTitle}>Add New Client</Text>
+            <Text style={styles.formCopy}>
+              Create a new clinical record with the same essentials the Swift
+              app asked for first.
+            </Text>
             <PluckrTextField
               label="First Name"
               placeholder="First Name"
@@ -140,7 +142,7 @@ export function MobileClientListStage({
             />
             <PluckrTextField
               label="Notes"
-              placeholder="Notes"
+              placeholder="Notes (optional)"
               multiline
               value={clientForm.notes}
               onChangeText={(value) => onFormChange("notes", value)}
@@ -157,16 +159,24 @@ export function MobileClientListStage({
               onPress={() => onCancelCreate()}
             />
           </View>
-        </PaperCard>
+        </PluckrCard>
       ) : null}
 
-      <PaperCard>
+      <PluckrCard>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Clients</Text>
+          <Text style={styles.countChip}>{clients.length}</Text>
+        </View>
         {isLoading ? (
           <Text style={styles.emptyState}>Loading clients...</Text>
         ) : clients.length === 0 ? (
-          <Text style={styles.emptyState}>
-            No clients yet.
-          </Text>
+          <View style={styles.emptyStateStack}>
+            <Text style={styles.emptyStateTitle}>No clients yet</Text>
+            <Text style={styles.emptyState}>
+              Add your first client to get started.
+            </Text>
+            <PluckrButton label="Add Client" onPress={() => onStartCreate()} />
+          </View>
         ) : (
           <View style={styles.listStack}>
             {clients.map((client) => (
@@ -176,22 +186,32 @@ export function MobileClientListStage({
                 style={styles.cardButton}
                 onPress={() => onSelectClient(client)}
               >
-                <PaperCard compact>
-                <Text style={styles.cardTitle}>
-                  {client.first_name} {client.last_name}
-                </Text>
-                <Text style={styles.cardBody}>
-                  {client.notes || "No care notes yet."}
-                </Text>
-                <Text style={styles.cardMeta}>
-                  Last seen {formatDateLabel(client.last_seen_at)}
-                </Text>
-                </PaperCard>
+                <PluckrCard compact>
+                  <View style={styles.clientRow}>
+                    <View style={styles.clientCopy}>
+                      <Text style={styles.cardTitle}>
+                        {client.first_name} {client.last_name}
+                      </Text>
+                      {client.pronouns ? (
+                        <Text style={styles.pronounsText}>{client.pronouns}</Text>
+                      ) : null}
+                      <Text style={styles.cardBody}>
+                        {client.notes || "No care notes yet."}
+                      </Text>
+                      <Text style={styles.cardMeta}>
+                        Last seen {formatDateLabel(client.last_seen_at)}
+                      </Text>
+                    </View>
+                    <View style={styles.rowAccessory}>
+                      <Text style={styles.openGlyph}>›</Text>
+                    </View>
+                  </View>
+                </PluckrCard>
               </Pressable>
             ))}
           </View>
         )}
-      </PaperCard>
+      </PluckrCard>
     </View>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Newsreader } from "next/font/google";
 import type { ReactNode } from "react";
-import { buildPluckrThemeCss } from "@pluckr/design-system";
+import { buildPluckrThemeCss } from "@pluckr/design-system/themeTokens";
 
 import "./globals.css";
 

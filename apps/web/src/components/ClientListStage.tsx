@@ -85,10 +85,7 @@ export function ClientListStage({
             <div>
               <span className="section-eyebrow">All Clients</span>
               <h1 className="panel-title">Client List</h1>
-              <p className="panel-copy">
-                Search clients or create a new record the same way the Swift app
-                does.
-              </p>
+              <p className="panel-copy">Search or add clients.</p>
             </div>
             <button
               className="swift-button swift-button-primary client-stage-button"
@@ -158,7 +155,7 @@ export function ClientListStage({
               </div>
               <textarea
                 className="swift-field swift-field-textarea"
-                placeholder="Notes (optional)"
+                placeholder="Notes"
                 value={clientForm.notes}
                 onChange={(event) => onFormChange("notes", event.target.value)}
               />
@@ -189,7 +186,7 @@ export function ClientListStage({
             <p className="empty-state">Loading clients...</p>
           ) : clients.length === 0 ? (
             <div className="client-empty-state">
-              <p className="empty-state">No clients yet. Add your first client to get started.</p>
+              <p className="empty-state">No clients yet.</p>
             </div>
           ) : (
             <div className="workspace-list">

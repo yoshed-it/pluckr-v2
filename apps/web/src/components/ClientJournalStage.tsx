@@ -86,7 +86,7 @@ export function ClientJournalStage({
                 {client.first_name} {client.last_name}
               </h1>
               <p className="panel-copy">
-                {client.notes || "No care summary yet. Start the first chart entry below."}
+                {client.notes || "No notes yet."}
               </p>
             </div>
             <div className="journal-meta">
@@ -134,7 +134,7 @@ export function ClientJournalStage({
               </div>
               <textarea
                 className="swift-field swift-field-textarea"
-                placeholder="Treatment Summary"
+                placeholder="Summary"
                 value={chartForm.treatmentSummary}
                 onChange={(event) =>
                   onChartFormChange("treatmentSummary", event.target.value)
@@ -142,7 +142,7 @@ export function ClientJournalStage({
               />
               <textarea
                 className="swift-field swift-field-textarea"
-                placeholder="Clinical Notes"
+                placeholder="Notes"
                 value={chartForm.notes}
                 onChange={(event) => onChartFormChange("notes", event.target.value)}
               />
@@ -179,7 +179,7 @@ export function ClientJournalStage({
             <p className="empty-state">Loading journal...</p>
           ) : charts.length === 0 ? (
             <p className="empty-state">
-              No chart entries yet. Create the first one to start this client&apos;s history.
+              No chart entries yet.
             </p>
           ) : (
             <div className="workspace-list">
