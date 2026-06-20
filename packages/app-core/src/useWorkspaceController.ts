@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
+  addClientToDailyFolio,
   loadWorkspaceSnapshot,
+  removeClientFromDailyFolio,
   seedDemoOrganization,
   type ClientRecord,
   type MembershipWithOrganization,
@@ -21,7 +23,8 @@ const emptySummary: WorkspaceSummary = {
 export function useWorkspaceController(
   client: SupabaseClient,
   memberships: MembershipWithOrganization[],
-  selectedOrganizationId: string | null
+  selectedOrganizationId: string | null,
+  selectedMembershipId: string | null
 ) {
   const [workspaceLoading, setWorkspaceLoading] = useState(false);
   const [workspaceSeeding, setWorkspaceSeeding] = useState(false);
@@ -31,12 +34,14 @@ export function useWorkspaceController(
     useState<WorkspaceSummary>(emptySummary);
   const [workspaceClients, setWorkspaceClients] = useState<ClientRecord[]>([]);
   const [workspaceCharts, setWorkspaceCharts] = useState<RecentChartRecord[]>([]);
+  const [dailyFolioClients, setDailyFolioClients] = useState<ClientRecord[]>([]);
 
   useEffect(() => {
     if (!selectedOrganizationId || memberships.length === 0) {
       setWorkspaceSummary(emptySummary);
       setWorkspaceClients([]);
       setWorkspaceCharts([]);
+      setDailyFolioClients([]);
       return;
     }
 
@@ -48,10 +53,14 @@ export function useWorkspaceController(
       return;
     }
 
-    void loadWorkspace(selectedOrganizationId);
-  }, [client, memberships, selectedOrganizationId]);
+    if (!selectedMembershipId) {
+      return;
+    }
 
-  async function loadWorkspace(organizationId: string) {
+    void loadWorkspace(selectedOrganizationId, selectedMembershipId);
+  }, [client, memberships, selectedMembershipId, selectedOrganizationId]);
+
+  async function loadWorkspace(organizationId: string, membershipId: string) {
     setWorkspaceLoading(true);
     setWorkspaceError(null);
 
@@ -59,11 +68,13 @@ export function useWorkspaceController(
       const snapshot = await loadWorkspaceSnapshot(
         client,
         memberships,
-        organizationId
+        organizationId,
+        membershipId
       );
       setWorkspaceSummary(snapshot.summary);
       setWorkspaceClients(snapshot.clients);
       setWorkspaceCharts(snapshot.charts);
+      setDailyFolioClients(snapshot.dailyFolioClients);
     } catch (error) {
       setWorkspaceError(
         error instanceof Error
@@ -93,7 +104,9 @@ export function useWorkspaceController(
           : result.reason ?? "Demo data was already present."
       );
 
-      await loadWorkspace(selectedOrganizationId);
+      if (selectedMembershipId) {
+        await loadWorkspace(selectedOrganizationId, selectedMembershipId);
+      }
     } catch (error) {
       setWorkspaceError(
         error instanceof Error
@@ -109,6 +122,66 @@ export function useWorkspaceController(
     setWorkspaceNotice(null);
   }
 
+  async function addFolioClient(nextClient: ClientRecord) {
+    if (!selectedOrganizationId || !selectedMembershipId) {
+      return false;
+    }
+
+    setWorkspaceError(null);
+    setWorkspaceNotice(null);
+
+    try {
+      await addClientToDailyFolio(client, {
+        organizationId: selectedOrganizationId,
+        membershipId: selectedMembershipId,
+        clientId: nextClient.id
+      });
+      setDailyFolioClients((current) =>
+        current.some((clientRecord) => clientRecord.id === nextClient.id)
+          ? current
+          : [...current, nextClient]
+      );
+      setWorkspaceNotice(`${nextClient.first_name} added to today's folio.`);
+      return true;
+    } catch (error) {
+      setWorkspaceError(
+        error instanceof Error
+          ? error.message
+          : "Unable to add the client to today's folio."
+      );
+      return false;
+    }
+  }
+
+  async function removeFolioClient(nextClient: ClientRecord) {
+    if (!selectedOrganizationId || !selectedMembershipId) {
+      return false;
+    }
+
+    setWorkspaceError(null);
+    setWorkspaceNotice(null);
+
+    try {
+      await removeClientFromDailyFolio(client, {
+        organizationId: selectedOrganizationId,
+        membershipId: selectedMembershipId,
+        clientId: nextClient.id
+      });
+      setDailyFolioClients((current) =>
+        current.filter((clientRecord) => clientRecord.id !== nextClient.id)
+      );
+      setWorkspaceNotice(`${nextClient.first_name} removed from today's folio.`);
+      return true;
+    } catch (error) {
+      setWorkspaceError(
+        error instanceof Error
+          ? error.message
+          : "Unable to remove the client from today's folio."
+      );
+      return false;
+    }
+  }
+
   return {
     workspaceLoading,
     workspaceSeeding,
@@ -117,11 +190,14 @@ export function useWorkspaceController(
     workspaceSummary,
     workspaceClients,
     workspaceCharts,
+    dailyFolioClients,
     refreshWorkspace: () =>
-      selectedOrganizationId
-        ? loadWorkspace(selectedOrganizationId)
+      selectedOrganizationId && selectedMembershipId
+        ? loadWorkspace(selectedOrganizationId, selectedMembershipId)
         : Promise.resolve(),
     seedWorkspaceDemoData,
+    addFolioClient,
+    removeFolioClient,
     resetWorkspaceView
   };
 }

@@ -142,6 +142,60 @@ export async function createOrganization(
 }
 
 /**
+ * Accepts an invite token or full invite URL and joins the authenticated user
+ * to the organization referenced by that invite.
+ */
+export async function joinOrganizationWithInvite(
+  client: SupabaseClient,
+  inviteTokenOrLink: string
+) {
+  const normalizedToken = extractInviteToken(inviteTokenOrLink);
+
+  const { data, error } = await client.rpc("accept_invite_link", {
+    invite_token_input: normalizedToken
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data as {
+    organization_id: string;
+    organization_name: string;
+    membership_id: string;
+    role: string;
+    provider_id: string;
+  };
+}
+
+/**
+ * Updates privacy-related organization settings that affect how the mobile app
+ * protects sensitive clinical screens.
+ */
+export async function updateOrganizationPrivacy(
+  client: SupabaseClient,
+  input: {
+    organizationId: string;
+    protectSensitiveScreens: boolean;
+  }
+): Promise<OrganizationRecord> {
+  const { data, error } = await client
+    .from("organizations")
+    .update({
+      protect_sensitive_screens: input.protectSensitiveScreens
+    })
+    .eq("id", input.organizationId)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as OrganizationRecord;
+}
+
+/**
  * Calls the database seed function that creates demo clients and chart entries
  * for investor-ready walkthroughs.
  */
@@ -174,6 +228,13 @@ export async function listOrganizationClients(
   organizationId: string
 ) {
   return (await listClients(client, organizationId)).slice(0, 12) as ClientRecord[];
+}
+
+export async function listAllOrganizationClients(
+  client: SupabaseClient,
+  organizationId: string
+) {
+  return (await listClients(client, organizationId)) as ClientRecord[];
 }
 
 /**
@@ -240,17 +301,157 @@ export async function getWorkspaceSummary(
 export async function loadWorkspaceSnapshot(
   client: SupabaseClient,
   organizations: MembershipWithOrganization[],
-  organizationId: string
+  organizationId: string,
+  membershipId: string
 ): Promise<WorkspaceSnapshot> {
-  const [summary, clients, charts] = await Promise.all([
+  const [summary, clients, charts, dailyFolioClients] = await Promise.all([
     getWorkspaceSummary(client, organizations, organizationId),
     listOrganizationClients(client, organizationId),
-    listRecentCharts(client, organizationId)
+    listRecentCharts(client, organizationId),
+    listDailyFolioClients(client, organizationId, membershipId)
   ]);
 
   return {
     summary,
     clients,
-    charts
+    charts,
+    dailyFolioClients
   };
+}
+
+export async function listDailyFolioClients(
+  client: SupabaseClient,
+  organizationId: string,
+  membershipId: string
+) {
+  const providerId = await getProviderIdForMembership(
+    client,
+    organizationId,
+    membershipId
+  );
+
+  if (!providerId) {
+    return [] as ClientRecord[];
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const { data, error } = await client
+    .from("daily_folio_entries")
+    .select("client:clients(*)")
+    .eq("organization_id", organizationId)
+    .eq("provider_id", providerId)
+    .eq("folio_date", today)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return ((data ?? []) as Array<{ client: ClientRecord | ClientRecord[] | null }>)
+    .map((row) =>
+      Array.isArray(row.client) ? row.client[0] ?? null : row.client
+    )
+    .filter((row): row is ClientRecord => row !== null);
+}
+
+export async function addClientToDailyFolio(
+  client: SupabaseClient,
+  input: {
+    organizationId: string;
+    membershipId: string;
+    clientId: string;
+  }
+) {
+  const providerId = await getProviderIdForMembership(
+    client,
+    input.organizationId,
+    input.membershipId
+  );
+
+  if (!providerId) {
+    throw new Error("Provider profile not found for this organization.");
+  }
+
+  const { error } = await client.from("daily_folio_entries").upsert(
+    {
+      organization_id: input.organizationId,
+      provider_id: providerId,
+      client_id: input.clientId,
+      folio_date: new Date().toISOString().slice(0, 10)
+    },
+    {
+      onConflict: "provider_id,client_id,folio_date",
+      ignoreDuplicates: true
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function removeClientFromDailyFolio(
+  client: SupabaseClient,
+  input: {
+    organizationId: string;
+    membershipId: string;
+    clientId: string;
+  }
+) {
+  const providerId = await getProviderIdForMembership(
+    client,
+    input.organizationId,
+    input.membershipId
+  );
+
+  if (!providerId) {
+    throw new Error("Provider profile not found for this organization.");
+  }
+
+  const { error } = await client
+    .from("daily_folio_entries")
+    .delete()
+    .eq("organization_id", input.organizationId)
+    .eq("provider_id", providerId)
+    .eq("client_id", input.clientId)
+    .eq("folio_date", new Date().toISOString().slice(0, 10));
+
+  if (error) {
+    throw error;
+  }
+}
+
+function extractInviteToken(value: string) {
+  const trimmed = value.trim();
+
+  try {
+    const url = new URL(trimmed);
+    const token =
+      url.searchParams.get("token") ??
+      url.searchParams.get("invite") ??
+      url.pathname.split("/").filter(Boolean).at(-1);
+
+    return token?.trim() || trimmed;
+  } catch {
+    return trimmed;
+  }
+}
+
+async function getProviderIdForMembership(
+  client: SupabaseClient,
+  organizationId: string,
+  membershipId: string
+) {
+  const { data, error } = await client
+    .from("providers")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("membership_id", membershipId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return (data?.id as string | undefined) ?? null;
 }

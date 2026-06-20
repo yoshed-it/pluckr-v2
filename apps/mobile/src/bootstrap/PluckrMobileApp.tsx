@@ -1,11 +1,16 @@
 import "react-native-url-polyfill/auto";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import type { ChartUploadAsset } from "@pluckr/app-core";
-import { PluckrAppShell } from "@pluckr/design-system";
+import {
+  PluckrAppShell,
+  type PluckrPrivacyState
+} from "@pluckr/design-system";
 import { getSupabaseNativeClient } from "@pluckr/supabase";
+
+import { PluckrCameraCaptureModal } from "./PluckrCameraCaptureModal";
+import { usePluckrPrivacyGuard } from "./usePluckrPrivacyGuard";
 
 const logoSource = require("../../assets/pluckr-logo.png");
 
@@ -18,44 +23,51 @@ const logoSource = require("../../assets/pluckr-logo.png");
  */
 export function PluckrMobileApp() {
   const supabase = useState(() => getSupabaseNativeClient(AsyncStorage))[0];
+  const pendingCaptureResolveRef = useRef<
+    ((assets: ChartUploadAsset[]) => void) | null
+  >(null);
+  const [privacyState, setPrivacyState] = useState<PluckrPrivacyState>({
+    isSensitiveScreen: false,
+    protectSensitiveScreens: true
+  });
+  const [isCameraVisible, setIsCameraVisible] = useState(false);
+  const { privacyCurtainVisible } = usePluckrPrivacyGuard(privacyState);
 
-  async function requestChartImages(): Promise<ChartUploadAsset[]> {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
+  function requestChartImages(): Promise<ChartUploadAsset[]> {
+    setIsCameraVisible(true);
 
-    if (!permission.granted) {
-      return [];
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: false,
-      mediaTypes: ["images"],
-      quality: 0.7
+    return new Promise((resolve) => {
+      pendingCaptureResolveRef.current = resolve;
     });
+  }
 
-    if (result.canceled) {
-      return [];
-    }
+  function handleCloseCamera() {
+    setIsCameraVisible(false);
+    pendingCaptureResolveRef.current?.([]);
+    pendingCaptureResolveRef.current = null;
+  }
 
-    return Promise.all(
-      result.assets.map(async (asset, index) => {
-        const response = await fetch(asset.uri);
-        const blob = await response.blob();
-
-        return {
-          fileName: asset.fileName ?? `chart-image-${index + 1}.jpg`,
-          mimeType: asset.mimeType ?? blob.type ?? "image/jpeg",
-          bytes: await blob.arrayBuffer()
-        };
-      })
-    );
+  function handleConfirmCapture(asset: ChartUploadAsset) {
+    setIsCameraVisible(false);
+    pendingCaptureResolveRef.current?.([asset]);
+    pendingCaptureResolveRef.current = null;
   }
 
   return (
-    <PluckrAppShell
-      supabase={supabase}
-      storage={AsyncStorage}
-      logoSource={logoSource}
-      onRequestChartImages={requestChartImages}
-    />
+    <>
+      <PluckrAppShell
+        supabase={supabase}
+        storage={AsyncStorage}
+        logoSource={logoSource}
+        onRequestChartImages={requestChartImages}
+        privacyCurtainVisible={privacyCurtainVisible}
+        onPrivacyStateChange={setPrivacyState}
+      />
+      <PluckrCameraCaptureModal
+        visible={isCameraVisible}
+        onClose={handleCloseCamera}
+        onConfirmCapture={handleConfirmCapture}
+      />
+    </>
   );
 }

@@ -17,6 +17,7 @@ export type OrganizationRecord = {
   slug: string;
   description: string | null;
   stage: string;
+  protect_sensitive_screens: boolean;
   created_by_user_id: string | null;
   created_at: string;
   updated_at: string;
@@ -44,11 +45,19 @@ export type ProviderRecord = {
   organization_id: string;
   membership_id: string | null;
   full_name: string;
+  phone: string | null;
   title: string | null;
   handle: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+};
+
+export type ProviderProfileInput = {
+  organizationId: string;
+  membershipId: string;
+  fullName: string;
+  phone: string;
 };
 
 /**
@@ -162,6 +171,22 @@ export type MembershipWithOrganization = {
   organization: OrganizationRecord;
 };
 
+export type AdminProviderRecord = {
+  provider: ProviderRecord;
+  membership: MembershipRecord | null;
+};
+
+export type InviteLinkRecord = {
+  id: string;
+  organization_id: string;
+  email: string;
+  role: OrganizationRole;
+  token: string;
+  expires_at: string | null;
+  accepted_at: string | null;
+  created_at: string;
+};
+
 /**
  * Summary counts used by the first workspace dashboard.
  */
@@ -178,4 +203,5 @@ export type WorkspaceSnapshot = {
   summary: WorkspaceSummary;
   clients: ClientRecord[];
   charts: RecentChartRecord[];
+  dailyFolioClients: ClientRecord[];
 };

@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   createOrganization,
+  joinOrganizationWithInvite,
   listMembershipOrganizations,
+  updateOrganizationPrivacy,
   type MembershipWithOrganization
 } from "@pluckr/supabase";
 
@@ -24,7 +26,11 @@ export function useOrganizationController(
   const [isCreatingOrganization, setIsCreatingOrganization] = useState(false);
   const [organizationName, setOrganizationName] = useState("");
   const [organizationDescription, setOrganizationDescription] = useState("");
+  const [inviteToken, setInviteToken] = useState("");
   const [organizationSubmitting, setOrganizationSubmitting] = useState(false);
+  const [organizationSettingsSubmitting, setOrganizationSettingsSubmitting] =
+    useState(false);
+  const [isJoiningOrganization, setIsJoiningOrganization] = useState(false);
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<
     string | null
   >(null);
@@ -38,7 +44,10 @@ export function useOrganizationController(
       setIsCreatingOrganization(false);
       setOrganizationName("");
       setOrganizationDescription("");
+      setInviteToken("");
       setOrganizationSubmitting(false);
+      setOrganizationSettingsSubmitting(false);
+      setIsJoiningOrganization(false);
       setSelectedOrganizationId(null);
       return;
     }
@@ -111,6 +120,7 @@ export function useOrganizationController(
       setOrganizationName("");
       setOrganizationDescription("");
       setIsCreatingOrganization(false);
+      setIsJoiningOrganization(false);
       setOrganizationNotice(`${organization.name} is ready.`);
       setSelectedOrganizationId(organization.id);
     } catch (error) {
@@ -126,6 +136,8 @@ export function useOrganizationController(
 
   function startCreatingOrganization() {
     setOrganizationNotice(null);
+    setOrganizationError(null);
+    setIsJoiningOrganization(false);
     setIsCreatingOrganization(true);
   }
 
@@ -134,10 +146,44 @@ export function useOrganizationController(
     setOrganizationError(null);
   }
 
-  function showJoinMessage() {
-    setOrganizationNotice(
-      "Invite-based organization joining is next on deck. For now, create the first clinic here."
-    );
+  function startJoiningOrganization() {
+    setOrganizationNotice(null);
+    setOrganizationError(null);
+    setIsCreatingOrganization(false);
+    setIsJoiningOrganization(true);
+  }
+
+  function cancelJoiningOrganization() {
+    setIsJoiningOrganization(false);
+    setOrganizationError(null);
+    setInviteToken("");
+  }
+
+  async function submitJoinOrganization() {
+    setOrganizationSubmitting(true);
+    setOrganizationError(null);
+    setOrganizationNotice(null);
+
+    try {
+      const joined = await joinOrganizationWithInvite(client, inviteToken);
+
+      if (userId) {
+        await loadMemberships(userId);
+      }
+
+      setInviteToken("");
+      setIsJoiningOrganization(false);
+      setOrganizationNotice(`${joined.organization_name} joined successfully.`);
+      setSelectedOrganizationId(joined.organization_id);
+    } catch (error) {
+      setOrganizationError(
+        error instanceof Error
+          ? error.message
+          : "Unable to join that organization right now."
+      );
+    } finally {
+      setOrganizationSubmitting(false);
+    }
   }
 
   function resetAfterLogout() {
@@ -145,7 +191,55 @@ export function useOrganizationController(
     setIsCreatingOrganization(false);
     setOrganizationName("");
     setOrganizationDescription("");
+    setInviteToken("");
+    setOrganizationSettingsSubmitting(false);
+    setIsJoiningOrganization(false);
     setSelectedOrganizationId(null);
+  }
+
+  async function updateSelectedOrganizationPrivacy(
+    protectSensitiveScreens: boolean
+  ) {
+    if (!selectedOrganizationId) {
+      return null;
+    }
+
+    setOrganizationSettingsSubmitting(true);
+    setOrganizationError(null);
+    setOrganizationNotice(null);
+
+    try {
+      const updatedOrganization = await updateOrganizationPrivacy(client, {
+        organizationId: selectedOrganizationId,
+        protectSensitiveScreens
+      });
+
+      setMemberships((current) =>
+        current.map((record) =>
+          record.organization.id === updatedOrganization.id
+            ? {
+                ...record,
+                organization: updatedOrganization
+              }
+            : record
+        )
+      );
+      setOrganizationNotice(
+        protectSensitiveScreens
+          ? "Sensitive screen protection is on."
+          : "Sensitive screen protection is off."
+      );
+      return updatedOrganization;
+    } catch (error) {
+      setOrganizationError(
+        error instanceof Error
+          ? error.message
+          : "Unable to update privacy settings right now."
+      );
+      return null;
+    } finally {
+      setOrganizationSettingsSubmitting(false);
+    }
   }
 
   return {
@@ -154,17 +248,24 @@ export function useOrganizationController(
     organizationError,
     organizationNotice,
     isCreatingOrganization,
+    isJoiningOrganization,
     organizationName,
     organizationDescription,
+    inviteToken,
     organizationSubmitting,
+    organizationSettingsSubmitting,
     selectedOrganizationId,
     setOrganizationName,
     setOrganizationDescription,
+    setInviteToken,
     setSelectedOrganizationId,
     startCreatingOrganization,
     cancelCreatingOrganization,
+    startJoiningOrganization,
+    cancelJoiningOrganization,
     submitOrganization,
-    showJoinMessage,
+    submitJoinOrganization,
+    updateSelectedOrganizationPrivacy,
     resetAfterLogout
   };
 }

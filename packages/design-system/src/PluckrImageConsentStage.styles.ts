@@ -84,5 +84,8 @@ export const pluckrImageConsentStageStyles = StyleSheet.create({
     color: pluckrAppTheme.colors.textSecondary,
     fontSize: 14,
     lineHeight: 20
+  },
+  previewStack: {
+    gap: pluckrAppTheme.spacing.xs
   }
 });

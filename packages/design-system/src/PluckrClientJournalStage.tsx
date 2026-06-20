@@ -9,7 +9,11 @@ import type { ChartEntryRecord, ClientRecord } from "@pluckr/supabase";
 
 import { PluckrButton } from "./PluckrButton";
 import { PluckrCard } from "./PluckrCard";
+import { PluckrChartDetailPanel } from "./PluckrChartDetailPanel";
 import { PluckrChartEntryEditor } from "./PluckrChartEntryEditor";
+import { PluckrConfirmDialog } from "./PluckrConfirmDialog";
+import { PluckrFullScreenImageModal } from "./PluckrFullScreenImageModal";
+import { PluckrNoticeBanner } from "./PluckrNoticeBanner";
 import { PluckrTagPickerDrawer } from "./PluckrTagPickerDrawer";
 import { PluckrTextField } from "./PluckrTextField";
 import { pluckrClientJournalStageStyles as styles } from "./PluckrClientJournalStage.styles";
@@ -147,6 +151,23 @@ export function PluckrClientJournalStage({
   onSubmitChart
 }: PluckrClientJournalStageProps) {
   const [showClientTagPicker, setShowClientTagPicker] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [selectedChart, setSelectedChart] = useState<ChartEntryRecord | null>(null);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [chartPendingDelete, setChartPendingDelete] = useState<ChartEntryRecord | null>(null);
+
+  if (selectedChart && !isEditingChart) {
+    return (
+      <PluckrChartDetailPanel
+        chart={selectedChart}
+        onBack={() => setSelectedChart(null)}
+        onEdit={(chart) => {
+          setSelectedChart(null);
+          onEditChart(chart);
+        }}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -206,13 +227,13 @@ export function PluckrClientJournalStage({
         </View>
       </PluckrCard>
 
-      {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
-      {notice ? <Text style={[styles.message, styles.success]}>{notice}</Text> : null}
+      {error ? <PluckrNoticeBanner tone="error" message={error} /> : null}
+      {notice ? <PluckrNoticeBanner tone="success" message={notice} /> : null}
       {clientDetailError ? (
-        <Text style={[styles.message, styles.error]}>{clientDetailError}</Text>
+        <PluckrNoticeBanner tone="error" message={clientDetailError} />
       ) : null}
       {clientDetailNotice ? (
-        <Text style={[styles.message, styles.success]}>{clientDetailNotice}</Text>
+        <PluckrNoticeBanner tone="success" message={clientDetailNotice} />
       ) : null}
 
       {isEditingClient ? (
@@ -303,7 +324,7 @@ export function PluckrClientJournalStage({
               <Pressable
                 accessibilityRole="button"
                 style={styles.archiveButton}
-                onPress={onArchiveClient}
+                onPress={() => setShowArchiveConfirm(true)}
               >
                 <Text style={styles.archiveButtonLabel}>Archive</Text>
               </Pressable>
@@ -400,14 +421,30 @@ export function PluckrClientJournalStage({
                     </Text>
                     <View style={styles.imagePreviewRow}>
                       {chart.image_urls.slice(0, 3).map((imageUrl) => (
-                        <Image key={imageUrl} source={{ uri: imageUrl }} style={styles.imagePreview} resizeMode="cover" />
+                        <Pressable
+                          key={imageUrl}
+                          accessibilityRole="button"
+                          onPress={() => setSelectedImageUrl(imageUrl)}
+                        >
+                          <Image
+                            source={{ uri: imageUrl }}
+                            style={styles.imagePreview}
+                            resizeMode="cover"
+                          />
+                        </Pressable>
                       ))}
                     </View>
                   </View>
                 ) : null}
                 <View style={styles.entryActions}>
+                  <Text style={styles.link} onPress={() => setSelectedChart(chart)}>Open</Text>
                   <Text style={styles.link} onPress={() => onEditChart(chart)}>Edit</Text>
-                  <Text style={styles.logoutLink} onPress={() => onDeleteChart(chart)}>Delete</Text>
+                  <Text
+                    style={styles.logoutLink}
+                    onPress={() => setChartPendingDelete(chart)}
+                  >
+                    Delete
+                  </Text>
                 </View>
               </PluckrCard>
             ))}
@@ -423,6 +460,35 @@ export function PluckrClientJournalStage({
         onToggleTag={onToggleClientTag}
         onAddCustomTag={onAddCustomClientTag}
         onClose={() => setShowClientTagPicker(false)}
+      />
+      <PluckrFullScreenImageModal
+        visible={Boolean(selectedImageUrl)}
+        imageUrl={selectedImageUrl}
+        onClose={() => setSelectedImageUrl(null)}
+      />
+      <PluckrConfirmDialog
+        visible={showArchiveConfirm}
+        title="Archive Client?"
+        message="The client will be removed from active lists but kept in the organization record."
+        confirmLabel="Archive"
+        onCancel={() => setShowArchiveConfirm(false)}
+        onConfirm={() => {
+          setShowArchiveConfirm(false);
+          onArchiveClient();
+        }}
+      />
+      <PluckrConfirmDialog
+        visible={Boolean(chartPendingDelete)}
+        title="Delete Chart Entry?"
+        message="This treatment entry and its linked chart record will be removed from the journal."
+        confirmLabel="Delete"
+        onCancel={() => setChartPendingDelete(null)}
+        onConfirm={() => {
+          if (chartPendingDelete) {
+            onDeleteChart(chartPendingDelete);
+          }
+          setChartPendingDelete(null);
+        }}
       />
     </View>
   );

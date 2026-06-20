@@ -4,6 +4,7 @@ import type { ClientRecord } from "@pluckr/supabase";
 
 import { PluckrButton } from "./PluckrButton";
 import { PluckrCard } from "./PluckrCard";
+import { PluckrNoticeBanner } from "./PluckrNoticeBanner";
 import { PluckrTextField } from "./PluckrTextField";
 import { pluckrClientListStageStyles as styles } from "./PluckrClientListStage.styles";
 import { pluckrAppTheme } from "./pluckrAppTheme";
@@ -99,8 +100,8 @@ export function PluckrClientListStage({
         </View>
       </PluckrCard>
 
-      {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
-      {notice ? <Text style={[styles.message, styles.success]}>{notice}</Text> : null}
+      {error ? <PluckrNoticeBanner tone="error" message={error} /> : null}
+      {notice ? <PluckrNoticeBanner tone="success" message={notice} /> : null}
 
       {isCreatingClient ? (
         <PluckrCard>

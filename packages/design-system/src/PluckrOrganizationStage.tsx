@@ -11,6 +11,7 @@ import { PluckrBrandHeader } from "./PluckrBrandHeader";
 import { PluckrButton } from "./PluckrButton";
 import { PluckrOrganizationCard } from "./PluckrOrganizationCard";
 import { PluckrCard } from "./PluckrCard";
+import { PluckrNoticeBanner } from "./PluckrNoticeBanner";
 import { PluckrTextField } from "./PluckrTextField";
 import { pluckrAppTheme } from "./pluckrAppTheme";
 
@@ -18,18 +19,23 @@ type PluckrOrganizationStageProps = {
   logoSource: ImageSourcePropType;
   memberships: MembershipWithOrganization[];
   isCreating: boolean;
+  isJoining: boolean;
   organizationName: string;
   organizationDescription: string;
+  inviteToken: string;
   isSubmitting: boolean;
   error: string | null;
   notice: string | null;
   onSelectOrganization: (organizationId: string) => void;
   onStartCreate: () => void;
   onCancelCreate: () => void;
+  onStartJoin: () => void;
+  onCancelJoin: () => void;
   onOrganizationNameChange: (value: string) => void;
   onOrganizationDescriptionChange: (value: string) => void;
   onCreateOrganization: () => void;
-  onShowJoinMessage: () => void;
+  onInviteTokenChange: (value: string) => void;
+  onJoinOrganization: () => void;
   onLogout: () => void;
 };
 
@@ -37,18 +43,23 @@ export function PluckrOrganizationStage({
   logoSource,
   memberships,
   isCreating,
+  isJoining,
   organizationName,
   organizationDescription,
+  inviteToken,
   isSubmitting,
   error,
   notice,
   onSelectOrganization,
   onStartCreate,
   onCancelCreate,
+  onStartJoin,
+  onCancelJoin,
   onOrganizationNameChange,
   onOrganizationDescriptionChange,
   onCreateOrganization,
-  onShowJoinMessage,
+  onInviteTokenChange,
+  onJoinOrganization,
   onLogout
 }: PluckrOrganizationStageProps) {
   const isNewUser = memberships.length === 0;
@@ -73,8 +84,8 @@ export function PluckrOrganizationStage({
         logoSource={logoSource}
       />
 
-      {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
-      {notice ? <Text style={[styles.message, styles.success]}>{notice}</Text> : null}
+      {error ? <PluckrNoticeBanner tone="error" message={error} /> : null}
+      {notice ? <PluckrNoticeBanner tone="success" message={notice} /> : null}
 
       {isCreating ? (
         <PluckrCard>
@@ -104,6 +115,31 @@ export function PluckrOrganizationStage({
               variant="secondary"
               disabled={isSubmitting}
               onPress={() => onCancelCreate()}
+            />
+          </View>
+        </PluckrCard>
+      ) : isJoining ? (
+        <PluckrCard>
+          <View style={styles.stack}>
+            <Text style={styles.sectionTitle}>Join Organization</Text>
+            <PluckrTextField
+              label="Invite Token Or Link"
+              placeholder="Paste the invite token or full invite link"
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={inviteToken}
+              onChangeText={onInviteTokenChange}
+            />
+            <PluckrButton
+              label={isSubmitting ? "Joining..." : "Join Organization"}
+              disabled={!inviteToken.trim() || isSubmitting}
+              onPress={() => onJoinOrganization()}
+            />
+            <PluckrButton
+              label="Cancel"
+              variant="secondary"
+              disabled={isSubmitting}
+              onPress={() => onCancelJoin()}
             />
           </View>
         </PluckrCard>
@@ -143,12 +179,11 @@ export function PluckrOrganizationStage({
               <PluckrButton
                 label={isNewUser ? "Join Existing Organization" : "Join Organization"}
                 variant="secondary"
-                onPress={() => onShowJoinMessage()}
+                onPress={() => onStartJoin()}
               />
               {!isNewUser ? (
                 <Text style={styles.helperCopy}>
-                  Invite-link joining will be rebuilt to match the original
-                  Swift flow next.
+                  Paste an invite token or full link to join another clinic.
                 </Text>
               ) : null}
             </View>

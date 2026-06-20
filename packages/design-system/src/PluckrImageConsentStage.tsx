@@ -4,18 +4,24 @@ import type { ClientRecord } from "@pluckr/supabase";
 
 import { PluckrButton } from "./PluckrButton";
 import { PluckrCard } from "./PluckrCard";
+import {
+  PluckrSignaturePad,
+  SignaturePreview
+} from "./PluckrSignaturePad";
 import { PluckrTextField } from "./PluckrTextField";
 import { pluckrImageConsentStageStyles as styles } from "./PluckrImageConsentStage.styles";
 
 type PluckrImageConsentStageProps = {
   client: ClientRecord;
   signerName: string;
+  signatureValue: string | null;
   isSaving: boolean;
   error: string | null;
   notice: string | null;
   onBack: () => void;
   onLogout: () => void;
   onSignerNameChange: (value: string) => void;
+  onSignatureChange: (value: string | null) => void;
   onSignConsent: () => void;
 };
 
@@ -33,14 +39,20 @@ function formatTimestamp(value: string | null) {
 export function PluckrImageConsentStage({
   client,
   signerName,
+  signatureValue,
   isSaving,
   error,
   notice,
   onBack,
   onLogout,
   onSignerNameChange,
+  onSignatureChange,
   onSignConsent
 }: PluckrImageConsentStageProps) {
+  const hasExistingSignature = client.consent_signature_path?.startsWith(
+    "data:image/svg+xml;utf8,"
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
@@ -88,19 +100,28 @@ export function PluckrImageConsentStage({
         <View style={styles.formStack}>
           <Text style={styles.sectionTitle}>Digital Signature</Text>
           <Text style={styles.formCopy}>
-            This pass records the signer name and consent timestamp so the new
-            journal keeps the same gated behavior while we wire the full
-            signature canvas next.
+            Capture the client signature once and keep the consent record tied
+            to the charting workflow before any treatment images are added.
           </Text>
+          {hasExistingSignature ? (
+            <View style={styles.previewStack}>
+              <Text style={styles.detailLabel}>Current Signature On File</Text>
+              <SignaturePreview value={client.consent_signature_path} />
+            </View>
+          ) : null}
           <PluckrTextField
             label="Signer Name"
             placeholder="Client full name"
             value={signerName}
             onChangeText={onSignerNameChange}
           />
+          <PluckrSignaturePad
+            value={signatureValue}
+            onChange={onSignatureChange}
+          />
           <PluckrButton
             label={isSaving ? "Saving..." : "Sign Consent"}
-            disabled={!signerName.trim() || isSaving}
+            disabled={!signerName.trim() || !signatureValue || isSaving}
             onPress={() => onSignConsent()}
           />
         </View>
