@@ -20,6 +20,6 @@ Pluckr v2 starts from the same visual personality as the current Swift prototype
 
 ## What This Means Practically
 
-- Mobile and web both read from `@pluckr/design-system`
-- The first v2 screens should feel recognizably Pluckr on sight
-- Rework can happen later, but drift should not happen by accident
+- mobile and web both read from `@pluckr/design-system`
+- the first v2 screens should feel recognizably Pluckr on sight
+- rework can happen later, but drift should not happen by accident

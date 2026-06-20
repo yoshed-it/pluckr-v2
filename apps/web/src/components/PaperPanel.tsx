@@ -1,3 +1,7 @@
+/**
+ * Shared paper card wrapper that keeps the web rebuild visually anchored
+ * to the current Swift prototype's soft card treatment.
+ */
 import type { PropsWithChildren } from "react";
 
 type PaperPanelProps = PropsWithChildren<{

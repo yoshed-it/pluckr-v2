@@ -1,3 +1,6 @@
+/**
+ * Shared paper card wrapper for the mobile rebuild.
+ */
 import React, { type PropsWithChildren } from "react";
 import { StyleSheet, View } from "react-native";
 

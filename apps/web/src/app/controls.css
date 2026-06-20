@@ -1,0 +1,133 @@
+.form-stack,
+.field-stack,
+.action-stack,
+.workspace-list,
+.organization-list {
+  display: grid;
+  gap: 16px;
+}
+
+.field-stack {
+  gap: 8px;
+}
+
+.swift-field {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-primary);
+  font: inherit;
+  outline: none;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+
+.swift-field:focus {
+  border-color: rgba(127, 183, 133, 0.68);
+  box-shadow: 0 0 0 4px rgba(127, 183, 133, 0.12);
+}
+
+.swift-field-textarea {
+  resize: vertical;
+  min-height: 108px;
+}
+
+.swift-button,
+.swift-link-button,
+.organization-card {
+  font: inherit;
+  cursor: pointer;
+}
+
+.swift-button {
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  font-weight: 700;
+  transition:
+    transform 120ms ease,
+    opacity 120ms ease;
+}
+
+.swift-button:hover,
+.organization-card:hover {
+  transform: translateY(-1px);
+}
+
+.swift-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
+.swift-button-primary {
+  background: var(--color-sage);
+  color: white;
+}
+
+.swift-button-secondary {
+  background: rgba(127, 183, 133, 0.12);
+  color: var(--color-sage-strong);
+  border: 1px solid rgba(127, 183, 133, 0.24);
+}
+
+.swift-link-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--color-sage-strong);
+  font-weight: 700;
+}
+
+.danger-link {
+  color: var(--color-critical);
+}
+
+.inline-actions,
+.single-action-row {
+  display: flex;
+  align-items: center;
+}
+
+.inline-actions {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.single-action-row {
+  justify-content: center;
+}
+
+.message-banner {
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1px solid transparent;
+}
+
+.message-error {
+  background: rgba(224, 122, 95, 0.12);
+  border-color: rgba(224, 122, 95, 0.24);
+  color: var(--color-critical);
+}
+
+.message-success {
+  background: rgba(106, 191, 105, 0.12);
+  border-color: rgba(106, 191, 105, 0.24);
+  color: #2f6b35;
+}
+
+@media (prefers-color-scheme: dark) {
+  .swift-field {
+    background: rgba(36, 34, 32, 0.82);
+  }
+
+  .message-success {
+    color: #b8ebb7;
+  }
+}

@@ -135,6 +135,85 @@ create trigger chart_entries_set_updated_at
 before update on public.chart_entries
 for each row execute procedure public.set_updated_at();
 
+create or replace function public.is_org_member(target_organization_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.organization_memberships membership
+    where membership.organization_id = target_organization_id
+      and membership.user_id = auth.uid()
+  );
+$$;
+
+create or replace function public.can_manage_org(target_organization_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.organization_memberships membership
+    where membership.organization_id = target_organization_id
+      and membership.user_id = auth.uid()
+      and membership.role in ('owner', 'admin')
+  );
+$$;
+
+create or replace function public.can_edit_org_data(target_organization_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.organization_memberships membership
+    where membership.organization_id = target_organization_id
+      and membership.user_id = auth.uid()
+      and membership.role in ('owner', 'admin', 'provider')
+  );
+$$;
+
+create or replace function public.extract_org_id_from_storage_path(object_name text)
+returns uuid
+language plpgsql
+stable
+as $$
+declare
+  parts text[];
+begin
+  parts := storage.foldername(object_name);
+
+  if array_length(parts, 1) >= 2 and parts[1] = 'organizations' then
+    begin
+      return parts[2]::uuid;
+    exception
+      when others then
+        return null;
+    end;
+  end if;
+
+  return null;
+end;
+$$;
+
+revoke all on function public.is_org_member(uuid) from public;
+revoke all on function public.can_manage_org(uuid) from public;
+revoke all on function public.can_edit_org_data(uuid) from public;
+
+grant execute on function public.is_org_member(uuid) to authenticated;
+grant execute on function public.can_manage_org(uuid) to authenticated;
+grant execute on function public.can_edit_org_data(uuid) to authenticated;
+grant execute on function public.extract_org_id_from_storage_path(text) to authenticated;
+
 alter table public.organizations enable row level security;
 alter table public.organization_memberships enable row level security;
 alter table public.providers enable row level security;
@@ -143,55 +222,262 @@ alter table public.chart_entries enable row level security;
 alter table public.chart_images enable row level security;
 alter table public.invite_links enable row level security;
 
-create policy "prototype authenticated access organizations"
+drop policy if exists "prototype authenticated access organizations" on public.organizations;
+drop policy if exists "prototype authenticated access memberships" on public.organization_memberships;
+drop policy if exists "prototype authenticated access providers" on public.providers;
+drop policy if exists "prototype authenticated access clients" on public.clients;
+drop policy if exists "prototype authenticated access chart_entries" on public.chart_entries;
+drop policy if exists "prototype authenticated access chart_images" on public.chart_images;
+drop policy if exists "prototype authenticated access invite_links" on public.invite_links;
+
+drop policy if exists "org members can read organizations" on public.organizations;
+drop policy if exists "authenticated users can create organizations" on public.organizations;
+drop policy if exists "org managers can update organizations" on public.organizations;
+drop policy if exists "org owners and admins can delete organizations" on public.organizations;
+
+create policy "org members can read organizations"
 on public.organizations
-for all
+for select
 to authenticated
-using (true)
-with check (true);
+using (public.is_org_member(id));
 
-create policy "prototype authenticated access memberships"
+create policy "authenticated users can create organizations"
+on public.organizations
+for insert
+to authenticated
+with check (auth.uid() is not null);
+
+create policy "org managers can update organizations"
+on public.organizations
+for update
+to authenticated
+using (public.can_manage_org(id))
+with check (public.can_manage_org(id));
+
+create policy "org owners and admins can delete organizations"
+on public.organizations
+for delete
+to authenticated
+using (public.can_manage_org(id));
+
+drop policy if exists "org members can read memberships" on public.organization_memberships;
+drop policy if exists "org managers can update memberships" on public.organization_memberships;
+drop policy if exists "org managers can delete memberships" on public.organization_memberships;
+
+create policy "org members can read memberships"
 on public.organization_memberships
-for all
+for select
 to authenticated
-using (true)
-with check (true);
+using (public.is_org_member(organization_id) or user_id = auth.uid());
 
-create policy "prototype authenticated access providers"
+create policy "org managers can update memberships"
+on public.organization_memberships
+for update
+to authenticated
+using (public.can_manage_org(organization_id))
+with check (public.can_manage_org(organization_id));
+
+create policy "org managers can delete memberships"
+on public.organization_memberships
+for delete
+to authenticated
+using (public.can_manage_org(organization_id));
+
+drop policy if exists "org members can read providers" on public.providers;
+drop policy if exists "org managers can insert providers" on public.providers;
+drop policy if exists "org managers can update providers" on public.providers;
+drop policy if exists "org managers can delete providers" on public.providers;
+
+create policy "org members can read providers"
 on public.providers
-for all
+for select
 to authenticated
-using (true)
-with check (true);
+using (public.is_org_member(organization_id));
 
-create policy "prototype authenticated access clients"
+create policy "org managers can insert providers"
+on public.providers
+for insert
+to authenticated
+with check (public.can_manage_org(organization_id));
+
+create policy "org managers can update providers"
+on public.providers
+for update
+to authenticated
+using (public.can_manage_org(organization_id))
+with check (public.can_manage_org(organization_id));
+
+create policy "org managers can delete providers"
+on public.providers
+for delete
+to authenticated
+using (public.can_manage_org(organization_id));
+
+drop policy if exists "org members can read clients" on public.clients;
+drop policy if exists "org editors can insert clients" on public.clients;
+drop policy if exists "org editors can update clients" on public.clients;
+drop policy if exists "org managers can delete clients" on public.clients;
+
+create policy "org members can read clients"
 on public.clients
-for all
+for select
 to authenticated
-using (true)
-with check (true);
+using (public.is_org_member(organization_id));
 
-create policy "prototype authenticated access chart_entries"
+create policy "org editors can insert clients"
+on public.clients
+for insert
+to authenticated
+with check (public.can_edit_org_data(organization_id));
+
+create policy "org editors can update clients"
+on public.clients
+for update
+to authenticated
+using (public.can_edit_org_data(organization_id))
+with check (public.can_edit_org_data(organization_id));
+
+create policy "org managers can delete clients"
+on public.clients
+for delete
+to authenticated
+using (public.can_manage_org(organization_id));
+
+drop policy if exists "org members can read chart entries" on public.chart_entries;
+drop policy if exists "org editors can insert chart entries" on public.chart_entries;
+drop policy if exists "org editors can update chart entries" on public.chart_entries;
+drop policy if exists "org managers can delete chart entries" on public.chart_entries;
+
+create policy "org members can read chart entries"
 on public.chart_entries
-for all
+for select
 to authenticated
-using (true)
-with check (true);
+using (public.is_org_member(organization_id));
 
-create policy "prototype authenticated access chart_images"
+create policy "org editors can insert chart entries"
+on public.chart_entries
+for insert
+to authenticated
+with check (public.can_edit_org_data(organization_id));
+
+create policy "org editors can update chart entries"
+on public.chart_entries
+for update
+to authenticated
+using (public.can_edit_org_data(organization_id))
+with check (public.can_edit_org_data(organization_id));
+
+create policy "org managers can delete chart entries"
+on public.chart_entries
+for delete
+to authenticated
+using (public.can_manage_org(organization_id));
+
+drop policy if exists "org members can read chart images" on public.chart_images;
+drop policy if exists "org editors can insert chart images" on public.chart_images;
+drop policy if exists "org editors can update chart images" on public.chart_images;
+drop policy if exists "org managers can delete chart images" on public.chart_images;
+
+create policy "org members can read chart images"
 on public.chart_images
-for all
+for select
 to authenticated
-using (true)
-with check (true);
+using (public.is_org_member(organization_id));
 
-create policy "prototype authenticated access invite_links"
-on public.invite_links
-for all
+create policy "org editors can insert chart images"
+on public.chart_images
+for insert
 to authenticated
-using (true)
-with check (true);
+with check (public.can_edit_org_data(organization_id));
+
+create policy "org editors can update chart images"
+on public.chart_images
+for update
+to authenticated
+using (public.can_edit_org_data(organization_id))
+with check (public.can_edit_org_data(organization_id));
+
+create policy "org managers can delete chart images"
+on public.chart_images
+for delete
+to authenticated
+using (public.can_manage_org(organization_id));
+
+drop policy if exists "org managers can read invite links" on public.invite_links;
+drop policy if exists "org managers can insert invite links" on public.invite_links;
+drop policy if exists "org managers can update invite links" on public.invite_links;
+drop policy if exists "org managers can delete invite links" on public.invite_links;
+
+create policy "org managers can read invite links"
+on public.invite_links
+for select
+to authenticated
+using (public.can_manage_org(organization_id));
+
+create policy "org managers can insert invite links"
+on public.invite_links
+for insert
+to authenticated
+with check (public.can_manage_org(organization_id));
+
+create policy "org managers can update invite links"
+on public.invite_links
+for update
+to authenticated
+using (public.can_manage_org(organization_id))
+with check (public.can_manage_org(organization_id));
+
+create policy "org managers can delete invite links"
+on public.invite_links
+for delete
+to authenticated
+using (public.can_manage_org(organization_id));
 
 insert into storage.buckets (id, name, public)
 values ('client-media', 'client-media', false)
 on conflict (id) do nothing;
+
+drop policy if exists "org members can read client media" on storage.objects;
+drop policy if exists "org editors can upload client media" on storage.objects;
+drop policy if exists "org editors can update client media" on storage.objects;
+drop policy if exists "org managers can delete client media" on storage.objects;
+
+create policy "org members can read client media"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = 'client-media'
+  and public.is_org_member(public.extract_org_id_from_storage_path(name))
+);
+
+create policy "org editors can upload client media"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'client-media'
+  and public.can_edit_org_data(public.extract_org_id_from_storage_path(name))
+);
+
+create policy "org editors can update client media"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'client-media'
+  and public.can_edit_org_data(public.extract_org_id_from_storage_path(name))
+)
+with check (
+  bucket_id = 'client-media'
+  and public.can_edit_org_data(public.extract_org_id_from_storage_path(name))
+);
+
+create policy "org managers can delete client media"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'client-media'
+  and public.can_manage_org(public.extract_org_id_from_storage_path(name))
+);

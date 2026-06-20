@@ -1,0 +1,73 @@
+.workspace-list-button {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+}
+
+.journal-hero-panel {
+  gap: 24px;
+}
+
+.journal-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.journal-meta {
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+}
+
+.journal-meta-copy {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.journal-actions {
+  margin-top: 20px;
+}
+
+.journal-entry-card {
+  gap: 14px;
+}
+
+.journal-entry-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.journal-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.journal-entry-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .journal-hero,
+  .journal-entry-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .journal-meta {
+    justify-items: start;
+  }
+
+  .journal-entry-actions {
+    justify-content: flex-start;
+  }
+}
