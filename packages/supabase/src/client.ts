@@ -3,7 +3,10 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 let browserClient: SupabaseClient | null = null;
 let nativeClient: SupabaseClient | null = null;
 
-type EnvironmentMap = Record<string, string | undefined>;
+type BrowserClientConfig = {
+  url: string;
+  publishableKey: string;
+};
 
 type StorageAdapter = {
   getItem: (key: string) => Promise<string | null> | string | null;
@@ -12,13 +15,22 @@ type StorageAdapter = {
 };
 
 function getEnvironment() {
-  const scopedGlobal = globalThis as typeof globalThis & {
-    process?: {
-      env?: EnvironmentMap;
-    };
-  };
+  const processEnv = typeof process === "undefined" ? undefined : process.env;
 
-  return scopedGlobal.process?.env ?? {};
+  return {
+    NEXT_PUBLIC_SUPABASE_URL: processEnv?.NEXT_PUBLIC_SUPABASE_URL,
+    EXPO_PUBLIC_SUPABASE_URL: processEnv?.EXPO_PUBLIC_SUPABASE_URL,
+    SUPABASE_URL: processEnv?.SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+      processEnv?.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+      processEnv?.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    SUPABASE_PUBLISHABLE_KEY: processEnv?.SUPABASE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: processEnv?.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    EXPO_PUBLIC_SUPABASE_ANON_KEY: processEnv?.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SECRET_KEY: processEnv?.SUPABASE_SECRET_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: processEnv?.SUPABASE_SERVICE_ROLE_KEY
+  };
 }
 
 function requireEnv(name: string, value: string | undefined) {
@@ -53,13 +65,23 @@ export function getSupabasePublishableKey() {
   );
 }
 
-export function getSupabaseBrowserClient() {
+export function createSupabaseBrowserClient({
+  url,
+  publishableKey
+}: BrowserClientConfig) {
+  return createClient(url, publishableKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true
+    }
+  });
+}
+
+export function getSupabaseBrowserClient(config?: BrowserClientConfig) {
   if (!browserClient) {
-    browserClient = createClient(getSupabaseUrl(), getSupabasePublishableKey(), {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true
-      }
+    browserClient = createSupabaseBrowserClient({
+      url: config?.url ?? getSupabaseUrl(),
+      publishableKey: config?.publishableKey ?? getSupabasePublishableKey()
     });
   }
 

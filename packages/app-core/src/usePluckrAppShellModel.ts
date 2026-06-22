@@ -1,0 +1,633 @@
+import { useEffect, useState } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { ClientRecord } from "@pluckr/domain";
+import type { OrganizationRole } from "@pluckr/domain";
+import { updateClientConsent } from "@pluckr/supabase";
+
+import { createOrganizationSelectionStorage } from "./storage";
+import type { ChartUploadAsset } from "./chartFormState";
+import type { KeyValueStorage } from "./types";
+import { useAdminController } from "./useAdminController";
+import { useAuthController } from "./useAuthController";
+import { useClientDetailController } from "./useClientDetailController";
+import { useClientJournalController } from "./useClientJournalController";
+import { useClientListController } from "./useClientListController";
+import { useOrganizationController } from "./useOrganizationController";
+import { useProviderProfileController } from "./useProviderProfileController";
+import { useSessionController } from "./useSessionController";
+import { useWorkspaceController } from "./useWorkspaceController";
+
+type ActiveWorkspaceScreen =
+  | "workspace"
+  | "clients"
+  | "journal"
+  | "consent"
+  | "settings"
+  | "admin";
+
+type JournalOrigin = "workspace" | "clients";
+
+type UsePluckrAppShellModelProps = {
+  supabase: SupabaseClient;
+  storage: KeyValueStorage;
+  onRequestChartImages: () => Promise<ChartUploadAsset[]>;
+};
+
+export function usePluckrAppShellModel({
+  supabase,
+  storage,
+  onRequestChartImages
+}: UsePluckrAppShellModelProps) {
+  const [activeWorkspaceScreen, setActiveWorkspaceScreen] =
+    useState<ActiveWorkspaceScreen>("workspace");
+  const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
+  const [journalOrigin, setJournalOrigin] = useState<JournalOrigin>("workspace");
+  const [consentSignerName, setConsentSignerName] = useState("");
+  const [consentSignature, setConsentSignature] = useState<string | null>(null);
+  const [consentError, setConsentError] = useState<string | null>(null);
+  const [consentNotice, setConsentNotice] = useState<string | null>(null);
+  const [isSavingConsent, setIsSavingConsent] = useState(false);
+  const [showLaunchStage, setShowLaunchStage] = useState(true);
+  const selectionStorage = useState(() =>
+    createOrganizationSelectionStorage(storage)
+  )[0];
+
+  const sessionController = useSessionController(supabase);
+  const authController = useAuthController(supabase);
+  const organizationController = useOrganizationController(
+    supabase,
+    sessionController.session?.user.id,
+    selectionStorage
+  );
+  const selectedMembership = organizationController.memberships.find(
+    (record) =>
+      record.organization.id === organizationController.selectedOrganizationId
+  );
+  const workspaceController = useWorkspaceController(
+    supabase,
+    organizationController.memberships,
+    organizationController.selectedOrganizationId,
+    selectedMembership?.membership.id ?? null
+  );
+  const clientListController = useClientListController(
+    supabase,
+    organizationController.selectedOrganizationId
+  );
+  const clientJournalController = useClientJournalController(
+    supabase,
+    organizationController.selectedOrganizationId,
+    selectedClient
+  );
+  const clientDetailController = useClientDetailController(
+    supabase,
+    organizationController.selectedOrganizationId,
+    selectedClient
+  );
+  const providerProfileController = useProviderProfileController(
+    supabase,
+    selectedMembership
+  );
+  const adminController = useAdminController(supabase, selectedMembership);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLaunchStage(false);
+    }, 1400);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const isHydratingOrganization =
+    !showLaunchStage &&
+    !!sessionController.session?.user &&
+    organizationController.membershipsLoading;
+
+  const shouldShowAuth =
+    !showLaunchStage &&
+    !sessionController.isBooting &&
+    !sessionController.session?.user;
+
+  const shouldShowOrganizationGate =
+    !showLaunchStage &&
+    !sessionController.isBooting &&
+    !!sessionController.session?.user &&
+    !organizationController.membershipsLoading &&
+    !selectedMembership;
+
+  const shouldShowProviderSetupGate =
+    !showLaunchStage &&
+    !sessionController.isBooting &&
+    !!sessionController.session?.user &&
+    !organizationController.membershipsLoading &&
+    !!selectedMembership &&
+    !providerProfileController.isLoadingProvider &&
+    providerProfileController.providerSetupRequired;
+
+  const protectSensitiveScreens =
+    selectedMembership?.organization.protect_sensitive_screens ?? true;
+  const isSensitiveScreen =
+    Boolean(selectedMembership) &&
+    (activeWorkspaceScreen === "workspace" ||
+      activeWorkspaceScreen === "clients" ||
+      activeWorkspaceScreen === "journal" ||
+      activeWorkspaceScreen === "consent" ||
+      activeWorkspaceScreen === "settings" ||
+      activeWorkspaceScreen === "admin");
+
+  const clientFullName = selectedClient
+    ? `${selectedClient.first_name} ${selectedClient.last_name}`.trim()
+    : null;
+
+  const shouldShowShellNavigationBar =
+    !showLaunchStage &&
+    !sessionController.isBooting &&
+    !!selectedMembership &&
+    activeWorkspaceScreen !== "workspace" &&
+    !shouldShowOrganizationGate &&
+    !shouldShowProviderSetupGate;
+
+  const shouldShowUtilityBar =
+    !showLaunchStage &&
+    !sessionController.isBooting &&
+    !!selectedMembership &&
+    !shouldShowOrganizationGate &&
+    !shouldShowProviderSetupGate;
+
+  async function handleLogout() {
+    await selectionStorage.clearSelectedOrganizationId();
+    await supabase.auth.signOut();
+    setActiveWorkspaceScreen("workspace");
+    setSelectedClient(null);
+    setJournalOrigin("workspace");
+    setConsentSignerName("");
+    setConsentSignature(null);
+    setConsentError(null);
+    setConsentNotice(null);
+    authController.resetAfterLogout();
+    organizationController.resetAfterLogout();
+    workspaceController.resetWorkspaceView();
+  }
+
+  function handleBackToOrganizations() {
+    setSelectedClient(null);
+    setActiveWorkspaceScreen("workspace");
+    setJournalOrigin("workspace");
+    organizationController.setSelectedOrganizationId(null);
+  }
+
+  function openClientJournal(nextClient: ClientRecord, origin: JournalOrigin) {
+    setSelectedClient(nextClient);
+    setJournalOrigin(origin);
+    setActiveWorkspaceScreen("journal");
+  }
+
+  function handleBackFromJournal() {
+    setSelectedClient(null);
+    setActiveWorkspaceScreen(journalOrigin);
+  }
+
+  function handleBackFromConsent() {
+    setActiveWorkspaceScreen("journal");
+    setConsentError(null);
+    setConsentNotice(null);
+  }
+
+  const previousScreenLabel =
+    activeWorkspaceScreen === "clients"
+      ? "Dashboard"
+      : activeWorkspaceScreen === "journal"
+        ? journalOrigin === "workspace"
+          ? "Dashboard"
+          : "Clients"
+        : activeWorkspaceScreen === "consent"
+          ? "Client"
+          : activeWorkspaceScreen === "settings"
+            ? "Dashboard"
+            : activeWorkspaceScreen === "admin"
+              ? "Settings"
+              : null;
+
+  const navigationBackAction =
+    activeWorkspaceScreen === "clients"
+      ? () => setActiveWorkspaceScreen("workspace")
+      : activeWorkspaceScreen === "journal"
+        ? handleBackFromJournal
+        : activeWorkspaceScreen === "consent"
+          ? handleBackFromConsent
+          : activeWorkspaceScreen === "settings"
+            ? () => setActiveWorkspaceScreen("workspace")
+            : activeWorkspaceScreen === "admin"
+              ? () => setActiveWorkspaceScreen("settings")
+              : null;
+
+  const navigationTitle =
+    activeWorkspaceScreen === "workspace"
+      ? "Dashboard"
+      : activeWorkspaceScreen === "clients"
+        ? "Clients"
+        : activeWorkspaceScreen === "journal"
+          ? "Client"
+          : activeWorkspaceScreen === "consent"
+            ? "Image Consent"
+            : activeWorkspaceScreen === "settings"
+              ? "Settings"
+              : activeWorkspaceScreen === "admin"
+                ? "Team"
+                : "Dashboard";
+
+  const navigationSubtitle =
+    activeWorkspaceScreen === "workspace"
+      ? selectedMembership?.organization.name ?? null
+      : activeWorkspaceScreen === "clients"
+        ? selectedMembership?.organization.name ?? null
+        : activeWorkspaceScreen === "journal"
+          ? null
+          : activeWorkspaceScreen === "consent"
+            ? clientFullName ?? null
+            : activeWorkspaceScreen === "settings"
+              ? selectedMembership?.organization.name ?? null
+              : activeWorkspaceScreen === "admin"
+                ? selectedMembership?.organization.name ?? null
+                : null;
+
+  const utilityActions = [
+    ...(activeWorkspaceScreen !== "journal" &&
+    activeWorkspaceScreen !== "settings"
+      ? [
+          {
+            label: "Settings",
+            icon: "settings" as const,
+            iconOnly: true,
+            onPress: () => setActiveWorkspaceScreen("settings")
+          }
+        ]
+      : []),
+    {
+      label: "Log Out",
+      icon: "logout" as const,
+      iconOnly: true,
+      onPress: () => void handleLogout(),
+      tone: "critical" as const
+    }
+  ];
+
+  async function handleConsentSave() {
+    if (!selectedClient || !organizationController.selectedOrganizationId) {
+      return;
+    }
+
+    if (!consentSignerName.trim()) {
+      setConsentError("Signer name is required.");
+      return;
+    }
+
+    if (!consentSignature) {
+      setConsentError("Signature is required.");
+      return;
+    }
+
+    setIsSavingConsent(true);
+    setConsentError(null);
+    setConsentNotice(null);
+
+    try {
+      const updatedClient = await updateClientConsent(supabase, {
+        organizationId: organizationController.selectedOrganizationId,
+        clientId: selectedClient.id,
+        consentSignedAt: new Date().toISOString(),
+        consentSignaturePath: consentSignature
+      });
+
+      setSelectedClient(updatedClient);
+      setConsentNotice("Image consent recorded.");
+      setConsentSignerName("");
+      setConsentSignature(null);
+      setActiveWorkspaceScreen("journal");
+      await Promise.all([
+        clientListController.refreshClients(),
+        workspaceController.refreshWorkspace()
+      ]);
+    } catch (error) {
+      setConsentError(
+        error instanceof Error
+          ? error.message
+          : "Unable to save image consent right now."
+      );
+    } finally {
+      setIsSavingConsent(false);
+    }
+  }
+
+  function handleRequestChartImages() {
+    if (!selectedClient?.consent_signed_at) {
+      if (selectedClient) {
+        setConsentSignerName(
+          `${selectedClient.first_name} ${selectedClient.last_name}`.trim()
+        );
+        setConsentSignature(selectedClient.consent_signature_path);
+      }
+      setConsentError(null);
+      setConsentNotice(null);
+      setActiveWorkspaceScreen("consent");
+      return Promise.resolve([] as ChartUploadAsset[]);
+    }
+
+    return onRequestChartImages();
+  }
+
+  return {
+    showLaunchStage,
+    isBooting: sessionController.isBooting,
+    isHydratingOrganization,
+    isLoadingProvider: providerProfileController.isLoadingProvider,
+    shouldShowAuth,
+    shouldShowOrganizationGate,
+    shouldShowProviderSetupGate,
+    shouldShowUtilityBar,
+    shouldShowShellNavigationBar,
+    showProviderLoading:
+      Boolean(selectedMembership) && providerProfileController.isLoadingProvider,
+    showAdminStage: activeWorkspaceScreen === "admin" && Boolean(selectedMembership),
+    showClientListStage: activeWorkspaceScreen === "clients",
+    showConsentStage: activeWorkspaceScreen === "consent" && Boolean(selectedClient),
+    showClientJournalStage:
+      activeWorkspaceScreen === "journal" && Boolean(selectedClient),
+    showSettingsStage:
+      activeWorkspaceScreen === "settings" && Boolean(selectedMembership),
+    showProviderHomeStage: Boolean(selectedMembership),
+    previousScreenLabel,
+    navigationBackAction,
+    navigationTitle,
+    navigationSubtitle,
+    utilityActions,
+    protectSensitiveScreens,
+    isSensitiveScreen,
+    authStageProps: {
+      mode: authController.authMode,
+      fullName: authController.fullName,
+      email: authController.email,
+      password: authController.password,
+      confirmPassword: authController.confirmPassword,
+      error: authController.authError ?? sessionController.sessionError,
+      notice: authController.authNotice,
+      isSubmitting: authController.authSubmitting,
+      onModeChange: authController.changeAuthMode,
+      onFullNameChange: authController.setFullName,
+      onEmailChange: authController.setEmail,
+      onPasswordChange: authController.setPassword,
+      onConfirmPasswordChange: authController.setConfirmPassword,
+      onSubmit: () =>
+        void (authController.authMode === "signup"
+          ? authController.signUp()
+          : authController.authMode === "forgot"
+            ? authController.sendPasswordReset()
+            : authController.signIn())
+    },
+    organizationStageProps: {
+      memberships: organizationController.memberships,
+      isCreating:
+        !organizationController.membershipsLoading &&
+        (organizationController.isCreatingOrganization ||
+          organizationController.memberships.length === 0),
+      isJoining: organizationController.isJoiningOrganization,
+      organizationName: organizationController.organizationName,
+      organizationDescription: organizationController.organizationDescription,
+      inviteToken: organizationController.inviteToken,
+      isSubmitting:
+        organizationController.membershipsLoading ||
+        organizationController.organizationSubmitting,
+      error: organizationController.organizationError,
+      notice: organizationController.membershipsLoading
+        ? "Loading your organizations..."
+        : organizationController.organizationNotice,
+      onSelectOrganization: organizationController.setSelectedOrganizationId,
+      onStartCreate: organizationController.startCreatingOrganization,
+      onCancelCreate: organizationController.cancelCreatingOrganization,
+      onStartJoin: organizationController.startJoiningOrganization,
+      onCancelJoin: organizationController.cancelJoiningOrganization,
+      onOrganizationNameChange: organizationController.setOrganizationName,
+      onOrganizationDescriptionChange:
+        organizationController.setOrganizationDescription,
+      onCreateOrganization: () => void organizationController.submitOrganization(),
+      onInviteTokenChange: organizationController.setInviteToken,
+      onJoinOrganization: () => void organizationController.submitJoinOrganization(),
+      onLogout: () => void handleLogout()
+    },
+    providerSetupStageProps: {
+      fullName: providerProfileController.providerProfileForm.fullName,
+      phone: providerProfileController.providerProfileForm.phone,
+      error: providerProfileController.providerError,
+      notice: providerProfileController.providerNotice,
+      isSaving: providerProfileController.isSavingProvider,
+      onBack: handleBackToOrganizations,
+      onLogout: () => void handleLogout(),
+      onFormChange: providerProfileController.updateProviderProfileForm,
+      onSubmit: () => void providerProfileController.submitProviderProfile()
+    },
+    adminStageProps: selectedMembership
+      ? {
+          organization: selectedMembership.organization,
+          providers: adminController.providers,
+          inviteLinks: adminController.inviteLinks,
+          inviteForm: adminController.inviteForm,
+          isLoading: adminController.isLoadingAdmin,
+          isSaving: adminController.isSavingAdmin,
+          error: adminController.adminError,
+          notice: adminController.adminNotice,
+          hideToolbar: true,
+          onBack: () => setActiveWorkspaceScreen("settings"),
+          onInviteFormChange: (key: "email" | "role", value: string) =>
+            adminController.updateInviteForm(key, value),
+          onCreateInvite: () => void adminController.submitInvite(),
+          onChangeProviderRole: (
+            record: typeof adminController.providers[number],
+            role: OrganizationRole
+          ) =>
+            void adminController.changeProviderRole(record, role),
+          onToggleProviderStatus: (
+            record: typeof adminController.providers[number],
+            isActive: boolean
+          ) => void adminController.changeProviderStatus(record, isActive),
+          onRevokeInvite: (inviteId: string) =>
+            void adminController.removeInvite(inviteId)
+        }
+      : null,
+    clientListStageProps: {
+      clients: clientListController.filteredClients,
+      searchText: clientListController.searchText,
+      isLoading: clientListController.isLoadingClients,
+      error: clientListController.clientListError,
+      notice: clientListController.clientListNotice,
+      isCreatingClient: clientListController.isCreatingClient,
+      isSavingClient: clientListController.isSavingClient,
+      hideToolbar: true,
+      clientForm: clientListController.clientForm,
+      onBack: () => setActiveWorkspaceScreen("workspace"),
+      onLogout: () => void handleLogout(),
+      onSelectClient: (client: ClientRecord) => {
+        openClientJournal(client, "clients");
+      },
+      onSearchChange: clientListController.setSearchText,
+      onStartCreate: clientListController.startCreatingClient,
+      onCancelCreate: clientListController.cancelCreatingClient,
+      onFormChange: clientListController.updateClientForm,
+      onSubmitClient: () =>
+        void clientListController.submitClient().then((saved) => {
+          if (saved) {
+            void workspaceController.refreshWorkspace();
+          }
+        })
+    },
+    consentStageProps: selectedClient
+      ? {
+          client: selectedClient,
+          signerName: consentSignerName,
+          signatureValue: consentSignature,
+          isSaving: isSavingConsent,
+          error: consentError,
+          notice: consentNotice,
+          hideToolbar: true,
+          onBack: handleBackFromConsent,
+          onLogout: () => void handleLogout(),
+          onSignerNameChange: setConsentSignerName,
+          onSignatureChange: setConsentSignature,
+          onSignConsent: () => void handleConsentSave()
+        }
+      : null,
+    clientJournalStageProps: selectedClient
+      ? {
+          client: selectedClient,
+          charts: clientJournalController.charts,
+          isLoading: clientJournalController.isLoadingCharts,
+          error: clientJournalController.journalError,
+          notice: clientJournalController.journalNotice,
+          isEditingChart: clientJournalController.isEditingChart,
+          isSavingChart: clientJournalController.isSavingChart,
+          hideToolbar: true,
+          chartForm: clientJournalController.chartForm,
+          availableChartTags: clientJournalController.availableChartTags,
+          onBack: handleBackFromJournal,
+          onLogout: () => void handleLogout(),
+          onOpenConsent: () => {
+            setConsentSignerName(
+              `${selectedClient.first_name} ${selectedClient.last_name}`.trim()
+            );
+            setConsentSignature(selectedClient.consent_signature_path);
+            setConsentError(null);
+            setConsentNotice(null);
+            setActiveWorkspaceScreen("consent");
+          },
+          isEditingClient: clientDetailController.isEditingClient,
+          isSavingClient: clientDetailController.isSavingClient,
+          clientDetailError: clientDetailController.clientDetailError,
+          clientDetailNotice: clientDetailController.clientDetailNotice,
+          clientDetailForm: clientDetailController.clientDetailForm,
+          availableClientTags: clientDetailController.availableClientTags,
+          onStartEditClient: () => {
+            clientJournalController.cancelEditingChart();
+            clientDetailController.startEditingClient();
+          },
+          onCancelEditClient: clientDetailController.cancelEditingClient,
+          onClientDetailFormChange: clientDetailController.updateClientDetailForm,
+          onToggleClientTag: clientDetailController.toggleClientTag,
+          onAddCustomClientTag: clientDetailController.addCustomClientTag,
+          onSubmitClientDetails: () =>
+            void clientDetailController
+              .submitClientDetails()
+              .then((updatedClient) => {
+                if (updatedClient) {
+                  setSelectedClient(updatedClient);
+                  void Promise.all([
+                    clientListController.refreshClients(),
+                    workspaceController.refreshWorkspace()
+                  ]);
+                }
+              }),
+          onArchiveClient: () =>
+            void clientDetailController
+              .archiveSelectedClient()
+              .then((archivedClient) => {
+                if (archivedClient) {
+                  setSelectedClient(null);
+                  setActiveWorkspaceScreen("clients");
+                  void Promise.all([
+                    clientListController.refreshClients(),
+                    workspaceController.refreshWorkspace()
+                  ]);
+                }
+              }),
+          onStartChart: clientJournalController.startCreatingChart,
+          onCancelChart: clientJournalController.cancelEditingChart,
+          onEditChart: clientJournalController.startEditingChart,
+          onDeleteChart: (chart: typeof clientJournalController.charts[number]) =>
+            void clientJournalController.removeChart(chart),
+          onChartFormChange: clientJournalController.updateChartForm,
+          onToggleChartTag: clientJournalController.toggleChartTag,
+          onAddCustomChartTag: clientJournalController.addCustomChartTag,
+          onPickChartImages: () =>
+            void handleRequestChartImages().then((assets) => {
+              if (assets.length > 0) {
+                void clientJournalController.uploadChartAssets(assets);
+              }
+            }),
+          onRemoveChartImage: (image: typeof clientJournalController.chartForm.images[number]) =>
+            void clientJournalController.removeChartImageDraft(image),
+          onProbeStyleChange: clientJournalController.setProbeStyle,
+          onSubmitChart: () =>
+            void clientJournalController.submitChart().then((saved) => {
+              if (saved) {
+                void Promise.all([
+                  clientListController.refreshClients(),
+                  workspaceController.refreshWorkspace()
+                ]);
+              }
+            })
+        }
+      : null,
+    settingsStageProps: selectedMembership
+      ? {
+          organization: selectedMembership.organization,
+          membership: selectedMembership.membership,
+          provider: providerProfileController.provider,
+          membershipsCount: organizationController.memberships.length,
+          isUpdatingPrivacy:
+            organizationController.organizationSettingsSubmitting,
+          error: organizationController.organizationError,
+          notice: organizationController.organizationNotice,
+          onOpenAdmin: () => setActiveWorkspaceScreen("admin"),
+          onBackToOrganizations: handleBackToOrganizations,
+          onToggleProtectSensitiveScreens: (nextValue: boolean) =>
+            void organizationController.updateSelectedOrganizationPrivacy(nextValue)
+        }
+      : null,
+    providerHomeStageProps: selectedMembership
+      ? {
+          organization: selectedMembership.organization,
+          membership: selectedMembership.membership,
+          summary: workspaceController.workspaceSummary,
+          clients: workspaceController.workspaceClients,
+          charts: workspaceController.workspaceCharts,
+          dailyFolioClients: workspaceController.dailyFolioClients,
+          isLoading: workspaceController.workspaceLoading,
+          isSeeding: workspaceController.workspaceSeeding,
+          error:
+            organizationController.organizationError ??
+            workspaceController.workspaceError,
+          notice:
+            organizationController.organizationNotice ??
+            workspaceController.workspaceNotice,
+          onOpenClients: () => setActiveWorkspaceScreen("clients"),
+          onSeedDemoData: () => void workspaceController.seedWorkspaceDemoData(),
+          onOpenClient: (client: ClientRecord) => {
+            openClientJournal(client, "workspace");
+          },
+          onAddFolioClient: (client: ClientRecord) => {
+            void workspaceController.addFolioClient(client);
+          },
+          onRemoveFolioClient: (client: ClientRecord) => {
+            void workspaceController.removeFolioClient(client);
+          }
+        }
+      : null
+  };
+}

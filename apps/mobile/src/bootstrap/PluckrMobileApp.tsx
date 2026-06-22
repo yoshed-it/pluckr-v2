@@ -2,11 +2,11 @@ import "react-native-url-polyfill/auto";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useRef, useState } from "react";
-import type { ChartUploadAsset } from "@pluckr/app-core";
 import {
-  PluckrAppShell,
-  type PluckrPrivacyState
-} from "@pluckr/design-system";
+  type ChartUploadAsset,
+  usePluckrAppShellModel
+} from "@pluckr/app-core";
+import { PluckrAppShell } from "@pluckr/design-system/app-shell";
 import { getSupabaseNativeClient } from "@pluckr/supabase";
 
 import { PluckrCameraCaptureModal } from "./PluckrCameraCaptureModal";
@@ -26,12 +26,17 @@ export function PluckrMobileApp() {
   const pendingCaptureResolveRef = useRef<
     ((assets: ChartUploadAsset[]) => void) | null
   >(null);
-  const [privacyState, setPrivacyState] = useState<PluckrPrivacyState>({
-    isSensitiveScreen: false,
-    protectSensitiveScreens: true
-  });
   const [isCameraVisible, setIsCameraVisible] = useState(false);
-  const { privacyCurtainVisible } = usePluckrPrivacyGuard(privacyState);
+
+  const shellModel = usePluckrAppShellModel({
+    supabase,
+    storage: AsyncStorage,
+    onRequestChartImages: requestChartImages
+  });
+  const { privacyCurtainVisible } = usePluckrPrivacyGuard({
+    isSensitiveScreen: shellModel.isSensitiveScreen,
+    protectSensitiveScreens: shellModel.protectSensitiveScreens
+  });
 
   function requestChartImages(): Promise<ChartUploadAsset[]> {
     setIsCameraVisible(true);
@@ -56,12 +61,9 @@ export function PluckrMobileApp() {
   return (
     <>
       <PluckrAppShell
-        supabase={supabase}
-        storage={AsyncStorage}
+        model={shellModel}
         logoSource={logoSource}
-        onRequestChartImages={requestChartImages}
         privacyCurtainVisible={privacyCurtainVisible}
-        onPrivacyStateChange={setPrivacyState}
       />
       <PluckrCameraCaptureModal
         visible={isCameraVisible}

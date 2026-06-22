@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  PanResponder,
+  Image,
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View
 } from "react-native";
-import Svg, { Path } from "react-native-svg";
 
 import { pluckrAppTheme } from "./pluckrAppTheme";
 
@@ -19,67 +19,26 @@ type PluckrSignaturePadProps = {
 };
 
 /**
- * Lightweight shared signature pad for consent flows.
+ * Cross-platform signature fallback used during the stabilization sprint.
  *
- * We persist the signature as an SVG data URI so the app can preview and reuse
- * it without introducing a larger document pipeline yet.
+ * The native drawing pad can return later, but this version keeps consent
+ * capture functional on both web and mobile without a platform-specific SVG
+ * dependency in the shared UI layer.
  */
 export function PluckrSignaturePad({
   value,
   onChange
 }: PluckrSignaturePadProps) {
-  const [paths, setPaths] = useState<string[]>([]);
-  const activePathRef = useRef<string | null>(null);
+  const [signatureText, setSignatureText] = useState("");
 
   useEffect(() => {
-    if (!value) {
-      setPaths([]);
-      return;
-    }
-
-    const restoredPaths = extractPathsFromDataUri(value);
-    setPaths(restoredPaths);
+    setSignatureText(extractSignatureText(value));
   }, [value]);
 
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: (event) => {
-          const { locationX, locationY } = event.nativeEvent;
-          activePathRef.current = `M ${locationX.toFixed(1)} ${locationY.toFixed(1)}`;
-          setPaths((current) => [...current, activePathRef.current ?? ""]);
-        },
-        onPanResponderMove: (event) => {
-          const { locationX, locationY } = event.nativeEvent;
-          activePathRef.current = `${activePathRef.current ?? ""} L ${locationX.toFixed(
-            1
-          )} ${locationY.toFixed(1)}`;
-          setPaths((current) => {
-            const nextPaths = [...current];
-            nextPaths[nextPaths.length - 1] = activePathRef.current ?? "";
-            return nextPaths;
-          });
-        },
-        onPanResponderRelease: () => {
-          activePathRef.current = null;
-        },
-        onPanResponderTerminate: () => {
-          activePathRef.current = null;
-        }
-      }),
-    []
-  );
-
-  useEffect(() => {
-    if (paths.length === 0) {
-      onChange(null);
-      return;
-    }
-
-    onChange(createSignatureDataUri(paths));
-  }, [onChange, paths]);
+  function handleChange(nextValue: string) {
+    setSignatureText(nextValue);
+    onChange(nextValue.trim() ? createSignatureDataUri(nextValue.trim()) : null);
+  }
 
   return (
     <View style={styles.container}>
@@ -88,88 +47,82 @@ export function PluckrSignaturePad({
         <Pressable
           accessibilityRole="button"
           style={styles.clearButton}
-          onPress={() => setPaths([])}
+          onPress={() => handleChange("")}
         >
           <Text style={styles.clearLabel}>Clear</Text>
         </Pressable>
       </View>
-      <View style={styles.padShell} {...panResponder.panHandlers}>
-        <Svg width="100%" height="100%" viewBox={`0 0 ${PAD_WIDTH} ${PAD_HEIGHT}`}>
-          {paths.map((path) => (
-            <Path
-              key={path}
-              d={path}
-              stroke={pluckrAppTheme.colors.textPrimary}
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          ))}
-        </Svg>
-        {paths.length === 0 ? (
-          <View pointerEvents="none" style={styles.emptyState}>
-            <Text style={styles.emptyCopy}>Sign here with your finger or stylus</Text>
+      <View style={styles.padShell}>
+        <TextInput
+          placeholder="Type full name to sign"
+          placeholderTextColor={pluckrAppTheme.colors.textSecondary}
+          style={styles.input}
+          value={signatureText}
+          onChangeText={handleChange}
+        />
+        {value ? (
+          <View style={styles.previewWrap}>
+            <Image source={{ uri: value }} style={styles.previewImage} />
           </View>
-        ) : null}
+        ) : (
+          <View pointerEvents="none" style={styles.emptyState}>
+            <Text style={styles.emptyCopy}>
+              Type the signature to record consent during the stabilization
+              sprint.
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
 }
 
 export function SignaturePreview({ value }: { value: string | null }) {
-  const paths = value ? extractPathsFromDataUri(value) : [];
-
-  if (paths.length === 0) {
+  if (!value?.startsWith("data:image/svg+xml;utf8,")) {
     return null;
   }
 
   return (
     <View style={styles.previewShell}>
-      <Svg width="100%" height="100%" viewBox={`0 0 ${PAD_WIDTH} ${PAD_HEIGHT}`}>
-        {paths.map((path) => (
-          <Path
-            key={path}
-            d={path}
-            stroke={pluckrAppTheme.colors.textPrimary}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-          />
-        ))}
-      </Svg>
+      <Image source={{ uri: value }} style={styles.previewImage} />
     </View>
   );
 }
 
-function createSignatureDataUri(paths: string[]) {
+function createSignatureDataUri(signatureText: string) {
+  const escaped = escapeXml(signatureText);
   const xml = [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${PAD_WIDTH} ${PAD_HEIGHT}">`,
-    ...paths.map(
-      (path) =>
-        `<path d="${path}" stroke="#24353f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />`
-    ),
+    `<rect width="${PAD_WIDTH}" height="${PAD_HEIGHT}" fill="#fffdf8" />`,
+    `<text x="24" y="98" font-size="28" font-family="Georgia, serif" fill="#24353f">${escaped}</text>`,
     "</svg>"
   ].join("");
 
   return `data:image/svg+xml;utf8,${encodeURIComponent(xml)}`;
 }
 
-function extractPathsFromDataUri(value: string) {
-  if (!value.startsWith("data:image/svg+xml;utf8,")) {
-    return [];
+function extractSignatureText(value: string | null) {
+  if (!value?.startsWith("data:image/svg+xml;utf8,")) {
+    return "";
   }
 
   try {
     const encoded = value.replace(/^data:image\/svg\+xml;utf8,/, "");
     const xml = decodeURIComponent(encoded);
-    const matches = [...xml.matchAll(/<path d="([^"]+)"/g)];
-
-    return matches.map((match) => match[1]).filter(Boolean);
+    const match = xml.match(/<text [^>]*>([^<]+)<\/text>/);
+    return match?.[1] ?? "";
   } catch {
-    return [];
+    return "";
   }
+}
+
+function escapeXml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }
 
 const styles = StyleSheet.create({
@@ -203,31 +156,49 @@ const styles = StyleSheet.create({
     fontWeight: "700"
   },
   padShell: {
-    height: PAD_HEIGHT,
+    minHeight: PAD_HEIGHT,
     borderRadius: pluckrAppTheme.radii.lg,
     borderWidth: 1,
     borderColor: "rgba(44, 62, 80, 0.1)",
     backgroundColor: "#fffdf8",
     overflow: "hidden"
   },
+  input: {
+    minHeight: 52,
+    paddingHorizontal: pluckrAppTheme.spacing.md,
+    paddingVertical: pluckrAppTheme.spacing.sm,
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 22,
+    lineHeight: 30,
+    fontFamily: "Georgia"
+  },
   emptyState: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
+    minHeight: 96,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    paddingHorizontal: pluckrAppTheme.spacing.md
   },
   emptyCopy: {
     color: pluckrAppTheme.colors.textSecondary,
     fontSize: 13,
-    lineHeight: 18
+    lineHeight: 18,
+    textAlign: "center"
+  },
+  previewWrap: {
+    height: 108,
+    marginHorizontal: pluckrAppTheme.spacing.md,
+    marginBottom: pluckrAppTheme.spacing.md,
+    borderRadius: pluckrAppTheme.radii.md,
+    overflow: "hidden"
   },
   previewShell: {
     height: 120,
     borderRadius: pluckrAppTheme.radii.md,
     backgroundColor: "#fffdf8",
     overflow: "hidden"
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%"
   }
 });

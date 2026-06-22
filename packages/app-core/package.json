@@ -5,6 +5,7 @@
   "type": "module",
   "main": "src/index.ts",
   "dependencies": {
+    "@pluckr/domain": "0.1.0",
     "@pluckr/supabase": "0.1.0",
     "@supabase/supabase-js": "^2.0.0",
     "react": "^19.2.0"

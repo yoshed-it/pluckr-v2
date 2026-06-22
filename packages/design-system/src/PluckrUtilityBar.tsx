@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { PluckrIcon, type PluckrIconName } from "./PluckrIcon";
+import { PluckrIcon, type PluckrIconName } from "./primitives/Icon";
 import { pluckrAppTheme } from "./pluckrAppTheme";
 
 type PluckrUtilityAction = {
@@ -116,12 +116,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: pluckrAppTheme.radii.full,
-    backgroundColor: "rgba(44, 62, 80, 0.06)",
+    borderWidth: 1,
+    borderColor: pluckrAppTheme.colors.border,
+    backgroundColor: pluckrAppTheme.colors.surface,
     flexDirection: "row",
     gap: 6
   },
   criticalActionPill: {
-    backgroundColor: "rgba(184, 61, 61, 0.08)"
+    borderColor: pluckrAppTheme.colors.criticalSurface,
+    backgroundColor: pluckrAppTheme.colors.criticalSurface
   },
   actionLabel: {
     color: pluckrAppTheme.colors.textPrimary,
@@ -143,14 +146,14 @@ const styles = StyleSheet.create({
     maxWidth: "100%"
   },
   backChevron: {
-    color: "#007AFF",
+    color: pluckrAppTheme.colors.sageStrong,
     fontSize: 24,
     lineHeight: 26,
     marginRight: 2,
     fontWeight: "400"
   },
   backLabel: {
-    color: "#007AFF",
+    color: pluckrAppTheme.colors.sageStrong,
     flexShrink: 1,
     fontSize: 15,
     lineHeight: 20,

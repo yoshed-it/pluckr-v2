@@ -11,4 +11,5 @@ export * from "./useClientListController";
 export * from "./useOrganizationController";
 export * from "./useProviderProfileController";
 export * from "./useSessionController";
+export * from "./usePluckrAppShellModel";
 export * from "./useWorkspaceController";

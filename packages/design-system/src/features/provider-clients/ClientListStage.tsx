@@ -1,0 +1,214 @@
+import React from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
+import type { ClientRecord } from "@pluckr/domain";
+
+import { PluckrSectionHeader } from "../../composite/SectionHeader";
+import { PluckrButton } from "../../primitives/Button";
+import { PluckrCard } from "../../primitives/Card";
+import { PluckrNoticeBanner } from "../../primitives/NoticeBanner";
+import { PluckrTextField } from "../../primitives/TextField";
+import { pluckrClientListStageStyles as styles } from "./ClientListStage.styles";
+import { pluckrAppTheme } from "../../pluckrAppTheme";
+
+type PluckrClientListStageProps = {
+  clients: ClientRecord[];
+  searchText: string;
+  isLoading: boolean;
+  error: string | null;
+  notice: string | null;
+  isCreatingClient: boolean;
+  isSavingClient: boolean;
+  hideToolbar?: boolean;
+  clientForm: {
+    firstName: string;
+    lastName: string;
+    pronouns: string;
+    phone: string;
+    email: string;
+    notes: string;
+  };
+  onBack: () => void;
+  onLogout: () => void;
+  onSelectClient: (client: ClientRecord) => void;
+  onSearchChange: (value: string) => void;
+  onStartCreate: () => void;
+  onCancelCreate: () => void;
+  onFormChange: (
+    key: "firstName" | "lastName" | "pronouns" | "phone" | "email" | "notes",
+    value: string
+  ) => void;
+  onSubmitClient: () => void;
+};
+
+function formatDateLabel(value: string | null) {
+  if (!value) {
+    return "No activity yet";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric"
+  }).format(new Date(value));
+}
+
+export function PluckrClientListStage({
+  clients,
+  searchText,
+  isLoading,
+  error,
+  notice,
+  isCreatingClient,
+  isSavingClient,
+  hideToolbar = false,
+  clientForm,
+  onBack,
+  onLogout,
+  onSelectClient,
+  onSearchChange,
+  onStartCreate,
+  onCancelCreate,
+  onFormChange,
+  onSubmitClient
+}: PluckrClientListStageProps) {
+  return (
+    <View style={styles.container}>
+      {!hideToolbar ? (
+        <View style={styles.toolbar}>
+          <Text style={styles.link} onPress={onBack}>
+            ← Dashboard
+          </Text>
+          <Text style={styles.logoutLink} onPress={onLogout}>
+            Log Out
+          </Text>
+        </View>
+      ) : null}
+
+      <PluckrCard>
+        <PluckrSectionHeader title="Directory" count={clients.length} />
+        <View style={styles.searchRow}>
+          <TextInput
+            placeholder="Search clients..."
+            placeholderTextColor={pluckrAppTheme.colors.textSecondary}
+            style={styles.searchField}
+            value={searchText}
+            onChangeText={onSearchChange}
+          />
+        </View>
+        <View style={styles.heroActions}>
+          <PluckrButton label="Add Client" onPress={() => onStartCreate()} />
+        </View>
+      </PluckrCard>
+
+      {error ? <PluckrNoticeBanner tone="error" message={error} /> : null}
+      {notice ? <PluckrNoticeBanner tone="success" message={notice} /> : null}
+
+      {isCreatingClient ? (
+        <PluckrCard>
+          <View style={styles.formStack}>
+            <PluckrSectionHeader title="New Client" />
+            <Text style={styles.formCopy}>
+              Create a new clinical record with the same essentials the Swift
+              app asked for first.
+            </Text>
+            <PluckrTextField
+              label="First Name"
+              placeholder="First Name"
+              value={clientForm.firstName}
+              onChangeText={(value) => onFormChange("firstName", value)}
+            />
+            <PluckrTextField
+              label="Last Name"
+              placeholder="Last Name"
+              value={clientForm.lastName}
+              onChangeText={(value) => onFormChange("lastName", value)}
+            />
+            <PluckrTextField
+              label="Pronouns"
+              placeholder="Pronouns"
+              value={clientForm.pronouns}
+              onChangeText={(value) => onFormChange("pronouns", value)}
+            />
+            <PluckrTextField
+              label="Phone Number"
+              placeholder="Phone Number"
+              value={clientForm.phone}
+              onChangeText={(value) => onFormChange("phone", value)}
+            />
+            <PluckrTextField
+              label="Email Address"
+              placeholder="Email Address"
+              value={clientForm.email}
+              onChangeText={(value) => onFormChange("email", value)}
+            />
+            <PluckrTextField
+              label="Notes"
+              placeholder="Notes (optional)"
+              multiline
+              value={clientForm.notes}
+              onChangeText={(value) => onFormChange("notes", value)}
+            />
+            <PluckrButton
+              label={isSavingClient ? "Saving..." : "Save Client"}
+              disabled={isSavingClient}
+              onPress={() => onSubmitClient()}
+            />
+            <PluckrButton
+              label="Cancel"
+              variant="secondary"
+              disabled={isSavingClient}
+              onPress={() => onCancelCreate()}
+            />
+          </View>
+        </PluckrCard>
+      ) : null}
+
+      <PluckrCard>
+        <PluckrSectionHeader title="Results" count={clients.length} />
+        {isLoading ? (
+          <Text style={styles.emptyState}>Loading clients...</Text>
+        ) : clients.length === 0 ? (
+          <View style={styles.emptyStateStack}>
+            <Text style={styles.emptyStateTitle}>No clients yet</Text>
+            <Text style={styles.emptyState}>
+              Add your first client to get started.
+            </Text>
+            <PluckrButton label="Add Client" onPress={() => onStartCreate()} />
+          </View>
+        ) : (
+          <View style={styles.listStack}>
+            {clients.map((client) => (
+              <Pressable
+                key={client.id}
+                accessibilityRole="button"
+                style={styles.cardButton}
+                onPress={() => onSelectClient(client)}
+              >
+                <PluckrCard compact>
+                  <View style={styles.clientRow}>
+                    <View style={styles.clientCopy}>
+                      <Text style={styles.cardTitle}>
+                        {client.first_name} {client.last_name}
+                      </Text>
+                      {client.pronouns ? (
+                        <Text style={styles.pronounsText}>{client.pronouns}</Text>
+                      ) : null}
+                      <Text style={styles.cardBody}>
+                        {client.notes || "No care notes yet."}
+                      </Text>
+                      <Text style={styles.cardMeta}>
+                        Last seen {formatDateLabel(client.last_seen_at)}
+                      </Text>
+                    </View>
+                    <View style={styles.rowAccessory}>
+                      <Text style={styles.openGlyph}>›</Text>
+                    </View>
+                  </View>
+                </PluckrCard>
+              </Pressable>
+            ))}
+          </View>
+        )}
+      </PluckrCard>
+    </View>
+  );
+}

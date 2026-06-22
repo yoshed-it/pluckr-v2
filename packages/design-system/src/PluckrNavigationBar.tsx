@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     paddingBottom: pluckrAppTheme.spacing.sm,
     gap: 4,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(44, 62, 80, 0.08)"
+    borderBottomColor: pluckrAppTheme.colors.divider
   },
   row: {
     minHeight: 32,
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     textAlign: Platform.OS === "ios" ? "center" : "center"
   },
   subtitle: {
-    color: pluckrAppTheme.colors.textSecondary,
+    color: pluckrAppTheme.colors.textMuted,
     fontSize: 13,
     lineHeight: 18
   },

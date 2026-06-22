@@ -3,7 +3,7 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 html,
@@ -13,10 +13,7 @@ body {
 }
 
 body {
-  background:
-    radial-gradient(circle at top left, rgba(127, 183, 133, 0.16), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(168, 218, 220, 0.18), transparent 24%),
-    linear-gradient(180deg, var(--color-background) 0%, var(--color-background-soft) 100%);
+  background: var(--color-background-soft);
   color: var(--color-text-primary);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
@@ -83,7 +80,7 @@ a {
 
 .brand-logo {
   object-fit: contain;
-  filter: drop-shadow(0 18px 32px rgba(44, 62, 80, 0.08));
+  filter: drop-shadow(0 12px 24px rgba(35, 40, 36, 0.05));
 }
 
 .brand-copy {
@@ -96,18 +93,9 @@ a {
   overflow: hidden;
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.8) 100%);
+  background: var(--color-surface);
   box-shadow: var(--shadow-paper-soft);
   padding: 28px;
-  backdrop-filter: blur(14px);
-}
-
-@media (prefers-color-scheme: dark) {
-  .paper-panel {
-    background:
-      linear-gradient(180deg, rgba(36, 34, 32, 0.95) 0%, rgba(43, 41, 39, 0.86) 100%);
-  }
 }
 
 .paper-panel::after {
@@ -117,8 +105,8 @@ a {
   width: 180px;
   height: 180px;
   border-radius: 999px;
-  background: rgba(127, 183, 133, 0.08);
-  filter: blur(4px);
+  background: var(--color-info-surface);
+  filter: blur(18px);
 }
 
 .auth-panel {
@@ -181,8 +169,8 @@ a {
   gap: 8px;
   border-radius: var(--radius-lg);
   padding: 16px;
-  background: rgba(232, 245, 233, 0.55);
-  border: 1px solid rgba(127, 183, 133, 0.18);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
 }
 
 .metric-value {

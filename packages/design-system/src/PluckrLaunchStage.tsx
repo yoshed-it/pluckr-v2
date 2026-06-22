@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, type ImageSourcePropType } from "react-native";
 
-import { PluckrBrandHeader } from "./PluckrBrandHeader";
+import { PluckrBrandHeader } from "./composite/BrandHeader";
 import { pluckrAppTheme } from "./pluckrAppTheme";
 
 type PluckrLaunchStageProps = {

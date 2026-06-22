@@ -16,9 +16,13 @@
     "paths": {
       "@pluckr/app-core": ["packages/app-core/src/index.ts"],
       "@pluckr/design-system": ["packages/design-system/src/index.ts"],
+      "@pluckr/design-system/app-shell": [
+        "packages/design-system/src/PluckrAppShell.tsx"
+      ],
       "@pluckr/design-system/themeTokens": [
         "packages/design-system/src/themeTokens.ts"
       ],
+      "@pluckr/domain": ["packages/domain/src/index.ts"],
       "@pluckr/supabase": ["packages/supabase/src/index.ts"]
     }
   }

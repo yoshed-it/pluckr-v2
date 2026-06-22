@@ -1,7 +1,6 @@
-export type ChartImageDraft = {
-  storagePath: string;
-  previewUrl: string;
-};
+import type { ChartImageDraft } from "@pluckr/domain";
+
+export type { ChartImageDraft } from "@pluckr/domain";
 
 export type ChartUploadAsset = {
   fileName: string;

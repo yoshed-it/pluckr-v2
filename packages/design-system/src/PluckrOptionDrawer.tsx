@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { PluckrBottomDrawer } from "./PluckrBottomDrawer";
-import { PluckrTextField } from "./PluckrTextField";
+import { PluckrBottomDrawer } from "./primitives/BottomSheet";
+import { PluckrTextField } from "./primitives/TextField";
 import { pluckrAppTheme } from "./pluckrAppTheme";
 
 type Option = {

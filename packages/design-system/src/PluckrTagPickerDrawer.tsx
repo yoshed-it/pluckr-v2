@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { PluckrBottomDrawer } from "./PluckrBottomDrawer";
-import { PluckrButton } from "./PluckrButton";
-import { PluckrTextField } from "./PluckrTextField";
+import { PluckrBottomDrawer } from "./primitives/BottomSheet";
+import { PluckrButton } from "./primitives/Button";
+import { PluckrTextField } from "./primitives/TextField";
 import { pluckrAppTheme } from "./pluckrAppTheme";
 
 type PluckrTagPickerDrawerProps = {

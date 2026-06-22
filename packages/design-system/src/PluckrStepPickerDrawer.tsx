@@ -9,7 +9,7 @@ import {
   type NativeSyntheticEvent
 } from "react-native";
 
-import { PluckrBottomDrawer } from "./PluckrBottomDrawer";
+import { PluckrBottomDrawer } from "./primitives/BottomSheet";
 import { pluckrAppTheme } from "./pluckrAppTheme";
 
 type PluckrStepPickerDrawerProps = {

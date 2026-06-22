@@ -1,8 +1,8 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import type { MembershipWithOrganization } from "@pluckr/supabase";
+import type { MembershipWithOrganization } from "@pluckr/domain";
 
-import { PluckrCard } from "./PluckrCard";
+import { PluckrCard } from "./primitives/Card";
 import { pluckrAppTheme } from "./pluckrAppTheme";
 
 type PluckrOrganizationCardProps = {
