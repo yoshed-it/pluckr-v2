@@ -6,14 +6,16 @@ not bloat the current implementation slice.
 ## Active TODO
 
 - use [Product Backlog](./product-backlog.md) as the source of truth for phased product planning and implementation order
-- finish Swift parity for the client journal and chart-entry workflow
-- port client editing and deletion flows from the Swift app
-- expand client detail beyond the current summary: richer notes, tags, and the rest of the legacy client metadata
-- add invite-based organization joining instead of the current placeholder
-- harden auth after parity work: web SSR auth, mobile secure token storage, and owner/admin MFA
+- tighten auth and setup routing so sign-in resolves directly into the user's attached organization instead of treating org selection as a daily screen
+- simplify the current organization -> workspace model so most users belong to one org and enter the provider workspace without a picker
+- improve the add-client flow with better validation, clearer intake fields, and a more intentional mobile/web presentation
+- refine the client workspace around a care-first header strip plus charting history, not a profile-heavy EMR page
+- move deeper client identity and admin details into a future info drawer attached to edit/details actions
+- harden auth after the core flow settles: web SSR auth, mobile secure token storage, and owner/admin MFA
 
 ## Future
 
+- scheduling architecture brief before implementation: shared domain logic, platform-specific interaction layers, and drag/drop only where it truly helps
 - restore image capture, upload, and consent workflows with Supabase Storage
 - add richer provider/admin management once the provider workflow is stable
 - improve chart forms to cover more of the legacy Swift treatment detail model
@@ -24,6 +26,7 @@ not bloat the current implementation slice.
 
 - drag-and-drop scheduling or client ordering once the list and journal surfaces settle
 - start session timer so an active treatment session can stay open, visible, and easy to chart against in real time
+- web scheduling surface should support a modern drag-and-drop calendar while mobile uses touch-first reschedule patterns instead of forcing desktop behavior onto phones
 - smarter chart templates based on treatment area or modality
 - investor/demo mode with curated sample organizations and resettable seed data
 - workflow automations for follow-up reminders, consent renewals, and care-plan nudges

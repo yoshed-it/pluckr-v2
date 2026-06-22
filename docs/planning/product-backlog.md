@@ -31,6 +31,7 @@ Goal: make the app feel stable and coherent enough for daily use and demos.
 
 - Add user-friendly validation for email, phone number, and required fields.
 - Rework post-login routing so users land in the correct setup or working state.
+- Simplify org resolution so most users sign in directly into their attached org instead of landing on a standing organization picker.
 - Add save/loading/error/empty state polish across the current auth, org, client, and chart flows.
 - Tighten destructive action handling with confirmation patterns on mobile and web.
 
@@ -50,7 +51,7 @@ Goal: make client intake and client context feel complete.
 ### Priority 1.1
 
 - Expand Add Client into a proper intake flow.
-- Expand Client Profile into a real treatment context surface.
+- Expand Client Workspace into a real treatment context surface without turning it into a profile-heavy EMR page.
 - Add expandable summary notes.
 - Surface consent state clearly in both add-client and client-profile flows.
 
@@ -65,20 +66,16 @@ Goal: make client intake and client context feel complete.
 - image consent status
 - optional care summary
 
-### Client Profile Sections
+### Client Workspace Structure
 
-- contact info
-- pronouns
-- care summary
-- consent status
-- treatment history
-- chart entries
-- notes
+- top care strip with preferred name, pronouns, status, tags, and quick actions
+- treatment history / chart entries as the primary work area
+- deeper identity and admin details in a future drawer or details panel
 
 ### Recommended UX Pattern
 
 - mobile: bottom sheet for quick add, full screen when the form becomes longer
-- tablet/web: side drawer for quick add, dedicated client profile surface for deeper editing
+- tablet/web: side drawer for quick add, secondary details drawer for deeper client editing
 
 ### Dependencies
 
@@ -241,13 +238,14 @@ flows are touched.
 ## Recommended Implementation Order
 
 1. Validation and routing baseline
-2. Add Client flow
-3. Client Profile expansion
-4. Provider Profile
-5. Minimal Provider Dashboard
-6. Navigation shell: bottom bar + context bar
-7. Permissions foundation
-8. Offline/drafts/audit/export reliability work
+2. Attached-org auth/setup flow
+3. Add Client flow
+4. Client Workspace expansion
+5. Provider Profile
+6. Minimal Provider Dashboard
+7. Navigation shell: bottom bar + context bar
+8. Permissions foundation
+9. Offline/drafts/audit/export reliability work
 
 ## Data Model Implications
 

@@ -25,9 +25,10 @@ Use this list before starting broader roadmap work. No distractions.
 
 ### 1.3 Organization gate
 
-- `done` organization selection and organization creation exist
+- `partial` organization creation and membership attachment exist
+- `missing` direct one-user / one-org resolution after sign-in
 - `missing` real invite-based organization join flow
-- `partial` multi-organization switching is not yet as complete as the Swift experience
+- `partial` organization selection still exists too prominently for the intended product model
 
 ### 1.4 Provider setup gate
 
@@ -80,12 +81,13 @@ Use this list before starting broader roadmap work. No distractions.
 ### 4.1 Client header
 
 - `partial` client header exists
-- `partial` still needs tighter parity on hierarchy and metadata presentation
+- `partial` still needs to behave like a care strip instead of drifting toward a profile page
+- `missing` preferred-name-first hierarchy and tighter care-context presentation
 
 ### 4.2 Client detail surface
 
 - `partial` contact info, notes, consent state, and client tags exist
-- `partial` still needs stronger profile composition and expandable summary behavior
+- `partial` detailed identity/admin info should move toward a secondary details drawer instead of expanding the main care workspace
 
 ### 4.3 Client editing
 
@@ -210,14 +212,15 @@ This is the order we should actually work in:
 1. images and consent end-to-end
 2. chart detail view
 3. provider profile setup gate and routing
-4. real join-organization flow
-5. provider home / folio parity
-6. probe management
-7. admin / providers management surfaces
-8. shared snackbar / feedback / bug-report utilities
-9. final pass on loading / empty / error / destructive-action polish
-10. naming audit and parity-safe cleanup
-11. only then move into new features / backlog / TODO work
+4. one-user / one-org sign-in routing
+5. real join-organization flow
+6. provider home / folio parity
+7. probe management
+8. admin / providers management surfaces
+9. shared snackbar / feedback / bug-report utilities
+10. final pass on loading / empty / error / destructive-action polish
+11. naming audit and parity-safe cleanup
+12. only then move into new features / backlog / TODO work
 
 ## 13. What Not To Do Yet
 

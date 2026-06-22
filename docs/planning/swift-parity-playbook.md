@@ -10,8 +10,8 @@ That means the first screens should not feel like a redesign. They should feel l
 
 The current v2 slice is implemented in both apps:
 
-- web: auth -> organization selection -> workspace
-- mobile: auth -> organization selection -> workspace
+- web: auth -> organization-aware provider workspace
+- mobile: auth -> organization-aware provider workspace
 - web: dedicated client list screen with search and add-client flow
 - mobile: dedicated client list screen with search and add-client flow
 - web: dedicated client journal screen with chart list and chart-entry editing
@@ -22,6 +22,12 @@ Shared data behavior now lives in Supabase:
 - creating an organization automatically creates the owner membership
 - creating an organization automatically creates the first provider row
 - a demo seed RPC can create realistic investor data for an empty clinic
+
+Current product direction:
+
+- most users should attach to one organization and enter it directly after sign-in
+- organization selection should not remain a normal daily provider destination
+- multi-organization support can return later as an admin/settings-level capability
 
 ## Swift To V2 Mapping
 
@@ -38,7 +44,7 @@ V2 implementation:
 - `apps/web/src/components/AuthStage.tsx`
 - `apps/mobile/src/components/MobileAuthStage.tsx`
 
-### Organization Selection
+### Organization / Practice Setup
 
 Swift reference:
 
@@ -47,9 +53,14 @@ Swift reference:
 
 V2 implementation:
 
-- `apps/web/src/components/OrganizationStage.tsx`
-- `apps/mobile/src/components/MobileOrganizationStage.tsx`
+- `packages/design-system/src/features/provider-onboarding/OrganizationGate.tsx`
 - `supabase/migrations/202606190002_auth_bootstrap_and_demo_seed.sql`
+
+Direction change:
+
+- keep organization creation and attach flows
+- stop treating organization picking as the end-state UX for most users
+- transition toward sign-in -> attached organization -> provider workspace
 
 ### First Workspace
 
@@ -59,8 +70,7 @@ Swift reference:
 
 V2 implementation:
 
-- `apps/web/src/components/WorkspaceStage.tsx`
-- `apps/mobile/src/components/MobileWorkspaceStage.tsx`
+- `packages/design-system/src/features/provider-dashboard/ProviderDashboard.tsx`
 - `packages/supabase/src/organization.ts`
 
 ### Client List
@@ -93,11 +103,12 @@ V2 implementation:
 
 ## Next Work, In Order
 
-1. port client editing and deletion flows
-2. port image and consent workflows
-3. add invite-based organization joining so the secondary org action is real
-4. port provider/admin management
-5. harden auth once the parity-first flows are stable
+1. tighten sign-in -> setup -> workspace routing
+2. simplify the one-user / one-org attachment flow
+3. improve add-client and client workspace behavior
+4. port image and consent workflows end-to-end
+5. port provider/admin management
+6. harden auth once the care-first flows are stable
 
 ## How To Verify This Slice
 
@@ -106,8 +117,8 @@ V2 implementation:
 3. run `npm run dev:web`
 4. run `npm run start:mobile`
 5. create an account or sign in
-6. create an organization
-7. seed demo data
+6. enter the attached organization or complete setup if none exists
+7. seed demo data if the workspace is empty
 8. confirm clients and recent charts render in both apps
 9. open a client from the client list
 10. create, edit, and delete a chart entry in both apps

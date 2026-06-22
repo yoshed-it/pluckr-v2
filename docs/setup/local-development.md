@@ -46,12 +46,13 @@ From the repo root:
 npm run dev:web
 ```
 
-Then sign in or create an account. The current web slice follows the same sequence as the Swift app:
+Then sign in or create an account. The current web slice is moving toward a simpler provider setup flow:
 
 1. sign in or create an account
-2. create or select an organization
-3. seed demo data if the workspace is empty
-4. review client list and recent charts
+2. attach to an organization through setup if none exists
+3. enter the provider workspace directly when an org is already attached
+4. seed demo data if the workspace is empty
+5. review client list and recent charts
 
 ## Run The Mobile App
 
