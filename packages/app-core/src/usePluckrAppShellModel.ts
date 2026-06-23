@@ -201,6 +201,12 @@ export function usePluckrAppShellModel({
     activeWorkspaceScreen !== "journal" &&
     !shouldShowOrganizationGate &&
     !shouldShowProviderSetupGate;
+  const shouldShowBottomNavigation =
+    !showLaunchStage &&
+    !sessionController.isBooting &&
+    !!selectedMembership &&
+    !shouldShowOrganizationGate &&
+    !shouldShowProviderSetupGate;
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -214,6 +220,46 @@ export function usePluckrAppShellModel({
     authController.resetAfterLogout();
     organizationController.resetAfterLogout();
     workspaceController.resetWorkspaceView();
+  }
+
+  function handleOpenHomeFromBottomNavigation() {
+    clientJournalController.cancelEditingChart();
+    clientDetailController.cancelEditingClient();
+    setSelectedClient(null);
+    setJournalOrigin("workspace");
+    setActiveWorkspaceScreen("workspace");
+  }
+
+  function handleOpenClientsFromBottomNavigation() {
+    clientJournalController.cancelEditingChart();
+    clientDetailController.cancelEditingClient();
+    setSelectedClient(null);
+    setJournalOrigin("clients");
+    setActiveWorkspaceScreen("clients");
+  }
+
+  function handleOpenCreateFromBottomNavigation() {
+    clientJournalController.cancelEditingChart();
+    clientDetailController.cancelEditingClient();
+    setSelectedClient(null);
+    setJournalOrigin("clients");
+    setActiveWorkspaceScreen("clients");
+    clientListController.startCreatingClient();
+  }
+
+  function handleOpenReportsFromBottomNavigation() {
+    showSnackbar({
+      key: "manual:reports-coming-soon",
+      message: "Reports are coming soon.",
+      tone: "info"
+    });
+  }
+
+  function handleOpenMoreFromBottomNavigation() {
+    clientJournalController.cancelEditingChart();
+    clientDetailController.cancelEditingClient();
+    setSelectedClient(null);
+    setActiveWorkspaceScreen("settings");
   }
 
   function openClientJournal(nextClient: ClientRecord, origin: JournalOrigin) {
@@ -311,6 +357,50 @@ export function usePluckrAppShellModel({
       tone: "critical" as const
     }
   ];
+  const bottomNavigation = shouldShowBottomNavigation
+    ? {
+        items: [
+          {
+            key: "home",
+            label: "Home",
+            icon: "home" as const,
+            active: activeWorkspaceScreen === "workspace",
+            onPress: handleOpenHomeFromBottomNavigation
+          },
+          {
+            key: "clients",
+            label: "Clients",
+            icon: "clients" as const,
+            active:
+              activeWorkspaceScreen === "clients" ||
+              activeWorkspaceScreen === "journal" ||
+              activeWorkspaceScreen === "consent",
+            onPress: handleOpenClientsFromBottomNavigation
+          },
+          {
+            key: "reports",
+            label: "Reports",
+            icon: "reports" as const,
+            active: false,
+            onPress: handleOpenReportsFromBottomNavigation
+          },
+          {
+            key: "more",
+            label: "More",
+            icon: "more" as const,
+            active:
+              activeWorkspaceScreen === "settings" ||
+              activeWorkspaceScreen === "admin",
+            onPress: handleOpenMoreFromBottomNavigation
+          }
+        ],
+        primaryAction: {
+          label: "Add",
+          icon: "add" as const,
+          onPress: handleOpenCreateFromBottomNavigation
+        }
+      }
+    : null;
 
   const snackbarFeedback =
     createSnackbarFeedback(
@@ -516,6 +606,7 @@ export function usePluckrAppShellModel({
     navigationTitle,
     navigationSubtitle,
     utilityActions,
+    bottomNavigation,
     snackbar: activeSnackbar
       ? {
           ...activeSnackbar,

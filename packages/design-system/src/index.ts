@@ -1,5 +1,6 @@
 export * from "./themeTokens";
 export * from "./pluckrAppTheme";
+export * from "./composite/BottomNavigationBar";
 export * from "./composite/BrandHeader";
 export * from "./composite/TopBar";
 export * from "./primitives/Button";

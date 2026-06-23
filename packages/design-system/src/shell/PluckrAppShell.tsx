@@ -20,6 +20,10 @@ import { PluckrOrganizationStage } from "../features/provider-onboarding/Organiz
 import { PluckrProviderHomeStage } from "../features/provider-dashboard/ProviderDashboard";
 import { PluckrProviderSetupStage } from "../features/provider-onboarding/ProviderSetupStage";
 import { PluckrSettingsStage } from "../features/settings/SettingsStage";
+import {
+  BottomNavigationBar,
+  type BottomNavigationBarProps
+} from "../composite/BottomNavigationBar";
 import { TopBar } from "../composite/TopBar";
 import { PluckrUtilityBar } from "../PluckrUtilityBar";
 import { PluckrSnackbar, type PluckrSnackbarTone } from "../primitives/Snackbar";
@@ -51,6 +55,7 @@ type PluckrAppShellModel = {
   navigationTitle: string;
   navigationSubtitle: string | null;
   utilityActions: React.ComponentProps<typeof PluckrUtilityBar>["actions"];
+  bottomNavigation: BottomNavigationBarProps | null;
   snackbar: {
     id: string;
     message: string;
@@ -168,6 +173,9 @@ export function PluckrAppShell({
         onAction={model.snackbar?.onAction}
         onDismiss={model.snackbar?.onDismiss}
       />
+      {model.bottomNavigation ? (
+        <BottomNavigationBar {...model.bottomNavigation} />
+      ) : null}
       {privacyCurtainVisible &&
       model.isSensitiveScreen &&
       model.protectSensitiveScreens ? (
@@ -190,7 +198,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: pluckrAppTheme.spacing.lg,
     paddingTop: pluckrAppTheme.spacing.lg,
-    paddingBottom: pluckrAppTheme.spacing.xxxl,
+    paddingBottom:
+      pluckrAppTheme.navigation.bottomBarHeight +
+      pluckrAppTheme.spacing.xxxl,
     gap: pluckrAppTheme.spacing.md
   },
   privacyCurtain: {
