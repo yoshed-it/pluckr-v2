@@ -11,12 +11,14 @@ not bloat the current implementation slice.
 - improve the add-client flow with better validation, clearer intake fields, and a more intentional mobile/web presentation
 - refine the client workspace around a care-first header strip plus charting history, not a profile-heavy EMR page
 - move deeper client identity and admin details into a future info drawer attached to edit/details actions
+- define the photo assignment model before finalizing Take Photo: client library photos, chart/session photos, consent-linked images, and unassigned captures need clear ownership
 - harden auth after the core flow settles: web SSR auth, mobile secure token storage, and owner/admin MFA
 
 ## Future
 
 - scheduling architecture brief before implementation: shared domain logic, platform-specific interaction layers, and drag/drop only where it truly helps
 - restore image capture, upload, and consent workflows with Supabase Storage
+- decide whether the bottom nav `Reports` slot should stay reports or become a higher-frequency clinical destination after capture/scheduling settle
 - add richer provider/admin management once the provider workflow is stable
 - improve chart forms to cover more of the legacy Swift treatment detail model
 - explore a shared bottom navigation bar for the most common sections once the information architecture settles
@@ -30,6 +32,7 @@ not bloat the current implementation slice.
 - smarter chart templates based on treatment area or modality
 - investor/demo mode with curated sample organizations and resettable seed data
 - workflow automations for follow-up reminders, consent renewals, and care-plan nudges
+- media assignment inbox: captured photos start as pending media, then attach to a chart entry, client photo library, body area, document, or consent record before becoming part of permanent clinical history
 
 ## Rules For Using This Doc
 

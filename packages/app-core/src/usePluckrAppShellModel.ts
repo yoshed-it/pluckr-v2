@@ -20,10 +20,13 @@ type ActiveWorkspaceScreen =
   | "clients"
   | "journal"
   | "consent"
+  | "more"
   | "settings"
   | "admin";
 
 type JournalOrigin = "workspace" | "clients";
+type SettingsOrigin = "workspace" | "clients" | "more";
+type AdminOrigin = "settings" | "more";
 
 type SnackbarTone = "success" | "error" | "warning" | "info";
 
@@ -68,6 +71,9 @@ export function usePluckrAppShellModel({
     useState<ActiveWorkspaceScreen>("workspace");
   const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
   const [journalOrigin, setJournalOrigin] = useState<JournalOrigin>("workspace");
+  const [settingsOrigin, setSettingsOrigin] =
+    useState<SettingsOrigin>("workspace");
+  const [adminOrigin, setAdminOrigin] = useState<AdminOrigin>("settings");
   const [consentSignerName, setConsentSignerName] = useState("");
   const [consentSignature, setConsentSignature] = useState<string | null>(null);
   const [consentError, setConsentError] = useState<string | null>(null);
@@ -213,6 +219,8 @@ export function usePluckrAppShellModel({
     setActiveWorkspaceScreen("workspace");
     setSelectedClient(null);
     setJournalOrigin("workspace");
+    setSettingsOrigin("workspace");
+    setAdminOrigin("settings");
     setConsentSignerName("");
     setConsentSignature(null);
     setConsentError(null);
@@ -238,13 +246,20 @@ export function usePluckrAppShellModel({
     setActiveWorkspaceScreen("clients");
   }
 
-  function handleOpenCreateFromBottomNavigation() {
+  function openSettings(origin: SettingsOrigin) {
     clientJournalController.cancelEditingChart();
     clientDetailController.cancelEditingClient();
     setSelectedClient(null);
-    setJournalOrigin("clients");
-    setActiveWorkspaceScreen("clients");
-    clientListController.startCreatingClient();
+    setSettingsOrigin(origin);
+    setActiveWorkspaceScreen("settings");
+  }
+
+  function handleOpenCreateFromBottomNavigation() {
+    showSnackbar({
+      key: "manual:future-action-center",
+      message: "Action center coming soon.",
+      tone: "info"
+    });
   }
 
   function handleOpenReportsFromBottomNavigation() {
@@ -259,7 +274,7 @@ export function usePluckrAppShellModel({
     clientJournalController.cancelEditingChart();
     clientDetailController.cancelEditingClient();
     setSelectedClient(null);
-    setActiveWorkspaceScreen("settings");
+    setActiveWorkspaceScreen("more");
   }
 
   function openClientJournal(nextClient: ClientRecord, origin: JournalOrigin) {
@@ -289,9 +304,15 @@ export function usePluckrAppShellModel({
         : activeWorkspaceScreen === "consent"
           ? "Client"
           : activeWorkspaceScreen === "settings"
-            ? "Dashboard"
+            ? settingsOrigin === "more"
+              ? "More"
+              : settingsOrigin === "clients"
+                ? "Clients"
+                : "Dashboard"
             : activeWorkspaceScreen === "admin"
-              ? "Settings"
+              ? adminOrigin === "more"
+                ? "More"
+                : "Settings"
               : null;
 
   const navigationBackAction =
@@ -302,9 +323,9 @@ export function usePluckrAppShellModel({
         : activeWorkspaceScreen === "consent"
           ? handleBackFromConsent
           : activeWorkspaceScreen === "settings"
-            ? () => setActiveWorkspaceScreen("workspace")
+            ? () => setActiveWorkspaceScreen(settingsOrigin)
             : activeWorkspaceScreen === "admin"
-              ? () => setActiveWorkspaceScreen("settings")
+              ? () => setActiveWorkspaceScreen(adminOrigin)
               : null;
 
   const navigationTitle =
@@ -316,6 +337,8 @@ export function usePluckrAppShellModel({
           ? "Client"
           : activeWorkspaceScreen === "consent"
             ? "Image Consent"
+            : activeWorkspaceScreen === "more"
+              ? "More"
             : activeWorkspaceScreen === "settings"
               ? "Settings"
               : activeWorkspaceScreen === "admin"
@@ -331,6 +354,8 @@ export function usePluckrAppShellModel({
           ? null
           : activeWorkspaceScreen === "consent"
             ? clientFullName ?? null
+            : activeWorkspaceScreen === "more"
+              ? null
             : activeWorkspaceScreen === "settings"
               ? selectedMembership?.organization.name ?? null
               : activeWorkspaceScreen === "admin"
@@ -339,13 +364,17 @@ export function usePluckrAppShellModel({
 
   const utilityActions = [
     ...(activeWorkspaceScreen !== "journal" &&
-    activeWorkspaceScreen !== "settings"
+    activeWorkspaceScreen !== "settings" &&
+    activeWorkspaceScreen !== "more"
       ? [
           {
             label: "Settings",
             icon: "settings" as const,
             iconOnly: true,
-            onPress: () => setActiveWorkspaceScreen("settings")
+            onPress: () =>
+              openSettings(
+                activeWorkspaceScreen === "clients" ? "clients" : "workspace"
+              )
           }
         ]
       : []),
@@ -389,6 +418,7 @@ export function usePluckrAppShellModel({
             label: "More",
             icon: "more" as const,
             active:
+              activeWorkspaceScreen === "more" ||
               activeWorkspaceScreen === "settings" ||
               activeWorkspaceScreen === "admin",
             onPress: handleOpenMoreFromBottomNavigation
@@ -401,6 +431,56 @@ export function usePluckrAppShellModel({
         }
       }
     : null;
+
+  const canManageTeam =
+    selectedMembership?.membership.role === "owner" ||
+    selectedMembership?.membership.role === "admin";
+  const moreStageItems = selectedMembership
+    ? [
+        {
+          key: "home",
+          label: "Home",
+          description: "Return to today and recent activity.",
+          icon: "home" as const,
+          onPress: handleOpenHomeFromBottomNavigation
+        },
+        {
+          key: "clients",
+          label: "Clients",
+          description: "Open the client directory.",
+          icon: "clients" as const,
+          onPress: handleOpenClientsFromBottomNavigation
+        },
+        {
+          key: "settings",
+          label: "Settings",
+          description: "Account, privacy, and workspace controls.",
+          icon: "settings" as const,
+          onPress: () => openSettings("more")
+        },
+        ...(canManageTeam
+          ? [
+              {
+                key: "team",
+                label: "Team",
+                description: "Manage providers and invites.",
+                icon: "clients" as const,
+                onPress: () => {
+                  setAdminOrigin("more");
+                  setActiveWorkspaceScreen("admin");
+                }
+              }
+            ]
+          : []),
+        {
+          key: "reports",
+          label: "Reports",
+          description: "Placeholder while we define reporting.",
+          icon: "reports" as const,
+          onPress: handleOpenReportsFromBottomNavigation
+        }
+      ]
+    : [];
 
   const snackbarFeedback =
     createSnackbarFeedback(
@@ -598,6 +678,7 @@ export function usePluckrAppShellModel({
     showConsentStage: activeWorkspaceScreen === "consent" && Boolean(selectedClient),
     showClientJournalStage:
       activeWorkspaceScreen === "journal" && Boolean(selectedClient),
+    showMoreStage: activeWorkspaceScreen === "more" && Boolean(selectedMembership),
     showSettingsStage:
       activeWorkspaceScreen === "settings" && Boolean(selectedMembership),
     showProviderHomeStage: Boolean(selectedMembership),
@@ -689,7 +770,7 @@ export function usePluckrAppShellModel({
           error: adminController.adminError,
           notice: adminController.adminNotice,
           hideToolbar: true,
-          onBack: () => setActiveWorkspaceScreen("settings"),
+          onBack: () => setActiveWorkspaceScreen(adminOrigin),
           onInviteFormChange: (key: "email" | "role", value: string) =>
             adminController.updateInviteForm(key, value),
           onCreateInvite: () => void adminController.submitInvite(),
@@ -863,9 +944,17 @@ export function usePluckrAppShellModel({
             organizationController.organizationSettingsSubmitting,
           error: organizationController.organizationError,
           notice: organizationController.organizationNotice,
-          onOpenAdmin: () => setActiveWorkspaceScreen("admin"),
+          onOpenAdmin: () => {
+            setAdminOrigin("settings");
+            setActiveWorkspaceScreen("admin");
+          },
           onToggleProtectSensitiveScreens: (nextValue: boolean) =>
             void organizationController.updateSelectedOrganizationPrivacy(nextValue)
+        }
+      : null,
+    moreStageProps: selectedMembership
+      ? {
+          items: moreStageItems
         }
       : null,
     providerHomeStageProps: selectedMembership

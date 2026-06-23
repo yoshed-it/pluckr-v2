@@ -15,6 +15,7 @@ import { PluckrClientJournalStage } from "../features/provider-clients/ClientJou
 import { PluckrClientListStage } from "../features/provider-clients/ClientListStage";
 import { PluckrImageConsentStage } from "../features/provider-clients/ImageConsentStage";
 import { PluckrJournalLoadingStage } from "../PluckrJournalLoadingStage";
+import { PluckrMoreStage } from "../features/more/MoreStage";
 import { PluckrLaunchStage } from "../PluckrLaunchStage";
 import { PluckrOrganizationStage } from "../features/provider-onboarding/OrganizationGate";
 import { PluckrProviderHomeStage } from "../features/provider-dashboard/ProviderDashboard";
@@ -49,6 +50,7 @@ type PluckrAppShellModel = {
   showConsentStage: boolean;
   showClientJournalStage: boolean;
   showSettingsStage: boolean;
+  showMoreStage: boolean;
   showProviderHomeStage: boolean;
   previousScreenLabel: string | null;
   navigationBackAction: (() => void) | null;
@@ -85,6 +87,7 @@ type PluckrAppShellModel = {
     | React.ComponentProps<typeof PluckrClientJournalStage>
     | null;
   settingsStageProps: React.ComponentProps<typeof PluckrSettingsStage> | null;
+  moreStageProps: React.ComponentProps<typeof PluckrMoreStage> | null;
   providerHomeStageProps:
     | React.ComponentProps<typeof PluckrProviderHomeStage>
     | null;
@@ -157,6 +160,8 @@ export function PluckrAppShell({
           <PluckrImageConsentStage {...model.consentStageProps} />
         ) : model.showClientJournalStage && model.clientJournalStageProps ? (
           <PluckrClientJournalStage {...model.clientJournalStageProps} />
+        ) : model.showMoreStage && model.moreStageProps ? (
+          <PluckrMoreStage {...model.moreStageProps} />
         ) : model.showSettingsStage && model.settingsStageProps ? (
           <PluckrSettingsStage {...model.settingsStageProps} />
         ) : model.showProviderHomeStage && model.providerHomeStageProps ? (

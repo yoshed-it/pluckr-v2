@@ -31,6 +31,7 @@ export * from "./features/provider-dashboard/ProviderHomeHero";
 export * from "./features/provider-dashboard/RecentClientsPanel";
 export * from "./features/provider-dashboard/RecentActivityPanel";
 export * from "./features/settings/SettingsStage";
+export * from "./features/more/MoreStage";
 export * from "./features/provider-clients/ClientListStage";
 export * from "./features/provider-clients/ClientJournalStage";
 export * from "./features/provider-charting/ChartDetailPanel";
