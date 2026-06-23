@@ -78,6 +78,7 @@ export function PluckrChartDetailPanel({
                 key={area.id}
                 area={area}
                 index={index}
+                treatmentAreaCount={treatmentAreas.length}
                 showDivider={index > 0}
               />
             ))}
@@ -147,17 +148,23 @@ export function PluckrChartDetailPanel({
 function TreatmentAreaDetail({
   area,
   index,
+  treatmentAreaCount,
   showDivider
 }: {
   area: ChartTreatmentAreaRecord;
   index: number;
+  treatmentAreaCount: number;
   showDivider: boolean;
 }) {
   return (
     <View style={styles.areaDetail}>
       {showDivider ? <View style={styles.areaDivider} /> : null}
       <View style={styles.areaHeader}>
-        <Text style={styles.areaTitle}>Treatment Area #{index + 1}</Text>
+        <Text style={styles.areaTitle}>
+          {treatmentAreaCount > 1
+            ? `Treatment Area ${index + 1}`
+            : "Treatment Area"}
+        </Text>
         <Text style={styles.areaName}>{area.treatment_area}</Text>
       </View>
       <View style={styles.metricStack}>

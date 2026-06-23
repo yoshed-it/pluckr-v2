@@ -58,7 +58,9 @@ export function PluckrMoreStage() {
 const styles = StyleSheet.create({
   container: {
     gap: pluckrAppTheme.spacing.lg,
-    paddingTop: pluckrAppTheme.spacing.sm
+    minHeight: 420,
+    paddingTop: pluckrAppTheme.spacing.sm,
+    backgroundColor: pluckrAppTheme.colors.backgroundSoft
   },
   header: {
     gap: pluckrAppTheme.spacing.xs

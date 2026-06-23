@@ -246,7 +246,10 @@ export function useClientJournalController(
     });
 
     for (const area of treatmentAreas) {
-      const label = `Treatment Area #${area.index + 1}`;
+      const label =
+        treatmentAreas.length > 1
+          ? `Treatment Area ${area.index + 1}`
+          : "Treatment Area";
 
       if (!area.treatmentArea) {
         setJournalError(`${label} is required.`);

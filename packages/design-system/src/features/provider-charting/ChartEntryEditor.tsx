@@ -150,6 +150,7 @@ export function PluckrChartEntryEditor({
             key={area.id}
             area={area}
             index={index}
+            treatmentAreaCount={chartForm.treatmentAreas.length}
             previousChartReference={
               previousChartReferencesByAreaId[area.id] ?? null
             }
@@ -383,12 +384,14 @@ export function PluckrChartEntryEditor({
 function TreatmentAreaSection({
   area,
   index,
+  treatmentAreaCount,
   previousChartReference,
   onOpenDrawer,
   onFieldChange
 }: {
   area: TreatmentAreaForm;
   index: number;
+  treatmentAreaCount: number;
   previousChartReference: ChartEntryRecord | null;
   onOpenDrawer: (drawer: ActiveDrawer) => void;
   onFieldChange: (
@@ -414,7 +417,11 @@ function TreatmentAreaSection({
     <View style={styles.treatmentAreaBlock}>
       {index > 0 ? <View style={styles.areaDivider} /> : null}
       <View style={styles.treatmentAreaHeader}>
-        <Text style={styles.sectionTitle}>Treatment Area #{index + 1}</Text>
+        <Text style={styles.sectionTitle}>
+          {treatmentAreaCount > 1
+            ? `Treatment Area ${index + 1}`
+            : "Treatment Area"}
+        </Text>
       </View>
 
       <View style={styles.sectionBody}>

@@ -623,7 +623,8 @@ export function usePluckrAppShellModel({
     showMoreStage: activeWorkspaceScreen === "more" && Boolean(selectedMembership),
     showSettingsStage:
       activeWorkspaceScreen === "settings" && Boolean(selectedMembership),
-    showProviderHomeStage: Boolean(selectedMembership),
+    showProviderHomeStage:
+      activeWorkspaceScreen === "workspace" && Boolean(selectedMembership),
     previousScreenLabel,
     navigationBackAction,
     navigationTitle,
