@@ -120,6 +120,10 @@ export function useClientJournalController(
         typeof chart.treatment_seconds === "number"
           ? String(chart.treatment_seconds)
           : "3",
+      appointmentDurationMinutes:
+        typeof chart.appointment_duration_minutes === "number"
+          ? String(chart.appointment_duration_minutes)
+          : "",
       usingOnePiece: chart.probe_is_one_piece,
       probeShank: parseProbeName(chart.probe).shank,
       probeSize: parseProbeName(chart.probe).size,
@@ -188,6 +192,9 @@ export function useClientJournalController(
         ? parseSetting(chartForm.dcLevel)
         : null,
       treatmentSeconds: parseSetting(chartForm.treatmentSeconds),
+      appointmentDurationMinutes: parseSetting(
+        chartForm.appointmentDurationMinutes
+      ),
       probe: selectedProbe,
       probeIsOnePiece: chartForm.usingOnePiece,
       treatmentArea,

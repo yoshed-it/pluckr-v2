@@ -67,6 +67,7 @@ export type ChartEntryRecord = {
   rf_level: number | null;
   dc_level: number | null;
   treatment_seconds: number | null;
+  appointment_duration_minutes: number | null;
   probe: string | null;
   probe_is_one_piece: boolean;
   notes: string | null;

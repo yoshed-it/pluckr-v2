@@ -29,6 +29,7 @@ type ChartEditorProps = {
     rfLevel: string;
     dcLevel: string;
     treatmentSeconds: string;
+    appointmentDurationMinutes: string;
     usingOnePiece: boolean;
     probeShank: string;
     probeSize: string;
@@ -47,6 +48,7 @@ type ChartEditorProps = {
       | "rfLevel"
       | "dcLevel"
       | "treatmentSeconds"
+      | "appointmentDurationMinutes"
       | "probeShank"
       | "probeSize"
       | "probeMaterial"
@@ -86,7 +88,7 @@ export function PluckrChartEntryEditor({
   onCancelChart
 }: ChartEditorProps) {
   const [activeDrawer, setActiveDrawer] = useState<
-    null | "probe" | "area" | "rf" | "dc" | "time" | "tags"
+    null | "probe" | "area" | "rf" | "dc" | "time" | "duration" | "tags"
   >(null);
 
   const selectedProbe = formatProbeName({
@@ -112,6 +114,18 @@ export function PluckrChartEntryEditor({
         </View>
 
         <PreviousChartReference chart={previousChartReference} />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Appointment</Text>
+          <View style={styles.machineGrid}>
+            <MachineTile
+              label="Duration"
+              value={chartForm.appointmentDurationMinutes || "Set"}
+              unit={chartForm.appointmentDurationMinutes ? "min" : ""}
+              onPress={() => setActiveDrawer("duration")}
+            />
+          </View>
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Modality</Text>
@@ -162,7 +176,7 @@ export function PluckrChartEntryEditor({
                 />
               ) : null}
               <MachineTile
-                label="Time"
+                label="Seconds"
                 value={chartForm.treatmentSeconds}
                 unit="sec"
                 onPress={() => setActiveDrawer("time")}
@@ -345,7 +359,7 @@ export function PluckrChartEntryEditor({
       />
       <PluckrStepPickerDrawer
         visible={activeDrawer === "time"}
-        title="Time"
+        title="Insertion Seconds"
         subtitle="Scroll to the insertion time."
         value={Number.parseFloat(chartForm.treatmentSeconds) || 3}
         unit="sec"
@@ -354,6 +368,20 @@ export function PluckrChartEntryEditor({
         max={30}
         onChange={(value) =>
           onChartFormChange("treatmentSeconds", value.toFixed(0))
+        }
+        onClose={() => setActiveDrawer(null)}
+      />
+      <PluckrStepPickerDrawer
+        visible={activeDrawer === "duration"}
+        title="Appointment Duration"
+        subtitle="Scroll to the full appointment length."
+        value={Number.parseFloat(chartForm.appointmentDurationMinutes) || 60}
+        unit="min"
+        step={5}
+        min={5}
+        max={480}
+        onChange={(value) =>
+          onChartFormChange("appointmentDurationMinutes", value.toFixed(0))
         }
         onClose={() => setActiveDrawer(null)}
       />

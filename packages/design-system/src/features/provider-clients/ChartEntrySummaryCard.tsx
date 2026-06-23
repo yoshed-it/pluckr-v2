@@ -44,6 +44,9 @@ export function ChartEntrySummaryCard({
       : null,
     typeof chart.treatment_seconds === "number"
       ? `${chart.treatment_seconds} sec`
+      : null,
+    typeof chart.appointment_duration_minutes === "number"
+      ? `${chart.appointment_duration_minutes} min appt`
       : null
   ].filter(Boolean) as string[];
   const tagChips = (chart.tags ?? []).slice(0, 3);

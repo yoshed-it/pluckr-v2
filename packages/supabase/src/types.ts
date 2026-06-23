@@ -66,6 +66,7 @@ export type ChartEntryInput = {
   rfLevel?: number | null;
   dcLevel?: number | null;
   treatmentSeconds?: number | null;
+  appointmentDurationMinutes?: number | null;
   probe?: string | null;
   probeIsOnePiece?: boolean;
   treatmentSummary?: string | null;

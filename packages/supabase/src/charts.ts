@@ -70,6 +70,11 @@ function sanitizeChartInput(input: ChartEntryInput) {
       Number.isFinite(input.treatmentSeconds)
         ? input.treatmentSeconds
         : null,
+    appointment_duration_minutes:
+      typeof input.appointmentDurationMinutes === "number" &&
+      Number.isFinite(input.appointmentDurationMinutes)
+        ? input.appointmentDurationMinutes
+        : null,
     probe: input.probe?.trim() || null,
     probe_is_one_piece: input.probeIsOnePiece ?? true,
     treatment_summary: input.treatmentSummary?.trim() || null,

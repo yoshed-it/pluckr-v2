@@ -49,6 +49,7 @@ type PluckrClientJournalStageProps = {
     rfLevel: string;
     dcLevel: string;
     treatmentSeconds: string;
+    appointmentDurationMinutes: string;
     usingOnePiece: boolean;
     probeShank: string;
     probeSize: string;
@@ -94,6 +95,7 @@ type PluckrClientJournalStageProps = {
       | "rfLevel"
       | "dcLevel"
       | "treatmentSeconds"
+      | "appointmentDurationMinutes"
       | "probeShank"
       | "probeSize"
       | "probeMaterial"

@@ -13,6 +13,7 @@ export type ChartFormState = {
   rfLevel: string;
   dcLevel: string;
   treatmentSeconds: string;
+  appointmentDurationMinutes: string;
   usingOnePiece: boolean;
   probeShank: string;
   probeSize: string;
@@ -30,6 +31,7 @@ export const emptyChartForm: ChartFormState = {
   rfLevel: "10.0",
   dcLevel: "0.1",
   treatmentSeconds: "3",
+  appointmentDurationMinutes: "",
   usingOnePiece: true,
   probeShank: "F",
   probeSize: "3",
