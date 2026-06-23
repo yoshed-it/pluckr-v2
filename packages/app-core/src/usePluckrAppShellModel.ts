@@ -254,14 +254,6 @@ export function usePluckrAppShellModel({
     setActiveWorkspaceScreen("settings");
   }
 
-  function handleOpenCreateFromBottomNavigation() {
-    showSnackbar({
-      key: "manual:future-action-center",
-      message: "Action center coming soon.",
-      tone: "info"
-    });
-  }
-
   function handleOpenReportsFromBottomNavigation() {
     showSnackbar({
       key: "manual:reports-coming-soon",
@@ -427,7 +419,7 @@ export function usePluckrAppShellModel({
         primaryAction: {
           label: "Add",
           icon: "add" as const,
-          onPress: handleOpenCreateFromBottomNavigation
+          disabled: true
         }
       }
     : null;

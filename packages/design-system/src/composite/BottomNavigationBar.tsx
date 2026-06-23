@@ -17,7 +17,8 @@ export type BottomNavigationBarProps = {
   primaryAction: {
     label: string;
     icon: PluckrIconName;
-    onPress: () => void;
+    onPress?: () => void;
+    disabled?: boolean;
   };
 };
 
@@ -40,17 +41,24 @@ export function BottomNavigationBar({
         <Pressable
           accessibilityLabel={primaryAction.label}
           accessibilityRole="button"
+          accessibilityState={{ disabled: primaryAction.disabled }}
           style={({ pressed }) => [
             styles.primaryAction,
+            primaryAction.disabled ? styles.primaryActionDisabled : null,
             pressed ? styles.pressed : null
           ]}
+          disabled={primaryAction.disabled}
           onPress={primaryAction.onPress}
         >
           <PluckrIcon
             name={primaryAction.icon}
             size={pluckrAppTheme.iconSizes.xl}
-            color={pluckrAppTheme.colors.surface}
-            strokeWidth={2.4}
+            color={
+              primaryAction.disabled
+                ? pluckrAppTheme.colors.textMuted
+                : pluckrAppTheme.colors.surface
+            }
+            strokeWidth={2.2}
           />
         </Pressable>
         {items.slice(2, 4).map((item) => (
@@ -158,6 +166,11 @@ const styles = StyleSheet.create({
       height: 8
     },
     elevation: 9
+  },
+  primaryActionDisabled: {
+    backgroundColor: pluckrAppTheme.colors.surfaceMuted,
+    shadowOpacity: 0,
+    elevation: 0
   },
   pressed: {
     opacity: 0.72

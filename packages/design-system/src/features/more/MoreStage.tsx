@@ -29,13 +29,10 @@ const upcomingModules = [
 export function PluckrMoreStage() {
   return (
     <View style={styles.container}>
-      <View style={styles.intro}>
-        <Text style={styles.title}>
-          More tools and features will live here as Pluckr grows.
-        </Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>More</Text>
         <Text style={styles.copy}>
-          This space will collect the larger practice workflows without
-          crowding the treatment workspace.
+          Additional tools and features will appear here as your practice grows.
         </Text>
       </View>
 
@@ -50,8 +47,8 @@ export function PluckrMoreStage() {
       <View style={styles.comingSoon}>
         <Text style={styles.comingSoonLabel}>Coming Soon</Text>
         <Text style={styles.comingSoonCopy}>
-          We will activate these areas as each workflow becomes real enough to
-          support clinical use.
+          Pluckr is being built one workflow at a time. Future updates will
+          appear here without disrupting your daily clinical workflow.
         </Text>
       </View>
     </View>
@@ -60,16 +57,16 @@ export function PluckrMoreStage() {
 
 const styles = StyleSheet.create({
   container: {
-    gap: pluckrAppTheme.spacing.xl,
-    paddingTop: pluckrAppTheme.spacing.xs
+    gap: pluckrAppTheme.spacing.lg,
+    paddingTop: pluckrAppTheme.spacing.sm
   },
-  intro: {
+  header: {
     gap: pluckrAppTheme.spacing.xs
   },
   title: {
     color: pluckrAppTheme.colors.textPrimary,
-    fontSize: pluckrAppTheme.typography.subheading,
-    lineHeight: 25,
+    fontSize: pluckrAppTheme.typography.heading,
+    lineHeight: 30,
     fontWeight: "800"
   },
   copy: {
@@ -81,10 +78,14 @@ const styles = StyleSheet.create({
   chipGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: pluckrAppTheme.spacing.xs
+    gap: pluckrAppTheme.spacing.sm,
+    paddingTop: pluckrAppTheme.spacing.xs,
+    paddingBottom: pluckrAppTheme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: pluckrAppTheme.colors.divider
   },
   moduleChip: {
-    minHeight: 34,
+    minHeight: 32,
     justifyContent: "center",
     paddingHorizontal: pluckrAppTheme.spacing.sm,
     borderRadius: pluckrAppTheme.radii.full,
@@ -94,15 +95,13 @@ const styles = StyleSheet.create({
   },
   moduleChipLabel: {
     color: pluckrAppTheme.colors.textSecondary,
-    fontSize: 13,
+    fontSize: 12,
     lineHeight: 16,
     fontWeight: "800"
   },
   comingSoon: {
     gap: pluckrAppTheme.spacing.xs,
-    paddingTop: pluckrAppTheme.spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: pluckrAppTheme.colors.divider
+    paddingTop: pluckrAppTheme.spacing.sm
   },
   comingSoonLabel: {
     color: pluckrAppTheme.colors.sageStrong,
