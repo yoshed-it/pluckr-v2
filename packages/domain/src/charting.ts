@@ -26,10 +26,29 @@ export const treatmentAreaOptions = [
   "Other"
 ] as const;
 
+export const appointmentDurationPresets = [
+  15,
+  30,
+  45,
+  60,
+  75,
+  90,
+  120
+] as const;
+
+export type AppointmentDurationPreset =
+  (typeof appointmentDurationPresets)[number];
+
 export type ChartImageDraft = {
   storagePath: string;
   previewUrl: string;
 };
+
+export function isAppointmentDurationPreset(
+  value: number | null | undefined
+): value is AppointmentDurationPreset {
+  return appointmentDurationPresets.some((preset) => preset === value);
+}
 
 export function modalityUsesRf(modality: string) {
   return modality === "Thermolysis" || modality === "Blend";

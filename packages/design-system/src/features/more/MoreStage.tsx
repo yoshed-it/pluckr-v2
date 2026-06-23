@@ -1,122 +1,121 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
-import { PluckrIcon, type PluckrIconName } from "../../primitives/Icon";
-import { PluckrCard } from "../../primitives/Card";
 import { pluckrAppTheme } from "../../tokens/pluckrAppTheme";
 
-export type MoreStageItem = {
-  key: string;
-  label: string;
-  description: string;
-  icon: PluckrIconName;
-  onPress: () => void;
-};
-
-type MoreStageProps = {
-  items: MoreStageItem[];
-};
+const upcomingModules = [
+  "Consultations",
+  "Scheduling",
+  "Photos",
+  "Documents",
+  "Insurance",
+  "Reports",
+  "Analytics",
+  "AI Assistant",
+  "Client Portal",
+  "Messages",
+  "Workflows",
+  "Settings",
+  "Team",
+  "Integrations"
+] as const;
 
 /**
- * App-wide overflow hub for destinations that should not crowd daily charting.
+ * Intentional placeholder for app-wide modules that are not daily charting.
+ *
+ * The chips are display-only for now so unfinished destinations do not feel
+ * interactive before their workflows exist.
  */
-export function PluckrMoreStage({ items }: MoreStageProps) {
+export function PluckrMoreStage() {
   return (
     <View style={styles.container}>
-      <PluckrCard compact>
-        <Text style={styles.kicker}>Control Center</Text>
-        <View style={styles.grid}>
-          {items.map((item) => (
-            <Pressable
-              key={item.key}
-              accessibilityRole="button"
-              accessibilityLabel={item.label}
-              style={({ pressed }) => [
-                styles.item,
-                pressed ? styles.pressed : null
-              ]}
-              onPress={item.onPress}
-            >
-              <View style={styles.iconWell}>
-                <PluckrIcon
-                  name={item.icon}
-                  size={pluckrAppTheme.iconSizes.md}
-                  color={pluckrAppTheme.colors.sageStrong}
-                  strokeWidth={2.2}
-                />
-              </View>
-              <View style={styles.copy}>
-                <Text style={styles.label}>{item.label}</Text>
-                <Text numberOfLines={2} style={styles.description}>
-                  {item.description}
-                </Text>
-              </View>
-            </Pressable>
-          ))}
-        </View>
-      </PluckrCard>
+      <View style={styles.intro}>
+        <Text style={styles.title}>
+          More tools and features will live here as Pluckr grows.
+        </Text>
+        <Text style={styles.copy}>
+          This space will collect the larger practice workflows without
+          crowding the treatment workspace.
+        </Text>
+      </View>
+
+      <View style={styles.chipGrid}>
+        {upcomingModules.map((module) => (
+          <View key={module} style={styles.moduleChip}>
+            <Text style={styles.moduleChipLabel}>{module}</Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.comingSoon}>
+        <Text style={styles.comingSoonLabel}>Coming Soon</Text>
+        <Text style={styles.comingSoonCopy}>
+          We will activate these areas as each workflow becomes real enough to
+          support clinical use.
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    gap: pluckrAppTheme.spacing.md
+    gap: pluckrAppTheme.spacing.xl,
+    paddingTop: pluckrAppTheme.spacing.xs
   },
-  kicker: {
+  intro: {
+    gap: pluckrAppTheme.spacing.xs
+  },
+  title: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: pluckrAppTheme.typography.subheading,
+    lineHeight: 25,
+    fontWeight: "800"
+  },
+  copy: {
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: pluckrAppTheme.typography.body,
+    lineHeight: 22,
+    fontWeight: "600"
+  },
+  chipGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: pluckrAppTheme.spacing.xs
+  },
+  moduleChip: {
+    minHeight: 34,
+    justifyContent: "center",
+    paddingHorizontal: pluckrAppTheme.spacing.sm,
+    borderRadius: pluckrAppTheme.radii.full,
+    borderWidth: 1,
+    borderColor: pluckrAppTheme.colors.border,
+    backgroundColor: pluckrAppTheme.colors.surface
+  },
+  moduleChipLabel: {
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: "800"
+  },
+  comingSoon: {
+    gap: pluckrAppTheme.spacing.xs,
+    paddingTop: pluckrAppTheme.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: pluckrAppTheme.colors.divider
+  },
+  comingSoonLabel: {
     color: pluckrAppTheme.colors.sageStrong,
     fontSize: pluckrAppTheme.typography.caption,
     lineHeight: 16,
     fontWeight: "800",
-    letterSpacing: 1.8,
+    letterSpacing: 1.4,
     textTransform: "uppercase"
   },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: pluckrAppTheme.spacing.sm,
-    marginTop: pluckrAppTheme.spacing.md
-  },
-  item: {
-    minWidth: 142,
-    flexGrow: 1,
-    flexBasis: "46%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: pluckrAppTheme.spacing.sm,
-    minHeight: 72,
-    padding: pluckrAppTheme.spacing.sm,
-    borderRadius: pluckrAppTheme.radii.lg,
-    borderWidth: 1,
-    borderColor: pluckrAppTheme.colors.border,
-    backgroundColor: pluckrAppTheme.colors.surfaceMuted
-  },
-  iconWell: {
-    width: 34,
-    height: 34,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: pluckrAppTheme.radii.full,
-    backgroundColor: pluckrAppTheme.colors.mint
-  },
-  copy: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2
-  },
-  label: {
-    color: pluckrAppTheme.colors.textPrimary,
-    fontSize: 14,
-    lineHeight: 18,
-    fontWeight: "800"
-  },
-  description: {
-    color: pluckrAppTheme.colors.textSecondary,
-    fontSize: 12,
-    lineHeight: 16,
+  comingSoonCopy: {
+    color: pluckrAppTheme.colors.textMuted,
+    fontSize: 13,
+    lineHeight: 19,
     fontWeight: "600"
-  },
-  pressed: {
-    opacity: 0.72
   }
 });

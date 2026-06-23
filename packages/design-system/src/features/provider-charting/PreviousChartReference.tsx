@@ -97,6 +97,9 @@ function buildSettingItems(chart: ChartEntryRecord) {
     modalityUsesDc(chart.modality ?? "") && typeof chart.dc_level === "number"
       ? { label: "DC", value: chart.dc_level.toFixed(1) }
       : null,
+    typeof chart.appointment_duration_minutes === "number"
+      ? { label: "Appt", value: `${chart.appointment_duration_minutes} min` }
+      : null,
     typeof chart.treatment_seconds === "number"
       ? { label: "Seconds", value: `${chart.treatment_seconds}` }
       : null

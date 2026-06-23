@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import {
+  appointmentDurationPresets,
   chartModalities,
   type ChartEntryRecord,
   type ChartImageDraft,
@@ -88,7 +89,7 @@ export function PluckrChartEntryEditor({
   onCancelChart
 }: ChartEditorProps) {
   const [activeDrawer, setActiveDrawer] = useState<
-    null | "probe" | "area" | "rf" | "dc" | "time" | "duration" | "tags"
+    null | "probe" | "area" | "rf" | "dc" | "time" | "tags"
   >(null);
 
   const selectedProbe = formatProbeName({
@@ -117,14 +118,12 @@ export function PluckrChartEntryEditor({
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Appointment</Text>
-          <View style={styles.machineGrid}>
-            <MachineTile
-              label="Duration"
-              value={chartForm.appointmentDurationMinutes || "Set"}
-              unit={chartForm.appointmentDurationMinutes ? "min" : ""}
-              onPress={() => setActiveDrawer("duration")}
-            />
-          </View>
+          <DurationPresetSelector
+            value={chartForm.appointmentDurationMinutes}
+            onChange={(nextValue) =>
+              onChartFormChange("appointmentDurationMinutes", nextValue)
+            }
+          />
         </View>
 
         <View style={styles.section}>
@@ -371,20 +370,6 @@ export function PluckrChartEntryEditor({
         }
         onClose={() => setActiveDrawer(null)}
       />
-      <PluckrStepPickerDrawer
-        visible={activeDrawer === "duration"}
-        title="Appointment Duration"
-        subtitle="Scroll to the full appointment length."
-        value={Number.parseFloat(chartForm.appointmentDurationMinutes) || 60}
-        unit="min"
-        step={5}
-        min={5}
-        max={480}
-        onChange={(value) =>
-          onChartFormChange("appointmentDurationMinutes", value.toFixed(0))
-        }
-        onClose={() => setActiveDrawer(null)}
-      />
       <PluckrTagPickerDrawer
         visible={activeDrawer === "tags"}
         title="Chart Tags"
@@ -398,27 +383,50 @@ export function PluckrChartEntryEditor({
   );
 }
 
-function SelectionField({
-  label,
+function DurationPresetSelector({
   value,
-  hint,
-  onPress
+  onChange
 }: {
-  label: string;
   value: string;
-  hint?: string;
-  onPress: () => void;
+  onChange: (value: string) => void;
 }) {
   return (
-    <Pressable accessibilityRole="button" style={styles.compactField} onPress={onPress}>
-      <Text style={styles.compactLabel}>{label}</Text>
-      <Text style={styles.compactValue}>{value}</Text>
-      {hint ? <Text style={styles.compactHint}>{hint}</Text> : null}
-    </Pressable>
+    <View style={styles.durationPresetGroup}>
+      <View style={styles.durationPresetRow}>
+        {appointmentDurationPresets.map((duration) => {
+          const label = `${duration} min`;
+          const selected = value === String(duration);
+
+          return (
+            <Pressable
+              key={duration}
+              accessibilityLabel={`Appointment duration ${label}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              style={[
+                styles.durationPresetChip,
+                selected ? styles.durationPresetChipActive : null
+              ]}
+              onPress={() => onChange(String(duration))}
+            >
+              <Text
+                style={[
+                  styles.durationPresetLabel,
+                  selected ? styles.durationPresetLabelActive : null
+                ]}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <Text style={styles.requiredHint}>Required for every chart entry.</Text>
+    </View>
   );
 }
 
-function CompactField({
+function SelectionField({
   label,
   value,
   hint,

@@ -12,6 +12,7 @@ import {
 } from "@pluckr/supabase";
 import {
   formatProbeName,
+  isAppointmentDurationPreset,
   modalityUsesDc,
   modalityUsesRf,
   parseProbeName,
@@ -177,6 +178,15 @@ export function useClientJournalController(
       return false;
     }
 
+    const appointmentDurationMinutes = parseSetting(
+      chartForm.appointmentDurationMinutes
+    );
+
+    if (!isAppointmentDurationPreset(appointmentDurationMinutes)) {
+      setJournalError("Appointment duration is required.");
+      return false;
+    }
+
     setIsSavingChart(true);
     setJournalError(null);
     setJournalNotice(null);
@@ -192,9 +202,7 @@ export function useClientJournalController(
         ? parseSetting(chartForm.dcLevel)
         : null,
       treatmentSeconds: parseSetting(chartForm.treatmentSeconds),
-      appointmentDurationMinutes: parseSetting(
-        chartForm.appointmentDurationMinutes
-      ),
+      appointmentDurationMinutes,
       probe: selectedProbe,
       probeIsOnePiece: chartForm.usingOnePiece,
       treatmentArea,

@@ -64,6 +64,42 @@ export const pluckrChartEntryEditorStyles = StyleSheet.create({
   sectionBody: {
     gap: pluckrAppTheme.spacing.sm
   },
+  durationPresetGroup: {
+    gap: pluckrAppTheme.spacing.xs
+  },
+  durationPresetRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: pluckrAppTheme.spacing.xs
+  },
+  durationPresetChip: {
+    minHeight: 38,
+    justifyContent: "center",
+    paddingHorizontal: pluckrAppTheme.spacing.sm,
+    borderRadius: pluckrAppTheme.radii.full,
+    borderWidth: 1,
+    borderColor: pluckrAppTheme.colors.border,
+    backgroundColor: pluckrAppTheme.colors.surfaceMuted
+  },
+  durationPresetChipActive: {
+    borderColor: pluckrAppTheme.colors.sageStrong,
+    backgroundColor: pluckrAppTheme.colors.sage
+  },
+  durationPresetLabel: {
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: "800"
+  },
+  durationPresetLabelActive: {
+    color: pluckrAppTheme.colors.surface
+  },
+  requiredHint: {
+    color: pluckrAppTheme.colors.textMuted,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: "600"
+  },
   modalityRow: {
     flexDirection: "row",
     gap: pluckrAppTheme.spacing.xs

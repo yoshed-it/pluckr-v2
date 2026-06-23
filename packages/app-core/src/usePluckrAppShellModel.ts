@@ -432,56 +432,6 @@ export function usePluckrAppShellModel({
       }
     : null;
 
-  const canManageTeam =
-    selectedMembership?.membership.role === "owner" ||
-    selectedMembership?.membership.role === "admin";
-  const moreStageItems = selectedMembership
-    ? [
-        {
-          key: "home",
-          label: "Home",
-          description: "Return to today and recent activity.",
-          icon: "home" as const,
-          onPress: handleOpenHomeFromBottomNavigation
-        },
-        {
-          key: "clients",
-          label: "Clients",
-          description: "Open the client directory.",
-          icon: "clients" as const,
-          onPress: handleOpenClientsFromBottomNavigation
-        },
-        {
-          key: "settings",
-          label: "Settings",
-          description: "Account, privacy, and workspace controls.",
-          icon: "settings" as const,
-          onPress: () => openSettings("more")
-        },
-        ...(canManageTeam
-          ? [
-              {
-                key: "team",
-                label: "Team",
-                description: "Manage providers and invites.",
-                icon: "clients" as const,
-                onPress: () => {
-                  setAdminOrigin("more");
-                  setActiveWorkspaceScreen("admin");
-                }
-              }
-            ]
-          : []),
-        {
-          key: "reports",
-          label: "Reports",
-          description: "Placeholder while we define reporting.",
-          icon: "reports" as const,
-          onPress: handleOpenReportsFromBottomNavigation
-        }
-      ]
-    : [];
-
   const snackbarFeedback =
     createSnackbarFeedback(
       "auth",
@@ -953,11 +903,7 @@ export function usePluckrAppShellModel({
             void organizationController.updateSelectedOrganizationPrivacy(nextValue)
         }
       : null,
-    moreStageProps: selectedMembership
-      ? {
-          items: moreStageItems
-        }
-      : null,
+    moreStageProps: selectedMembership ? {} : null,
     providerHomeStageProps: selectedMembership
       ? {
           organization: selectedMembership.organization,
