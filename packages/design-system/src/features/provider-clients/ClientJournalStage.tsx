@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Text, View } from "react-native";
-import { type ChartEntryRecord, type ChartImageDraft, type ClientRecord } from "@pluckr/domain";
+import {
+  getPrimaryChartTreatmentArea,
+  type ChartEntryRecord,
+  type ChartImageDraft,
+  type ClientRecord
+} from "@pluckr/domain";
 
 import { PluckrConfirmDialog } from "../../PluckrConfirmDialog";
 import { PluckrTagPickerDrawer } from "../../PluckrTagPickerDrawer";
@@ -45,24 +50,28 @@ type PluckrClientJournalStageProps = {
   >;
   availableClientTags: string[];
   chartForm: {
-    modality: string;
-    rfLevel: string;
-    dcLevel: string;
-    treatmentSeconds: string;
     appointmentDurationMinutes: string;
-    usingOnePiece: boolean;
-    probeShank: string;
-    probeSize: string;
-    probeMaterial: string;
-    treatmentAreaSelection: string;
-    treatmentAreaOther: string;
+    treatmentAreas: Array<{
+      id: string;
+      modality: string;
+      rfLevel: string;
+      dcLevel: string;
+      treatmentSeconds: string;
+      usingOnePiece: boolean;
+      probeShank: string;
+      probeSize: string;
+      probeMaterial: string;
+      treatmentAreaSelection: string;
+      treatmentAreaOther: string;
+      notes: string;
+    }>;
     treatmentSummary: string;
     notes: string;
     tags: string[];
     images: ChartImageDraft[];
   };
   availableChartTags: string[];
-  previousChartReference: ChartEntryRecord | null;
+  previousChartReferencesByAreaId: Record<string, ChartEntryRecord | null>;
   hideToolbar?: boolean;
   onBack: () => void;
   onLogout: () => void;
@@ -91,25 +100,32 @@ type PluckrClientJournalStageProps = {
   onDeleteChart: (chart: ChartEntryRecord) => void;
   onChartFormChange: (
     key:
+      | "treatmentSummary"
+      | "appointmentDurationMinutes"
+      | "notes",
+    value: string
+  ) => void;
+  onTreatmentAreaFormChange: (
+    areaId: string,
+    key:
       | "modality"
       | "rfLevel"
       | "dcLevel"
       | "treatmentSeconds"
-      | "appointmentDurationMinutes"
       | "probeShank"
       | "probeSize"
       | "probeMaterial"
       | "treatmentAreaSelection"
       | "treatmentAreaOther"
-      | "treatmentSummary"
       | "notes",
     value: string
   ) => void;
+  onAddTreatmentArea: () => void;
   onToggleChartTag: (tagLabel: string) => void;
   onAddCustomChartTag: (tagLabel: string) => void;
   onPickChartImages: () => void;
   onRemoveChartImage: (image: ChartImageDraft) => void;
-  onProbeStyleChange: (usingOnePiece: boolean) => void;
+  onProbeStyleChange: (areaId: string, usingOnePiece: boolean) => void;
   onSubmitChart: () => void;
 };
 
@@ -130,7 +146,7 @@ export function PluckrClientJournalStage({
   availableClientTags,
   chartForm,
   availableChartTags,
-  previousChartReference,
+  previousChartReferencesByAreaId,
   hideToolbar = false,
   onBack,
   onLogout,
@@ -148,6 +164,8 @@ export function PluckrClientJournalStage({
   onEditChart,
   onDeleteChart,
   onChartFormChange,
+  onTreatmentAreaFormChange,
+  onAddTreatmentArea,
   onToggleChartTag,
   onAddCustomChartTag,
   onPickChartImages,
@@ -306,8 +324,10 @@ export function PluckrClientJournalStage({
           isSavingChart={isSavingChart}
           chartForm={chartForm}
           availableChartTags={availableChartTags}
-          previousChartReference={previousChartReference}
+          previousChartReferencesByAreaId={previousChartReferencesByAreaId}
           onChartFormChange={onChartFormChange}
+          onTreatmentAreaFormChange={onTreatmentAreaFormChange}
+          onAddTreatmentArea={onAddTreatmentArea}
           onToggleChartTag={onToggleChartTag}
           onAddCustomChartTag={onAddCustomChartTag}
           onPickImages={onPickChartImages}
@@ -348,6 +368,9 @@ export function PluckrClientJournalStage({
 
 function buildCareSnapshotItems(client: ClientRecord, charts: ChartEntryRecord[]) {
   const latestChart = charts[0] ?? null;
+  const primaryArea = latestChart
+    ? getPrimaryChartTreatmentArea(latestChart)
+    : null;
   const lastVisitSource =
     latestChart?.created_at ?? client.last_seen_at ?? client.created_at;
 
@@ -362,7 +385,7 @@ function buildCareSnapshotItems(client: ClientRecord, charts: ChartEntryRecord[]
     },
     {
       label: "Primary Area",
-      value: latestChart?.treatment_area || "Not recorded"
+      value: primaryArea?.treatment_area || "Not recorded"
     }
   ];
 }

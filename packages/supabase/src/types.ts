@@ -1,6 +1,7 @@
 export type {
   AdminProviderRecord,
   ChartEntryRecord,
+  ChartTreatmentAreaRecord,
   ClientRecord,
   InviteLinkRecord,
   MembershipRecord,
@@ -61,6 +62,7 @@ export type ClientUpdateInput = {
 export type ChartEntryInput = {
   organizationId: string;
   clientId: string;
+  treatmentAreas?: ChartTreatmentAreaInput[];
   treatmentArea?: string | null;
   modality?: string | null;
   rfLevel?: number | null;
@@ -73,4 +75,15 @@ export type ChartEntryInput = {
   notes?: string | null;
   tags?: string[];
   imagePaths?: string[];
+};
+
+export type ChartTreatmentAreaInput = {
+  treatmentArea: string;
+  modality?: string | null;
+  rfLevel?: number | null;
+  dcLevel?: number | null;
+  treatmentSeconds?: number | null;
+  probe?: string | null;
+  probeIsOnePiece?: boolean;
+  notes?: string | null;
 };

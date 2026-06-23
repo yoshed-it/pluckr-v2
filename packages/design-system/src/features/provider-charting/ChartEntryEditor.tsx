@@ -6,9 +6,9 @@ import {
   type ChartEntryRecord,
   type ChartImageDraft,
   type ClientRecord,
+  formatProbeName,
   modalityUsesDc,
   modalityUsesRf,
-  formatProbeName,
   treatmentAreaOptions
 } from "@pluckr/domain";
 
@@ -22,64 +22,86 @@ import { pluckrChartEntryEditorStyles as styles } from "./ChartEntryEditor.style
 import { PluckrProbeDrawer } from "./ProbeDrawer";
 import { PreviousChartReference } from "./PreviousChartReference";
 
+type TreatmentAreaForm = {
+  id: string;
+  modality: string;
+  rfLevel: string;
+  dcLevel: string;
+  treatmentSeconds: string;
+  usingOnePiece: boolean;
+  probeShank: string;
+  probeSize: string;
+  probeMaterial: string;
+  treatmentAreaSelection: string;
+  treatmentAreaOther: string;
+  notes: string;
+};
+
+type TreatmentAreaFormKey =
+  | "modality"
+  | "rfLevel"
+  | "dcLevel"
+  | "treatmentSeconds"
+  | "probeShank"
+  | "probeSize"
+  | "probeMaterial"
+  | "treatmentAreaSelection"
+  | "treatmentAreaOther"
+  | "notes";
+
+type ActiveDrawer =
+  | null
+  | { type: "duration" | "tags" }
+  | { type: "area" | "probe" | "rf" | "dc" | "time"; areaId: string };
+
 type ChartEditorProps = {
   client: ClientRecord;
   isSavingChart: boolean;
   chartForm: {
-    modality: string;
-    rfLevel: string;
-    dcLevel: string;
-    treatmentSeconds: string;
     appointmentDurationMinutes: string;
-    usingOnePiece: boolean;
-    probeShank: string;
-    probeSize: string;
-    probeMaterial: string;
-    treatmentAreaSelection: string;
-    treatmentAreaOther: string;
+    treatmentAreas: TreatmentAreaForm[];
+    treatmentSummary: string;
     notes: string;
     tags: string[];
     images: ChartImageDraft[];
   };
   availableChartTags: string[];
-  previousChartReference: ChartEntryRecord | null;
+  previousChartReferencesByAreaId: Record<string, ChartEntryRecord | null>;
   onChartFormChange: (
-    key:
-      | "modality"
-      | "rfLevel"
-      | "dcLevel"
-      | "treatmentSeconds"
-      | "appointmentDurationMinutes"
-      | "probeShank"
-      | "probeSize"
-      | "probeMaterial"
-      | "treatmentAreaSelection"
-      | "treatmentAreaOther"
-      | "notes",
+    key: "appointmentDurationMinutes" | "treatmentSummary" | "notes",
     value: string
   ) => void;
+  onTreatmentAreaFormChange: (
+    areaId: string,
+    key: TreatmentAreaFormKey,
+    value: string
+  ) => void;
+  onAddTreatmentArea: () => void;
   onToggleChartTag: (tagLabel: string) => void;
   onAddCustomChartTag: (tagLabel: string) => void;
   onPickImages: () => void;
   onRemoveImage: (image: ChartImageDraft) => void;
-  onProbeStyleChange: (usingOnePiece: boolean) => void;
+  onProbeStyleChange: (areaId: string, usingOnePiece: boolean) => void;
   onSubmitChart: () => void;
   onCancelChart: () => void;
 };
 
 /**
- * Shared chart editor for the parity shell.
+ * Shared chart editor for one appointment/session.
  *
- * Electrologists already know the workflow, so the UI stays compact and avoids
- * explanatory labels that slow them down.
+ * A session owns appointment-level metadata and one or more treatment-area
+ * blocks. Each area keeps independent settings so providers can document
+ * multiple body areas without creating separate appointments.
  */
 export function PluckrChartEntryEditor({
   client,
   isSavingChart,
   chartForm,
   availableChartTags,
-  previousChartReference,
+  previousChartReferencesByAreaId,
   onChartFormChange,
+  onTreatmentAreaFormChange,
+  onAddTreatmentArea,
   onToggleChartTag,
   onAddCustomChartTag,
   onPickImages,
@@ -88,22 +110,17 @@ export function PluckrChartEntryEditor({
   onSubmitChart,
   onCancelChart
 }: ChartEditorProps) {
-  const [activeDrawer, setActiveDrawer] = useState<
-    null | "probe" | "area" | "rf" | "dc" | "time" | "duration" | "tags"
-  >(null);
-
-  const selectedProbe = formatProbeName({
-    shank: chartForm.probeShank,
-    size: chartForm.probeSize,
-    material: chartForm.probeMaterial
-  });
-  const areaValue = useMemo(() => {
-    if (chartForm.treatmentAreaSelection === "Other") {
-      return chartForm.treatmentAreaOther || "Other";
+  const [activeDrawer, setActiveDrawer] = useState<ActiveDrawer>(null);
+  const activeTreatmentArea = useMemo(() => {
+    if (!activeDrawer || !("areaId" in activeDrawer)) {
+      return null;
     }
 
-    return chartForm.treatmentAreaSelection || "Choose treatment area";
-  }, [chartForm.treatmentAreaOther, chartForm.treatmentAreaSelection]);
+    return (
+      chartForm.treatmentAreas.find((area) => area.id === activeDrawer.areaId) ??
+      null
+    );
+  }, [activeDrawer, chartForm.treatmentAreas]);
 
   return (
     <PluckrCard>
@@ -111,116 +128,43 @@ export function PluckrChartEntryEditor({
         <View style={styles.editorHeader}>
           <Text style={styles.kicker}>Treatment Log</Text>
           <Text style={styles.title}>Chart Entry</Text>
-          <Text style={styles.copy}>Fast charting, nothing extra.</Text>
-        </View>
-
-        <PreviousChartReference chart={previousChartReference} />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Modality</Text>
-          <View style={styles.modalityRow}>
-            {chartModalities.map((modality) => (
-              <Pressable
-                key={modality}
-                accessibilityRole="button"
-                style={[
-                  styles.modalityButton,
-                  chartForm.modality === modality ? styles.modalityButtonActive : null
-                ]}
-                onPress={() => onChartFormChange("modality", modality)}
-              >
-                <Text
-                  style={[
-                    styles.modalityLabel,
-                    chartForm.modality === modality ? styles.modalityLabelActive : null
-                  ]}
-                >
-                  {modality}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+          <Text style={styles.copy}>One appointment, multiple areas.</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Settings</Text>
-          <View style={styles.machineGrid}>
-            <SelectionField
-              label="Appointment"
-              value={
-                chartForm.appointmentDurationMinutes
-                  ? `${chartForm.appointmentDurationMinutes} min`
-                  : "Select duration"
-              }
-              hint="Duration"
-              onPress={() => setActiveDrawer("duration")}
-            />
-            {modalityUsesRf(chartForm.modality) ? (
-              <MachineTile
-                label="RF"
-                value={chartForm.rfLevel}
-                unit="V"
-                onPress={() => setActiveDrawer("rf")}
-              />
-            ) : null}
-            {modalityUsesDc(chartForm.modality) ? (
-              <MachineTile
-                label="DC"
-                value={chartForm.dcLevel}
-                unit="mA"
-                onPress={() => setActiveDrawer("dc")}
-              />
-            ) : null}
-            <MachineTile
-              label="Time"
-              value={chartForm.treatmentSeconds}
-              unit="sec"
-              onPress={() => setActiveDrawer("time")}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Probe</Text>
+          <Text style={styles.sectionTitle}>Appointment</Text>
           <SelectionField
-            label="Probe"
-            value={selectedProbe ? `Probe: ${selectedProbe}` : "Set probe"}
-            hint={chartForm.usingOnePiece ? "1pc" : "2pc"}
-            onPress={() => setActiveDrawer("probe")}
+            label="Duration"
+            value={
+              chartForm.appointmentDurationMinutes
+                ? `${chartForm.appointmentDurationMinutes} min`
+                : "Select duration"
+            }
+            hint="Required"
+            onPress={() => setActiveDrawer({ type: "duration" })}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Treatment Area</Text>
-          <View style={styles.sectionBody}>
-            <SelectionField
-              label="Area"
-              value={areaValue}
-              onPress={() => setActiveDrawer("area")}
-            />
-            {chartForm.treatmentAreaSelection === "Other" ? (
-              <PluckrTextField
-                label="Other"
-                placeholder="Enter the treatment area"
-                value={chartForm.treatmentAreaOther}
-                onChangeText={(value) =>
-                  onChartFormChange("treatmentAreaOther", value)
-                }
-              />
-            ) : null}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notes</Text>
-          <PluckrTextField
-            label="Notes"
-            placeholder="Reaction, insertions, blend, follow-up..."
-            multiline
-            value={chartForm.notes}
-            onChangeText={(value) => onChartFormChange("notes", value)}
+        {chartForm.treatmentAreas.map((area, index) => (
+          <TreatmentAreaSection
+            key={area.id}
+            area={area}
+            index={index}
+            previousChartReference={
+              previousChartReferencesByAreaId[area.id] ?? null
+            }
+            onOpenDrawer={setActiveDrawer}
+            onFieldChange={onTreatmentAreaFormChange}
           />
-        </View>
+        ))}
+
+        <Pressable
+          accessibilityRole="button"
+          style={styles.addTreatmentAreaButton}
+          onPress={onAddTreatmentArea}
+        >
+          <Text style={styles.addTreatmentAreaLabel}>+ Add Treatment Area</Text>
+        </Pressable>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Chart Tags</Text>
@@ -231,7 +175,7 @@ export function PluckrChartEntryEditor({
                 ? `${chartForm.tags.length} selected`
                 : "Select tags"
             }
-            onPress={() => setActiveDrawer("tags")}
+            onPress={() => setActiveDrawer({ type: "tags" })}
           />
           {chartForm.tags.length > 0 ? (
             <View style={styles.tagWrap}>
@@ -255,7 +199,7 @@ export function PluckrChartEntryEditor({
             <Text style={styles.imageTitle}>Treatment Photos</Text>
             <Text style={styles.imageCopy}>
               {client.consent_signed_at
-                ? "Consent is on file. Add and review treatment photos here."
+                ? "Consent is on file. Add and review session photos here."
                 : "Image consent is required before photos can be added."}
             </Text>
             <View style={styles.imageActionRow}>
@@ -305,69 +249,113 @@ export function PluckrChartEntryEditor({
       </View>
 
       <PluckrProbeDrawer
-        visible={activeDrawer === "probe"}
-        usingOnePiece={chartForm.usingOnePiece}
-        probeShank={chartForm.probeShank}
-        probeSize={chartForm.probeSize}
-        probeMaterial={chartForm.probeMaterial}
+        visible={activeDrawer?.type === "probe" && Boolean(activeTreatmentArea)}
+        usingOnePiece={activeTreatmentArea?.usingOnePiece ?? true}
+        probeShank={activeTreatmentArea?.probeShank ?? "F"}
+        probeSize={activeTreatmentArea?.probeSize ?? "3"}
+        probeMaterial={activeTreatmentArea?.probeMaterial ?? "Gold"}
         onClose={() => setActiveDrawer(null)}
-        onProbeStyleChange={onProbeStyleChange}
-        onProbeChange={onChartFormChange}
+        onProbeStyleChange={(usingOnePiece) => {
+          if (activeTreatmentArea) {
+            onProbeStyleChange(activeTreatmentArea.id, usingOnePiece);
+          }
+        }}
+        onProbeChange={(key, value) => {
+          if (activeTreatmentArea) {
+            onTreatmentAreaFormChange(activeTreatmentArea.id, key, value);
+          }
+        }}
       />
       <PluckrOptionDrawer
-        visible={activeDrawer === "area"}
+        visible={activeDrawer?.type === "area" && Boolean(activeTreatmentArea)}
         title="Treatment Area"
         onClose={() => setActiveDrawer(null)}
-        options={treatmentAreaOptions.map((area) => ({
-          label: area,
-          selected: chartForm.treatmentAreaSelection === area,
+        options={treatmentAreaOptions.map((areaOption) => ({
+          label: areaOption,
+          selected: activeTreatmentArea?.treatmentAreaSelection === areaOption,
           onPress: () => {
-            onChartFormChange("treatmentAreaSelection", area);
-            if (area !== "Other") {
-              onChartFormChange("treatmentAreaOther", "");
+            if (!activeTreatmentArea) {
+              return;
+            }
+
+            onTreatmentAreaFormChange(
+              activeTreatmentArea.id,
+              "treatmentAreaSelection",
+              areaOption
+            );
+            if (areaOption !== "Other") {
+              onTreatmentAreaFormChange(
+                activeTreatmentArea.id,
+                "treatmentAreaOther",
+                ""
+              );
             }
             setActiveDrawer(null);
           }
         }))}
       />
       <PluckrStepPickerDrawer
-        visible={activeDrawer === "rf"}
+        visible={activeDrawer?.type === "rf" && Boolean(activeTreatmentArea)}
         title="RF"
-        value={Number.parseFloat(chartForm.rfLevel) || 10}
+        value={Number.parseFloat(activeTreatmentArea?.rfLevel ?? "") || 10}
         unit="Volts"
         step={5}
         min={10}
         max={300}
-        onChange={(value) => onChartFormChange("rfLevel", value.toFixed(1))}
+        onChange={(value) => {
+          if (activeTreatmentArea) {
+            onTreatmentAreaFormChange(
+              activeTreatmentArea.id,
+              "rfLevel",
+              value.toFixed(1)
+            );
+          }
+        }}
         onClose={() => setActiveDrawer(null)}
       />
       <PluckrStepPickerDrawer
-        visible={activeDrawer === "dc"}
+        visible={activeDrawer?.type === "dc" && Boolean(activeTreatmentArea)}
         title="DC"
-        value={Number.parseFloat(chartForm.dcLevel) || 0.1}
+        value={Number.parseFloat(activeTreatmentArea?.dcLevel ?? "") || 0.1}
         unit="mA"
         step={0.1}
         min={0.1}
         max={300}
-        onChange={(value) => onChartFormChange("dcLevel", value.toFixed(1))}
+        onChange={(value) => {
+          if (activeTreatmentArea) {
+            onTreatmentAreaFormChange(
+              activeTreatmentArea.id,
+              "dcLevel",
+              value.toFixed(1)
+            );
+          }
+        }}
         onClose={() => setActiveDrawer(null)}
       />
       <PluckrStepPickerDrawer
-        visible={activeDrawer === "time"}
+        visible={activeDrawer?.type === "time" && Boolean(activeTreatmentArea)}
         title="Time"
         subtitle="Scroll to the insertion time."
-        value={Number.parseFloat(chartForm.treatmentSeconds) || 3}
+        value={
+          Number.parseFloat(activeTreatmentArea?.treatmentSeconds ?? "") || 3
+        }
         unit="sec"
         step={1}
         min={1}
         max={30}
-        onChange={(value) =>
-          onChartFormChange("treatmentSeconds", value.toFixed(0))
-        }
+        onChange={(value) => {
+          if (activeTreatmentArea) {
+            onTreatmentAreaFormChange(
+              activeTreatmentArea.id,
+              "treatmentSeconds",
+              value.toFixed(0)
+            );
+          }
+        }}
         onClose={() => setActiveDrawer(null)}
       />
       <PluckrOptionDrawer
-        visible={activeDrawer === "duration"}
+        visible={activeDrawer?.type === "duration"}
         title="Appointment Duration"
         onClose={() => setActiveDrawer(null)}
         options={appointmentDurationPresets.map((duration) => ({
@@ -380,7 +368,7 @@ export function PluckrChartEntryEditor({
         }))}
       />
       <PluckrTagPickerDrawer
-        visible={activeDrawer === "tags"}
+        visible={activeDrawer?.type === "tags"}
         title="Chart Tags"
         selectedTags={chartForm.tags}
         availableTags={availableChartTags}
@@ -389,6 +377,137 @@ export function PluckrChartEntryEditor({
         onClose={() => setActiveDrawer(null)}
       />
     </PluckrCard>
+  );
+}
+
+function TreatmentAreaSection({
+  area,
+  index,
+  previousChartReference,
+  onOpenDrawer,
+  onFieldChange
+}: {
+  area: TreatmentAreaForm;
+  index: number;
+  previousChartReference: ChartEntryRecord | null;
+  onOpenDrawer: (drawer: ActiveDrawer) => void;
+  onFieldChange: (
+    areaId: string,
+    key: TreatmentAreaFormKey,
+    value: string
+  ) => void;
+}) {
+  const selectedProbe = formatProbeName({
+    shank: area.probeShank,
+    size: area.probeSize,
+    material: area.probeMaterial
+  });
+  const areaValue = useMemo(() => {
+    if (area.treatmentAreaSelection === "Other") {
+      return area.treatmentAreaOther || "Other";
+    }
+
+    return area.treatmentAreaSelection || "Choose treatment area";
+  }, [area.treatmentAreaOther, area.treatmentAreaSelection]);
+
+  return (
+    <View style={styles.treatmentAreaBlock}>
+      {index > 0 ? <View style={styles.areaDivider} /> : null}
+      <View style={styles.treatmentAreaHeader}>
+        <Text style={styles.sectionTitle}>Treatment Area #{index + 1}</Text>
+      </View>
+
+      <View style={styles.sectionBody}>
+        <SelectionField
+          label="Treatment Area"
+          value={areaValue}
+          onPress={() => onOpenDrawer({ type: "area", areaId: area.id })}
+        />
+        {area.treatmentAreaSelection === "Other" ? (
+          <PluckrTextField
+            label="Other"
+            placeholder="Enter the treatment area"
+            value={area.treatmentAreaOther}
+            onChangeText={(value) =>
+              onFieldChange(area.id, "treatmentAreaOther", value)
+            }
+          />
+        ) : null}
+      </View>
+
+      <PreviousChartReference chart={previousChartReference} />
+
+      <View style={styles.sectionBody}>
+        <Text style={styles.sectionTitleSmall}>Modality</Text>
+        <View style={styles.modalityRow}>
+          {chartModalities.map((modality) => (
+            <Pressable
+              key={modality}
+              accessibilityRole="button"
+              style={[
+                styles.modalityButton,
+                area.modality === modality ? styles.modalityButtonActive : null
+              ]}
+              onPress={() => onFieldChange(area.id, "modality", modality)}
+            >
+              <Text
+                style={[
+                  styles.modalityLabel,
+                  area.modality === modality ? styles.modalityLabelActive : null
+                ]}
+              >
+                {modality}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.sectionBody}>
+        <Text style={styles.sectionTitleSmall}>Settings</Text>
+        <View style={styles.machineGrid}>
+          <SelectionField
+            label="Probe"
+            value={selectedProbe ? `Probe: ${selectedProbe}` : "Set probe"}
+            hint={area.usingOnePiece ? "1pc" : "2pc"}
+            onPress={() => onOpenDrawer({ type: "probe", areaId: area.id })}
+          />
+          {modalityUsesRf(area.modality) ? (
+            <MachineTile
+              label="RF"
+              value={area.rfLevel}
+              unit="V"
+              onPress={() => onOpenDrawer({ type: "rf", areaId: area.id })}
+            />
+          ) : null}
+          {modalityUsesDc(area.modality) ? (
+            <MachineTile
+              label="DC"
+              value={area.dcLevel}
+              unit="mA"
+              onPress={() => onOpenDrawer({ type: "dc", areaId: area.id })}
+            />
+          ) : null}
+          <MachineTile
+            label="Time"
+            value={area.treatmentSeconds}
+            unit="sec"
+            onPress={() => onOpenDrawer({ type: "time", areaId: area.id })}
+          />
+        </View>
+      </View>
+
+      <View style={styles.sectionBody}>
+        <Text style={styles.sectionTitleSmall}>Area Notes</Text>
+        <PluckrTextField
+          label="Area Notes"
+          placeholder="Reaction, insertions, blend, follow-up..."
+          multiline
+          value={area.notes}
+          onChangeText={(value) => onFieldChange(area.id, "notes", value)}
+        />
+      </View>
+    </View>
   );
 }
 

@@ -8,41 +8,61 @@ export type ChartUploadAsset = {
   bytes: ArrayBuffer;
 };
 
-export type ChartFormState = {
+export type ChartTreatmentAreaFormState = {
+  id: string;
   modality: string;
   rfLevel: string;
   dcLevel: string;
   treatmentSeconds: string;
-  appointmentDurationMinutes: string;
   usingOnePiece: boolean;
   probeShank: string;
   probeSize: string;
   probeMaterial: string;
   treatmentAreaSelection: string;
   treatmentAreaOther: string;
+  notes: string;
+};
+
+export type ChartFormState = {
+  appointmentDurationMinutes: string;
+  treatmentAreas: ChartTreatmentAreaFormState[];
   treatmentSummary: string;
   notes: string;
   tags: string[];
   images: ChartImageDraft[];
 };
 
-export const emptyChartForm: ChartFormState = {
-  modality: "",
-  rfLevel: "10.0",
-  dcLevel: "0.1",
-  treatmentSeconds: "3",
-  appointmentDurationMinutes: "",
-  usingOnePiece: true,
-  probeShank: "F",
-  probeSize: "3",
-  probeMaterial: "Gold",
-  treatmentAreaSelection: "",
-  treatmentAreaOther: "",
-  treatmentSummary: "",
-  notes: "",
-  tags: [],
-  images: []
-};
+export function createEmptyTreatmentAreaForm(
+  id: string
+): ChartTreatmentAreaFormState {
+  return {
+    id,
+    modality: "",
+    rfLevel: "10.0",
+    dcLevel: "0.1",
+    treatmentSeconds: "3",
+    usingOnePiece: true,
+    probeShank: "F",
+    probeSize: "3",
+    probeMaterial: "Gold",
+    treatmentAreaSelection: "",
+    treatmentAreaOther: "",
+    notes: ""
+  };
+}
+
+export function createEmptyChartForm(firstAreaId = "area-1"): ChartFormState {
+  return {
+    appointmentDurationMinutes: "",
+    treatmentAreas: [createEmptyTreatmentAreaForm(firstAreaId)],
+    treatmentSummary: "",
+    notes: "",
+    tags: [],
+    images: []
+  };
+}
+
+export const emptyChartForm: ChartFormState = createEmptyChartForm();
 
 export function parseSetting(value: string) {
   const numericValue = Number.parseFloat(value);

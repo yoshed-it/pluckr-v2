@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import {
+  getChartTreatmentAreas,
   type ChartEntryRecord,
+  type ChartTreatmentAreaRecord,
   modalityUsesDc,
   modalityUsesRf
 } from "@pluckr/domain";
@@ -26,6 +28,7 @@ export function PluckrChartDetailPanel({
   onEdit
 }: PluckrChartDetailPanelProps) {
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const treatmentAreas = getChartTreatmentAreas(chart);
 
   return (
     <View style={styles.container}>
@@ -51,45 +54,52 @@ export function PluckrChartDetailPanel({
       </PluckrCard>
 
       <PluckrCard>
-        <Text style={styles.sectionTitle}>Treatment Details</Text>
+        <Text style={styles.sectionTitle}>Appointment</Text>
         <View style={styles.metricStack}>
-          <Metric label="Modality" value={chart.modality || "Not recorded"} />
-          {modalityUsesRf(chart.modality ?? "") ? (
-            <Metric
-              label="RF Level"
-              value={
-                typeof chart.rf_level === "number"
-                  ? `${chart.rf_level.toFixed(1)} Volts`
-                  : "Not recorded"
-              }
-            />
-          ) : null}
-          {modalityUsesDc(chart.modality ?? "") ? (
-            <Metric
-              label="DC Level"
-              value={
-                typeof chart.dc_level === "number"
-                  ? `${chart.dc_level.toFixed(1)} mA`
-                  : "Not recorded"
-              }
-            />
-          ) : null}
-          {typeof chart.treatment_seconds === "number" ? (
-            <Metric label="Time" value={`${chart.treatment_seconds} sec`} />
-          ) : null}
-          {typeof chart.appointment_duration_minutes === "number" ? (
-            <Metric
-              label="Appointment Duration"
-              value={`${chart.appointment_duration_minutes} min`}
-            />
-          ) : null}
-          <Metric label="Probe" value={chart.probe || "Not recorded"} />
           <Metric
-            label="Treatment Area"
-            value={chart.treatment_area || "Not specified"}
+            label="Appointment Duration"
+            value={
+              typeof chart.appointment_duration_minutes === "number"
+                ? `${chart.appointment_duration_minutes} min`
+                : "Not recorded"
+            }
           />
+          <Metric label="Created" value={formatDateTime(chart.created_at)} />
+          <Metric label="Last Edited" value={formatDateTime(chart.updated_at)} />
         </View>
       </PluckrCard>
+
+      <PluckrCard>
+        <Text style={styles.sectionTitle}>Treatment Areas</Text>
+        {treatmentAreas.length > 0 ? (
+          <View style={styles.areaStack}>
+            {treatmentAreas.map((area, index) => (
+              <TreatmentAreaDetail
+                key={area.id}
+                area={area}
+                index={index}
+                showDivider={index > 0}
+              />
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.notesCopy}>
+            No treatment-area details were recorded.
+          </Text>
+        )}
+      </PluckrCard>
+
+      {chart.treatment_summary || chart.notes ? (
+        <PluckrCard>
+          <Text style={styles.sectionTitle}>Session Notes</Text>
+          {chart.treatment_summary ? (
+            <Text style={styles.notesCopy}>{chart.treatment_summary}</Text>
+          ) : null}
+          {chart.notes ? (
+            <Text style={styles.notesCopy}>{chart.notes}</Text>
+          ) : null}
+        </PluckrCard>
+      ) : null}
 
       {chart.tags.length > 0 ? (
         <PluckrCard>
@@ -103,21 +113,6 @@ export function PluckrChartDetailPanel({
           </View>
         </PluckrCard>
       ) : null}
-
-      {chart.notes ? (
-        <PluckrCard>
-          <Text style={styles.sectionTitle}>Clinical Notes</Text>
-          <Text style={styles.notesCopy}>{chart.notes}</Text>
-        </PluckrCard>
-      ) : null}
-
-      <PluckrCard>
-        <Text style={styles.sectionTitle}>Chart Information</Text>
-        <View style={styles.metricStack}>
-          <Metric label="Created" value={formatDateTime(chart.created_at)} />
-          <Metric label="Last Edited" value={formatDateTime(chart.updated_at)} />
-        </View>
-      </PluckrCard>
 
       {chart.image_urls.length > 0 ? (
         <PluckrCard>
@@ -145,6 +140,57 @@ export function PluckrChartDetailPanel({
         imageUrl={selectedImageUrl}
         onClose={() => setSelectedImageUrl(null)}
       />
+    </View>
+  );
+}
+
+function TreatmentAreaDetail({
+  area,
+  index,
+  showDivider
+}: {
+  area: ChartTreatmentAreaRecord;
+  index: number;
+  showDivider: boolean;
+}) {
+  return (
+    <View style={styles.areaDetail}>
+      {showDivider ? <View style={styles.areaDivider} /> : null}
+      <View style={styles.areaHeader}>
+        <Text style={styles.areaTitle}>Treatment Area #{index + 1}</Text>
+        <Text style={styles.areaName}>{area.treatment_area}</Text>
+      </View>
+      <View style={styles.metricStack}>
+        <Metric label="Modality" value={area.modality || "Not recorded"} />
+        <Metric label="Probe" value={area.probe || "Not recorded"} />
+        {modalityUsesRf(area.modality ?? "") ? (
+          <Metric
+            label="RF Level"
+            value={
+              typeof area.rf_level === "number"
+                ? `${area.rf_level.toFixed(1)} Volts`
+                : "Not recorded"
+            }
+          />
+        ) : null}
+        {modalityUsesDc(area.modality ?? "") ? (
+          <Metric
+            label="DC Level"
+            value={
+              typeof area.dc_level === "number"
+                ? `${area.dc_level.toFixed(1)} mA`
+                : "Not recorded"
+            }
+          />
+        ) : null}
+        {typeof area.treatment_seconds === "number" ? (
+          <Metric
+            label="Treatment Seconds"
+            value={`${area.treatment_seconds} sec`}
+          />
+        ) : null}
+      </View>
+      {area.notes ? <Text style={styles.notesCopy}>{area.notes}</Text> : null}
     </View>
   );
 }
@@ -219,6 +265,33 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     fontWeight: "700",
     marginBottom: pluckrAppTheme.spacing.md
+  },
+  areaStack: {
+    gap: pluckrAppTheme.spacing.md
+  },
+  areaDetail: {
+    gap: pluckrAppTheme.spacing.sm
+  },
+  areaDivider: {
+    height: 1,
+    backgroundColor: pluckrAppTheme.colors.divider
+  },
+  areaHeader: {
+    gap: 2
+  },
+  areaTitle: {
+    color: pluckrAppTheme.colors.sageStrong,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: "800",
+    letterSpacing: 0.8,
+    textTransform: "uppercase"
+  },
+  areaName: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 18,
+    lineHeight: 23,
+    fontWeight: "800"
   },
   metricStack: { gap: pluckrAppTheme.spacing.sm },
   metricRow: {

@@ -795,7 +795,8 @@ export function usePluckrAppShellModel({
           isSavingChart: clientJournalController.isSavingChart,
           hideToolbar: true,
           chartForm: clientJournalController.chartForm,
-          previousChartReference: clientJournalController.previousChartReference,
+          previousChartReferencesByAreaId:
+            clientJournalController.previousChartReferencesByAreaId,
           availableChartTags: clientJournalController.availableChartTags,
           onBack: handleBackFromJournal,
           onLogout: () => void handleLogout(),
@@ -864,6 +865,9 @@ export function usePluckrAppShellModel({
           onDeleteChart: (chart: typeof clientJournalController.charts[number]) =>
             void clientJournalController.removeChart(chart),
           onChartFormChange: clientJournalController.updateChartForm,
+          onTreatmentAreaFormChange:
+            clientJournalController.updateTreatmentAreaForm,
+          onAddTreatmentArea: clientJournalController.addTreatmentArea,
           onToggleChartTag: clientJournalController.toggleChartTag,
           onAddCustomChartTag: clientJournalController.addCustomChartTag,
           onPickChartImages: () =>

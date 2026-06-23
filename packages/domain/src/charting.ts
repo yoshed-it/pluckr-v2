@@ -1,3 +1,5 @@
+import type { ChartEntryRecord, ChartTreatmentAreaRecord } from "./types";
+
 export const chartModalities = ["Thermolysis", "Galvanic", "Blend"] as const;
 
 export type ChartModality = (typeof chartModalities)[number];
@@ -56,6 +58,49 @@ export function modalityUsesRf(modality: string) {
 
 export function modalityUsesDc(modality: string) {
   return modality === "Galvanic" || modality === "Blend";
+}
+
+export function getChartTreatmentAreas(chart: ChartEntryRecord) {
+  if (chart.treatment_areas && chart.treatment_areas.length > 0) {
+    return chart.treatment_areas;
+  }
+
+  if (
+    !chart.treatment_area &&
+    !chart.modality &&
+    !chart.probe &&
+    typeof chart.rf_level !== "number" &&
+    typeof chart.dc_level !== "number" &&
+    typeof chart.treatment_seconds !== "number"
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      id: `${chart.id}:legacy-area`,
+      chart_entry_id: chart.id,
+      organization_id: chart.organization_id,
+      client_id: chart.client_id,
+      sort_order: 0,
+      treatment_area: chart.treatment_area || "Area not recorded",
+      modality: chart.modality,
+      rf_level: chart.rf_level,
+      dc_level: chart.dc_level,
+      treatment_seconds: chart.treatment_seconds,
+      probe: chart.probe,
+      probe_is_one_piece: chart.probe_is_one_piece,
+      notes: chart.notes,
+      created_at: chart.created_at,
+      updated_at: chart.updated_at
+    }
+  ];
+}
+
+export function getPrimaryChartTreatmentArea(
+  chart: ChartEntryRecord
+): ChartTreatmentAreaRecord | null {
+  return getChartTreatmentAreas(chart)[0] ?? null;
 }
 
 export function resolveTreatmentAreaState(value: string | null | undefined) {

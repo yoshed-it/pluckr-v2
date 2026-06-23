@@ -1,6 +1,10 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { getClientDisplayName, type RecentChartRecord } from "@pluckr/domain";
+import {
+  getChartTreatmentAreas,
+  getClientDisplayName,
+  type RecentChartRecord
+} from "@pluckr/domain";
 
 import { PluckrCard } from "../../primitives/Card";
 import { PluckrSectionHeader } from "../../composite/SectionHeader";
@@ -50,7 +54,7 @@ export function PluckrRecentActivityPanel({
                   {chart.treatment_summary || chart.notes || "No summary yet."}
                 </Text>
                 <Text style={styles.activityMeta}>
-                  {chart.treatment_area || chart.modality || "Treatment"} on{" "}
+                  {formatActivityLabel(chart)} on{" "}
                   {formatDateLabel(chart.created_at)}
                 </Text>
               </View>
@@ -60,6 +64,12 @@ export function PluckrRecentActivityPanel({
       </View>
     </PluckrCard>
   );
+}
+
+function formatActivityLabel(chart: RecentChartRecord) {
+  const primaryArea = getChartTreatmentAreas(chart)[0] ?? null;
+
+  return primaryArea?.treatment_area || primaryArea?.modality || "Treatment";
 }
 
 const styles = StyleSheet.create({

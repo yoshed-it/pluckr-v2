@@ -75,6 +75,25 @@ export type ChartEntryRecord = {
   tags: string[];
   image_urls: string[];
   image_paths?: string[];
+  treatment_areas?: ChartTreatmentAreaRecord[];
+  created_at: string;
+  updated_at: string;
+};
+
+export type ChartTreatmentAreaRecord = {
+  id: string;
+  chart_entry_id: string;
+  organization_id: string;
+  client_id: string;
+  sort_order: number;
+  treatment_area: string;
+  modality: string | null;
+  rf_level: number | null;
+  dc_level: number | null;
+  treatment_seconds: number | null;
+  probe: string | null;
+  probe_is_one_piece: boolean;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 };

@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
+  getChartTreatmentAreas,
   type ChartEntryRecord,
   modalityUsesDc,
   modalityUsesRf
@@ -34,16 +35,20 @@ export function ChartEntrySummaryCard({
   onOpen
 }: Props) {
   const calendar = formatCalendarBits(chart.created_at);
+  const treatmentAreas = getChartTreatmentAreas(chart);
+  const primaryArea = treatmentAreas[0] ?? null;
   const detailChips = [
-    chart.probe,
-    modalityUsesRf(chart.modality ?? "") && typeof chart.rf_level === "number"
-      ? `${chart.rf_level.toFixed(1)} RF`
+    primaryArea?.probe,
+    modalityUsesRf(primaryArea?.modality ?? "") &&
+    typeof primaryArea?.rf_level === "number"
+      ? `${primaryArea.rf_level.toFixed(1)} RF`
       : null,
-    modalityUsesDc(chart.modality ?? "") && typeof chart.dc_level === "number"
-      ? `${chart.dc_level.toFixed(1)} DC`
+    modalityUsesDc(primaryArea?.modality ?? "") &&
+    typeof primaryArea?.dc_level === "number"
+      ? `${primaryArea.dc_level.toFixed(1)} DC`
       : null,
-    typeof chart.treatment_seconds === "number"
-      ? `${chart.treatment_seconds} sec`
+    typeof primaryArea?.treatment_seconds === "number"
+      ? `${primaryArea.treatment_seconds} sec`
       : null,
     typeof chart.appointment_duration_minutes === "number"
       ? `${chart.appointment_duration_minutes} min appt`
@@ -66,9 +71,12 @@ export function ChartEntrySummaryCard({
               <View style={styles.body}>
                 <View style={styles.headerRow}>
                   <Text style={styles.title}>
-                    {chart.modality || "Treatment"}{" "}
+                    {primaryArea?.modality || "Treatment"}{" "}
                     <Text style={styles.dot}>•</Text>{" "}
-                    {chart.treatment_area || "Area not recorded"}
+                    {primaryArea?.treatment_area || "Area not recorded"}
+                    {treatmentAreas.length > 1
+                      ? ` + ${treatmentAreas.length - 1}`
+                      : ""}
                   </Text>
                   <StatusChip label="Complete" tone="success" />
                 </View>
@@ -85,7 +93,10 @@ export function ChartEntrySummaryCard({
                   </View>
                 ) : null}
                 <Text style={styles.notes}>
-                  {chart.treatment_summary || chart.notes || "No notes"}
+                  {chart.treatment_summary ||
+                    primaryArea?.notes ||
+                    chart.notes ||
+                    "No notes"}
                 </Text>
               </View>
               <View style={styles.chevronWrap}>

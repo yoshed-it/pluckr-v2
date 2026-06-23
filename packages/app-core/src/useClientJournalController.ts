@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   createChartEntry,
@@ -12,6 +12,7 @@ import {
 } from "@pluckr/supabase";
 import {
   formatProbeName,
+  getChartTreatmentAreas,
   isAppointmentDurationPreset,
   modalityUsesDc,
   modalityUsesRf,
@@ -26,9 +27,11 @@ import {
   mergeTagLibrary
 } from "./tags";
 import {
-  emptyChartForm,
+  createEmptyChartForm,
+  createEmptyTreatmentAreaForm,
   parseSetting,
   type ChartImageDraft,
+  type ChartTreatmentAreaFormState,
   type ChartUploadAsset,
   type ChartFormState
 } from "./chartFormState";
@@ -49,7 +52,20 @@ export function useClientJournalController(
   const [isEditingChart, setIsEditingChart] = useState(false);
   const [isSavingChart, setIsSavingChart] = useState(false);
   const [editingChartId, setEditingChartId] = useState<string | null>(null);
-  const [chartForm, setChartForm] = useState<ChartFormState>(emptyChartForm);
+  const treatmentAreaSerialRef = useRef(1);
+  const [chartForm, setChartForm] = useState<ChartFormState>(() =>
+    createEmptyChartForm()
+  );
+
+  function createFreshChartForm() {
+    treatmentAreaSerialRef.current = 1;
+    return createEmptyChartForm("area-1");
+  }
+
+  function createNextTreatmentAreaForm() {
+    treatmentAreaSerialRef.current += 1;
+    return createEmptyTreatmentAreaForm(`area-${treatmentAreaSerialRef.current}`);
+  }
 
   useEffect(() => {
     if (!organizationId || !selectedClient) {
@@ -58,7 +74,7 @@ export function useClientJournalController(
       setJournalNotice(null);
       setIsEditingChart(false);
       setEditingChartId(null);
-      setChartForm(emptyChartForm);
+      setChartForm(createFreshChartForm());
       return;
     }
 
@@ -66,7 +82,7 @@ export function useClientJournalController(
     setJournalNotice(null);
     setIsEditingChart(false);
     setEditingChartId(null);
-    setChartForm(emptyChartForm);
+    setChartForm(createFreshChartForm());
     void loadCharts(organizationId, selectedClient.id);
   }, [client, organizationId, selectedClient]);
 
@@ -97,11 +113,31 @@ export function useClientJournalController(
     }));
   }
 
+  function updateTreatmentAreaForm<K extends keyof ChartTreatmentAreaFormState>(
+    areaId: string,
+    key: K,
+    value: ChartTreatmentAreaFormState[K]
+  ) {
+    setChartForm((current) => ({
+      ...current,
+      treatmentAreas: current.treatmentAreas.map((area) =>
+        area.id === areaId ? { ...area, [key]: value } : area
+      )
+    }));
+  }
+
+  function addTreatmentArea() {
+    setChartForm((current) => ({
+      ...current,
+      treatmentAreas: [...current.treatmentAreas, createNextTreatmentAreaForm()]
+    }));
+  }
+
   function startCreatingChart() {
     setJournalNotice(null);
     setJournalError(null);
     setEditingChartId(null);
-    setChartForm(emptyChartForm);
+    setChartForm(createFreshChartForm());
     setIsEditingChart(true);
   }
 
@@ -109,26 +145,41 @@ export function useClientJournalController(
     setJournalNotice(null);
     setJournalError(null);
     setEditingChartId(chart.id);
+    const treatmentAreas = getChartTreatmentAreas(chart).map((area, index) => {
+      const areaState = resolveTreatmentAreaState(area.treatment_area);
+      const probeState = parseProbeName(area.probe);
+
+      return {
+        id: `area-${index + 1}`,
+        treatmentAreaSelection: areaState.selection,
+        treatmentAreaOther: areaState.otherValue,
+        modality: area.modality ?? "",
+        rfLevel:
+          typeof area.rf_level === "number" ? area.rf_level.toFixed(1) : "10.0",
+        dcLevel:
+          typeof area.dc_level === "number" ? area.dc_level.toFixed(1) : "0.1",
+        treatmentSeconds:
+          typeof area.treatment_seconds === "number"
+            ? String(area.treatment_seconds)
+            : "3",
+        usingOnePiece: area.probe_is_one_piece,
+        probeShank: probeState.shank,
+        probeSize: probeState.size,
+        probeMaterial: probeState.material,
+        notes: area.notes ?? ""
+      };
+    });
+
+    treatmentAreaSerialRef.current = Math.max(1, treatmentAreas.length);
     setChartForm({
-      treatmentAreaSelection: resolveTreatmentAreaState(chart.treatment_area).selection,
-      treatmentAreaOther: resolveTreatmentAreaState(chart.treatment_area).otherValue,
-      modality: chart.modality ?? "",
-      rfLevel:
-        typeof chart.rf_level === "number" ? chart.rf_level.toFixed(1) : "10.0",
-      dcLevel:
-        typeof chart.dc_level === "number" ? chart.dc_level.toFixed(1) : "0.1",
-      treatmentSeconds:
-        typeof chart.treatment_seconds === "number"
-          ? String(chart.treatment_seconds)
-          : "3",
       appointmentDurationMinutes:
         typeof chart.appointment_duration_minutes === "number"
           ? String(chart.appointment_duration_minutes)
           : "",
-      usingOnePiece: chart.probe_is_one_piece,
-      probeShank: parseProbeName(chart.probe).shank,
-      probeSize: parseProbeName(chart.probe).size,
-      probeMaterial: parseProbeName(chart.probe).material,
+      treatmentAreas:
+        treatmentAreas.length > 0
+          ? treatmentAreas
+          : [createEmptyTreatmentAreaForm("area-1")],
       treatmentSummary: chart.treatment_summary ?? "",
       notes: chart.notes ?? "",
       tags: chart.tags,
@@ -144,7 +195,7 @@ export function useClientJournalController(
     setIsEditingChart(false);
     setEditingChartId(null);
     setJournalError(null);
-    setChartForm(emptyChartForm);
+    setChartForm(createFreshChartForm());
   }
 
   async function submitChart() {
@@ -152,29 +203,8 @@ export function useClientJournalController(
       return false;
     }
 
-    const selectedProbe = formatProbeName({
-      shank: chartForm.probeShank,
-      size: chartForm.probeSize,
-      material: chartForm.probeMaterial
-    });
-
-    if (!chartForm.modality.trim()) {
-      setJournalError("Treatment modality is required.");
-      return false;
-    }
-
-    if (!selectedProbe.trim()) {
-      setJournalError("Complete the probe details before saving the chart entry.");
-      return false;
-    }
-
-    const treatmentArea = resolveTreatmentAreaValue(
-      chartForm.treatmentAreaSelection,
-      chartForm.treatmentAreaOther
-    );
-
-    if (!treatmentArea) {
-      setJournalError("Treatment area is required.");
+    if (chartForm.treatmentAreas.length === 0) {
+      setJournalError("At least one treatment area is required.");
       return false;
     }
 
@@ -187,6 +217,53 @@ export function useClientJournalController(
       return false;
     }
 
+    const treatmentAreas = chartForm.treatmentAreas.map((area, index) => {
+      const treatmentArea = resolveTreatmentAreaValue(
+        area.treatmentAreaSelection,
+        area.treatmentAreaOther
+      );
+      const probe = formatProbeName({
+        shank: area.probeShank,
+        size: area.probeSize,
+        material: area.probeMaterial
+      });
+
+      return {
+        index,
+        treatmentArea,
+        modality: area.modality,
+        probe,
+        rfLevel: modalityUsesRf(area.modality)
+          ? parseSetting(area.rfLevel)
+          : null,
+        dcLevel: modalityUsesDc(area.modality)
+          ? parseSetting(area.dcLevel)
+          : null,
+        treatmentSeconds: parseSetting(area.treatmentSeconds),
+        probeIsOnePiece: area.usingOnePiece,
+        notes: area.notes
+      };
+    });
+
+    for (const area of treatmentAreas) {
+      const label = `Treatment Area #${area.index + 1}`;
+
+      if (!area.treatmentArea) {
+        setJournalError(`${label} is required.`);
+        return false;
+      }
+
+      if (!area.modality.trim()) {
+        setJournalError(`${label} modality is required.`);
+        return false;
+      }
+
+      if (!area.probe.trim()) {
+        setJournalError(`${label} probe details are required.`);
+        return false;
+      }
+    }
+
     setIsSavingChart(true);
     setJournalError(null);
     setJournalNotice(null);
@@ -194,18 +271,8 @@ export function useClientJournalController(
     const input = {
       organizationId,
       clientId: selectedClient.id,
-      modality: chartForm.modality,
-      rfLevel: modalityUsesRf(chartForm.modality)
-        ? parseSetting(chartForm.rfLevel)
-        : null,
-      dcLevel: modalityUsesDc(chartForm.modality)
-        ? parseSetting(chartForm.dcLevel)
-        : null,
-      treatmentSeconds: parseSetting(chartForm.treatmentSeconds),
       appointmentDurationMinutes,
-      probe: selectedProbe,
-      probeIsOnePiece: chartForm.usingOnePiece,
-      treatmentArea,
+      treatmentAreas,
       treatmentSummary: chartForm.treatmentSummary,
       notes: chartForm.notes,
       tags: dedupeTagLabels(chartForm.tags),
@@ -240,7 +307,7 @@ export function useClientJournalController(
       );
       setIsEditingChart(false);
       setEditingChartId(null);
-      setChartForm(emptyChartForm);
+      setChartForm(createFreshChartForm());
       return true;
     } catch (error) {
       setJournalError(
@@ -277,10 +344,12 @@ export function useClientJournalController(
     }
   }
 
-  function setProbeStyle(usingOnePiece: boolean) {
+  function setProbeStyle(areaId: string, usingOnePiece: boolean) {
     setChartForm((current) => ({
       ...current,
-      usingOnePiece
+      treatmentAreas: current.treatmentAreas.map((area) =>
+        area.id === areaId ? { ...area, usingOnePiece } : area
+      )
     }));
   }
 
@@ -390,13 +459,18 @@ export function useClientJournalController(
     return true;
   }
 
-  const previousChartReference = selectPreviousChartReference(
-    charts,
-    resolveTreatmentAreaValue(
-      chartForm.treatmentAreaSelection,
-      chartForm.treatmentAreaOther
-    ),
-    editingChartId
+  const previousChartReferencesByAreaId = Object.fromEntries(
+    chartForm.treatmentAreas.map((area) => [
+      area.id,
+      selectPreviousChartReference(
+        charts,
+        resolveTreatmentAreaValue(
+          area.treatmentAreaSelection,
+          area.treatmentAreaOther
+        ),
+        editingChartId
+      )
+    ])
   );
 
   return {
@@ -407,9 +481,11 @@ export function useClientJournalController(
     isEditingChart,
     isSavingChart,
     editingChartId,
-    previousChartReference,
+    previousChartReferencesByAreaId,
     chartForm,
     updateChartForm,
+    updateTreatmentAreaForm,
+    addTreatmentArea,
     availableChartTags: mergeTagLibrary(defaultChartTags, chartForm.tags),
     toggleChartTag,
     addCustomChartTag,

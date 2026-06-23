@@ -1,4 +1,8 @@
-import type { ChartEntryRecord } from "@pluckr/domain";
+import {
+  getChartTreatmentAreas,
+  type ChartEntryRecord,
+  type ChartTreatmentAreaRecord
+} from "@pluckr/domain";
 
 export * from "@pluckr/domain";
 
@@ -22,14 +26,46 @@ export function selectPreviousChartReference(
   const normalizedArea = normalizeTreatmentArea(currentTreatmentArea);
 
   if (normalizedArea) {
-    const sameAreaEntry = eligibleEntries.find(
-      (entry) => normalizeTreatmentArea(entry.treatment_area) === normalizedArea
-    );
+    for (const entry of eligibleEntries) {
+      const sameArea = getChartTreatmentAreas(entry).find(
+        (area) => normalizeTreatmentArea(area.treatment_area) === normalizedArea
+      );
 
-    if (sameAreaEntry) {
-      return sameAreaEntry;
+      if (sameArea) {
+        return createTreatmentAreaReference(entry, sameArea);
+      }
     }
   }
 
-  return eligibleEntries[0] ?? null;
+  const fallbackEntry = eligibleEntries[0] ?? null;
+
+  if (!fallbackEntry) {
+    return null;
+  }
+
+  return createTreatmentAreaReference(
+    fallbackEntry,
+    getChartTreatmentAreas(fallbackEntry)[0] ?? null
+  );
+}
+
+function createTreatmentAreaReference(
+  entry: ChartEntryRecord,
+  area: ChartTreatmentAreaRecord | null
+): ChartEntryRecord {
+  if (!area) {
+    return entry;
+  }
+
+  return {
+    ...entry,
+    treatment_area: area.treatment_area,
+    modality: area.modality,
+    rf_level: area.rf_level,
+    dc_level: area.dc_level,
+    treatment_seconds: area.treatment_seconds,
+    probe: area.probe,
+    probe_is_one_piece: area.probe_is_one_piece,
+    notes: area.notes
+  };
 }
