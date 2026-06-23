@@ -7,9 +7,14 @@ import { PluckrTextField } from "../../primitives/TextField";
 import { pluckrAppTheme } from "../../tokens/pluckrAppTheme";
 
 const pronounOptions = [
-  "He/Him",
-  "She/Her",
-  "They/Them"
+  "He / Him",
+  "She / Her",
+  "They / Them",
+  "He / They",
+  "She / They",
+  "They / He",
+  "They / She",
+  "Prefer not to say"
 ];
 const customOptionLabel = "Other / Custom";
 
