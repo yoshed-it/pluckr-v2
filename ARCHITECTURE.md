@@ -25,6 +25,56 @@ should strengthen the platform without becoming an open-ended rewrite.
 9. Prefer clear architecture over clever abstractions.
 10. Keep the app working during refactors.
 
+## Clinical Journey Orientation
+
+Pluckr is organized around clinical journeys, not CRUD entities.
+
+Every major feature should answer:
+
+> What journey is this improving?
+
+Tables and records are implementation details. The product experience should be
+designed around how providers and clients move through care.
+
+### Client Journey
+
+- Discover
+- Consult
+- Treat
+- Follow up
+- Complete
+
+### Provider Journey
+
+- Prepare
+- Treat
+- Document
+- Review
+- Plan next visit
+
+### Media Journey
+
+- Consent
+- Capture
+- Assign
+- Compare
+- Archive
+
+### Workflow Journey
+
+- Build
+- Assign
+- Complete
+- Review
+
+Architecture implication:
+
+- screens should not exist only because a table exists
+- feature modules should be named by the journey or workflow they support
+- domain models should support journey state, not just row shape
+- navigation should optimize the next clinical action, not entity management
+- backlog items should identify the journey they improve before implementation
+
 ## Stabilization Sprint Rules
 
 This sprint is intentionally short.
