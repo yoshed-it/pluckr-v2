@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { PluckrTagPickerDrawer } from "../../PluckrTagPickerDrawer";
-import { PluckrSectionHeader } from "../../composite/SectionHeader";
 import { PluckrButton } from "../../primitives/Button";
-import { PluckrCard } from "../../primitives/Card";
 import { PluckrTextField } from "../../primitives/TextField";
 import { pluckrClientListStageStyles as styles } from "./ClientListStage.styles";
 import { PronounPickerField } from "./PronounPickerField";
@@ -59,11 +57,12 @@ export function ClientCreateForm({
 
   return (
     <>
-      <PluckrCard>
-        <View style={styles.formStack}>
-          <PluckrSectionHeader title="New Client" />
+      <View style={styles.formStack}>
+        <View style={styles.intakeSection}>
+          <Text style={styles.intakeSectionTitle}>Daily care</Text>
           <Text style={styles.formCopy}>
-            Add the name providers use day-to-day plus the legal name for records.
+            Use the name providers should see during treatment. Legal details stay
+            in the record, not the primary workspace.
           </Text>
           <PluckrTextField
             label="Name"
@@ -74,51 +73,9 @@ export function ClientCreateForm({
             error={clientFormErrors.preferredName}
             onChangeText={(value) => onFormChange("preferredName", value)}
           />
-          <View style={styles.fieldRow}>
-            <PluckrTextField
-              label="Legal First"
-              placeholder="Legal first name"
-              value={clientForm.firstName}
-              autoCapitalize="words"
-              textContentType="givenName"
-              error={clientFormErrors.firstName}
-              onChangeText={(value) => onFormChange("firstName", value)}
-            />
-            <PluckrTextField
-              label="Legal Last"
-              placeholder="Legal last name"
-              value={clientForm.lastName}
-              autoCapitalize="words"
-              textContentType="familyName"
-              error={clientFormErrors.lastName}
-              onChangeText={(value) => onFormChange("lastName", value)}
-            />
-          </View>
-          <View style={styles.fieldRow}>
-            <PronounPickerField
-              value={clientForm.pronouns}
-              onChange={(value) => onFormChange("pronouns", value)}
-            />
-            <PluckrTextField
-              label="Phone"
-              placeholder="555-555-5555"
-              value={clientForm.phone}
-              keyboardType="phone-pad"
-              textContentType="telephoneNumber"
-              error={clientFormErrors.phone}
-              onChangeText={(value) => onFormChange("phone", value)}
-            />
-          </View>
-          <PluckrTextField
-            label="Email"
-            placeholder="client@example.com"
-            value={clientForm.email}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            error={clientFormErrors.email}
-            onChangeText={(value) => onFormChange("email", value)}
+          <PronounPickerField
+            value={clientForm.pronouns}
+            onChange={(value) => onFormChange("pronouns", value)}
           />
           <Pressable
             accessibilityRole="button"
@@ -141,6 +98,56 @@ export function ClientCreateForm({
               ))}
             </View>
           ) : null}
+        </View>
+
+        <View style={styles.intakeSection}>
+          <Text style={styles.intakeSectionTitle}>Legal and contact</Text>
+          <View style={styles.fieldRow}>
+            <PluckrTextField
+              label="Legal First"
+              placeholder="Legal first name"
+              value={clientForm.firstName}
+              autoCapitalize="words"
+              textContentType="givenName"
+              error={clientFormErrors.firstName}
+              onChangeText={(value) => onFormChange("firstName", value)}
+            />
+            <PluckrTextField
+              label="Legal Last"
+              placeholder="Legal last name"
+              value={clientForm.lastName}
+              autoCapitalize="words"
+              textContentType="familyName"
+              error={clientFormErrors.lastName}
+              onChangeText={(value) => onFormChange("lastName", value)}
+            />
+          </View>
+          <View style={styles.fieldRow}>
+            <PluckrTextField
+              label="Phone"
+              placeholder="555-555-5555"
+              value={clientForm.phone}
+              keyboardType="phone-pad"
+              textContentType="telephoneNumber"
+              error={clientFormErrors.phone}
+              onChangeText={(value) => onFormChange("phone", value)}
+            />
+          </View>
+          <PluckrTextField
+            label="Email"
+            placeholder="client@example.com"
+            value={clientForm.email}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            error={clientFormErrors.email}
+            onChangeText={(value) => onFormChange("email", value)}
+          />
+        </View>
+
+        <View style={styles.intakeSection}>
+          <Text style={styles.intakeSectionTitle}>Consent and notes</Text>
           <View style={styles.segmentRow}>
             <Pressable
               accessibilityRole="button"
@@ -184,6 +191,9 @@ export function ClientCreateForm({
             value={clientForm.careSummary}
             onChangeText={(value) => onFormChange("careSummary", value)}
           />
+        </View>
+
+        <View style={styles.formActionStack}>
           <PluckrButton
             label={isSavingClient ? "Saving..." : "Save Client"}
             disabled={isSavingClient}
@@ -196,7 +206,7 @@ export function ClientCreateForm({
             onPress={() => onCancelCreate()}
           />
         </View>
-      </PluckrCard>
+      </View>
       <PluckrTagPickerDrawer
         visible={showClientTagPicker}
         title="Client Tags"

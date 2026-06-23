@@ -6,6 +6,7 @@ import { PluckrConfirmDialog } from "../../PluckrConfirmDialog";
 import { PluckrTagPickerDrawer } from "../../PluckrTagPickerDrawer";
 import { PluckrCard } from "../../primitives/Card";
 import { CareSnapshotStrip } from "./CareSnapshotStrip";
+import { ClientActionsDrawer } from "./ClientActionsDrawer";
 import { ClientChartEntriesSection } from "./ClientChartEntriesSection";
 import { ClientDetailsSheet } from "./ClientDetailsSheet";
 import { ClientHeaderCard } from "./ClientHeaderCard";
@@ -152,6 +153,7 @@ export function PluckrClientJournalStage({
 }: PluckrClientJournalStageProps) {
   const [selectedChart, setSelectedChart] = useState<ChartEntryRecord | null>(null);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [showClientActions, setShowClientActions] = useState(false);
   const [showClientTagPicker, setShowClientTagPicker] = useState(false);
   const [activeTab, setActiveTab] = useState<ClientWorkspaceTabId>("chartEntries");
 
@@ -201,7 +203,10 @@ export function PluckrClientJournalStage({
         />
       ) : null}
 
-      <ClientWorkspaceTopBar onBack={onBack} onMore={onStartEditClient} />
+      <ClientWorkspaceTopBar
+        onBack={onBack}
+        onMore={() => setShowClientActions(true)}
+      />
 
       <ClientHeaderCard
         client={client}
@@ -243,7 +248,7 @@ export function PluckrClientJournalStage({
             key: "more",
             label: "More",
             icon: "more",
-            onPress: onStartEditClient
+            onPress: () => setShowClientActions(true)
           }
         ]}
       />
@@ -264,6 +269,17 @@ export function PluckrClientJournalStage({
         onSubmit={() => {
           void onSubmitClientDetails();
         }}
+        onArchiveClient={() => setShowArchiveConfirm(true)}
+      />
+
+      <ClientActionsDrawer
+        visible={showClientActions}
+        client={client}
+        onClose={() => setShowClientActions(false)}
+        onEditDetails={onStartEditClient}
+        onManageTags={() => setShowClientTagPicker(true)}
+        onOpenConsent={onOpenConsent}
+        onTakePhoto={onTakePhoto}
         onArchiveClient={() => setShowArchiveConfirm(true)}
       />
 

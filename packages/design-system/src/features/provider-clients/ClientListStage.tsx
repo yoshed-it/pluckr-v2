@@ -4,6 +4,7 @@ import { getClientDisplayName, type ClientRecord } from "@pluckr/domain";
 
 import { ClientCreateForm } from "./ClientCreateForm";
 import { PluckrSectionHeader } from "../../composite/SectionHeader";
+import { PluckrBottomDrawer } from "../../primitives/BottomSheet";
 import { PluckrButton } from "../../primitives/Button";
 import { PluckrCard } from "../../primitives/Card";
 import { pluckrClientListStageStyles as styles } from "./ClientListStage.styles";
@@ -120,7 +121,14 @@ export function PluckrClientListStage({
         </View>
       </PluckrCard>
 
-      {isCreatingClient ? (
+      <PluckrBottomDrawer
+        visible={isCreatingClient}
+        title="New client intake"
+        subtitle="Capture the care context first. Legal and admin details stay tucked away after setup."
+        actionLabel="×"
+        onAction={onCancelCreate}
+        onClose={onCancelCreate}
+      >
         <ClientCreateForm
           isSavingClient={isSavingClient}
           clientForm={clientForm}
@@ -132,7 +140,7 @@ export function PluckrClientListStage({
           onAddCustomClientTag={onAddCustomClientTag}
           onSubmitClient={onSubmitClient}
         />
-      ) : null}
+      </PluckrBottomDrawer>
 
       <PluckrCard>
         <PluckrSectionHeader title="Results" count={clients.length} />

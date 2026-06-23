@@ -44,6 +44,15 @@ export const pluckrClientListStageStyles = StyleSheet.create({
   formStack: {
     gap: pluckrAppTheme.spacing.md
   },
+  intakeSection: {
+    gap: pluckrAppTheme.spacing.sm
+  },
+  intakeSectionTitle: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "800"
+  },
   fieldRow: {
     gap: pluckrAppTheme.spacing.sm
   },
@@ -51,6 +60,9 @@ export const pluckrClientListStageStyles = StyleSheet.create({
     color: pluckrAppTheme.colors.textSecondary,
     fontSize: 14,
     lineHeight: 20
+  },
+  formActionStack: {
+    gap: pluckrAppTheme.spacing.sm
   },
   tagSelector: {
     gap: 2,

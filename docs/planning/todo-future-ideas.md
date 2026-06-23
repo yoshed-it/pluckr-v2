@@ -12,11 +12,13 @@ not bloat the current implementation slice.
 - refine the client workspace around a care-first header strip plus charting history, not a profile-heavy EMR page
 - move deeper client identity and admin details into a future info drawer attached to edit/details actions
 - define the photo assignment model before finalizing Take Photo: client library photos, chart/session photos, consent-linked images, and unassigned captures need clear ownership
+- separate provider-created client intake from future client-facing intake links so public intake can become a WorkflowRun instead of a one-off form
 - harden auth after the core flow settles: web SSR auth, mobile secure token storage, and owner/admin MFA
 
 ## Future
 
 - scheduling architecture brief before implementation: shared domain logic, platform-specific interaction layers, and drag/drop only where it truly helps
+- public intake flow: owner/provider sends a secure intake link, client completes assigned workflow sections, provider reviews before merging into the clinical record
 - restore image capture, upload, and consent workflows with Supabase Storage
 - decide whether the bottom nav `Reports` slot should stay reports or become a higher-frequency clinical destination after capture/scheduling settle
 - add richer provider/admin management once the provider workflow is stable
