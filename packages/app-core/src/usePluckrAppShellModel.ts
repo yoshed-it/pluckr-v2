@@ -339,45 +339,49 @@ export function usePluckrAppShellModel({
 
   const navigationSubtitle =
     activeWorkspaceScreen === "workspace"
-      ? selectedMembership?.organization.name ?? null
+      ? null
       : activeWorkspaceScreen === "clients"
-        ? selectedMembership?.organization.name ?? null
+        ? null
         : activeWorkspaceScreen === "journal"
           ? null
           : activeWorkspaceScreen === "consent"
-            ? clientFullName ?? null
+            ? null
             : activeWorkspaceScreen === "more"
-              ? null
+              ? "Additional tools and features will appear here as Pluckr grows."
             : activeWorkspaceScreen === "settings"
-              ? selectedMembership?.organization.name ?? null
+              ? null
               : activeWorkspaceScreen === "admin"
-                ? selectedMembership?.organization.name ?? null
+                ? null
                 : null;
 
-  const utilityActions = [
-    ...(activeWorkspaceScreen !== "journal" &&
-    activeWorkspaceScreen !== "settings" &&
-    activeWorkspaceScreen !== "more"
-      ? [
+  const utilityActions =
+    activeWorkspaceScreen === "more"
+      ? []
+      : [
+          ...(activeWorkspaceScreen !== "journal" &&
+          activeWorkspaceScreen !== "settings"
+            ? [
+                {
+                  label: "Settings",
+                  icon: "settings" as const,
+                  iconOnly: true,
+                  onPress: () =>
+                    openSettings(
+                      activeWorkspaceScreen === "clients"
+                        ? "clients"
+                        : "workspace"
+                    )
+                }
+              ]
+            : []),
           {
-            label: "Settings",
-            icon: "settings" as const,
+            label: "Log Out",
+            icon: "logout" as const,
             iconOnly: true,
-            onPress: () =>
-              openSettings(
-                activeWorkspaceScreen === "clients" ? "clients" : "workspace"
-              )
+            onPress: () => void handleLogout(),
+            tone: "critical" as const
           }
-        ]
-      : []),
-    {
-      label: "Log Out",
-      icon: "logout" as const,
-      iconOnly: true,
-      onPress: () => void handleLogout(),
-      tone: "critical" as const
-    }
-  ];
+        ];
   const bottomNavigation = shouldShowBottomNavigation
     ? {
         items: [

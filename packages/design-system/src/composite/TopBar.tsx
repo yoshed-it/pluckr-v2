@@ -14,6 +14,7 @@ type TopBarAction = {
 
 type TopBarProps = {
   title: string;
+  subtitle?: string | null;
   backLabel?: string | null;
   onBack?: (() => void) | null;
   actions?: TopBarAction[];
@@ -21,6 +22,7 @@ type TopBarProps = {
 
 export function TopBar({
   title,
+  subtitle = null,
   backLabel = null,
   onBack = null,
   actions = []
@@ -54,9 +56,16 @@ export function TopBar({
         ) : null}
       </View>
 
-      <Text numberOfLines={1} style={styles.title}>
-        {title}
-      </Text>
+      <View style={styles.titleStack}>
+        <Text numberOfLines={1} style={styles.title}>
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text numberOfLines={2} style={styles.subtitle}>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
 
       <View style={[styles.side, styles.trailing]}>
         {actions.slice(0, 2).map((action) => (
@@ -105,11 +114,22 @@ const styles = StyleSheet.create({
     fontWeight: "500"
   },
   title: {
-    flex: 1,
     color: pluckrAppTheme.colors.textPrimary,
     fontSize: 17,
     lineHeight: 22,
     fontWeight: "700",
+    textAlign: "center"
+  },
+  titleStack: {
+    flex: 1.5,
+    alignItems: "center",
+    gap: 2
+  },
+  subtitle: {
+    color: pluckrAppTheme.colors.textMuted,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: "600",
     textAlign: "center"
   },
   pressed: {

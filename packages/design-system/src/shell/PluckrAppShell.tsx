@@ -120,6 +120,7 @@ export function PluckrAppShell({
         {model.shouldShowUtilityBar || model.shouldShowShellNavigationBar ? (
           <TopBar
             title={model.navigationTitle}
+            subtitle={model.navigationSubtitle}
             backLabel={model.previousScreenLabel}
             onBack={model.navigationBackAction}
             actions={model.utilityActions

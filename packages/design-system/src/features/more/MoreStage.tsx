@@ -11,31 +11,23 @@ const upcomingModules = [
   "Insurance",
   "Reports",
   "Analytics",
-  "AI Assistant",
   "Client Portal",
   "Messages",
-  "Workflows",
   "Settings",
   "Team",
-  "Integrations"
+  "Workflows",
+  "Integrations",
+  "AI Assistant"
 ] as const;
 
 /**
- * Intentional placeholder for app-wide modules that are not daily charting.
+ * Permanent destination for app-wide modules that are not daily charting.
  *
- * The chips are display-only for now so unfinished destinations do not feel
- * interactive before their workflows exist.
+ * The chips are informational until a module has a real workflow behind it.
  */
 export function PluckrMoreStage() {
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>More</Text>
-        <Text style={styles.copy}>
-          Additional tools and features will appear here as your practice grows.
-        </Text>
-      </View>
-
       <View style={styles.chipGrid}>
         {upcomingModules.map((module) => (
           <View key={module} style={styles.moduleChip}>
@@ -47,8 +39,8 @@ export function PluckrMoreStage() {
       <View style={styles.comingSoon}>
         <Text style={styles.comingSoonLabel}>Coming Soon</Text>
         <Text style={styles.comingSoonCopy}>
-          Pluckr is being built one workflow at a time. Future updates will
-          appear here without disrupting your daily clinical workflow.
+          New capabilities will appear here as Pluckr expands. The provider
+          workflow remains the primary focus of the current beta.
         </Text>
       </View>
     </View>
@@ -61,21 +53,6 @@ const styles = StyleSheet.create({
     minHeight: 420,
     paddingTop: pluckrAppTheme.spacing.sm,
     backgroundColor: pluckrAppTheme.colors.backgroundSoft
-  },
-  header: {
-    gap: pluckrAppTheme.spacing.xs
-  },
-  title: {
-    color: pluckrAppTheme.colors.textPrimary,
-    fontSize: pluckrAppTheme.typography.heading,
-    lineHeight: 30,
-    fontWeight: "800"
-  },
-  copy: {
-    color: pluckrAppTheme.colors.textSecondary,
-    fontSize: pluckrAppTheme.typography.body,
-    lineHeight: 22,
-    fontWeight: "600"
   },
   chipGrid: {
     flexDirection: "row",
