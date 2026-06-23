@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getClientDisplayName, getClientLegalName, type ClientRecord } from "@pluckr/domain";
 import type { OrganizationRole } from "@pluckr/domain";
@@ -25,6 +25,36 @@ type ActiveWorkspaceScreen =
 
 type JournalOrigin = "workspace" | "clients";
 
+type SnackbarTone = "success" | "error" | "warning" | "info";
+
+type SnackbarFeedback = {
+  key: string;
+  message: string;
+  tone: SnackbarTone;
+  actionLabel?: string;
+  onAction?: () => void;
+};
+
+type SnackbarEvent = Omit<SnackbarFeedback, "key"> & {
+  id: string;
+};
+
+function createSnackbarFeedback(
+  source: string,
+  message: string | null | undefined,
+  tone: SnackbarTone
+): SnackbarFeedback | null {
+  if (!message) {
+    return null;
+  }
+
+  return {
+    key: `${source}:${tone}:${message}`,
+    message,
+    tone
+  };
+}
+
 type UsePluckrAppShellModelProps = {
   supabase: SupabaseClient;
   onRequestChartImages: () => Promise<ChartUploadAsset[]>;
@@ -44,6 +74,33 @@ export function usePluckrAppShellModel({
   const [consentNotice, setConsentNotice] = useState<string | null>(null);
   const [isSavingConsent, setIsSavingConsent] = useState(false);
   const [showLaunchStage, setShowLaunchStage] = useState(true);
+  const [activeSnackbar, setActiveSnackbar] =
+    useState<SnackbarEvent | null>(null);
+  const snackbarSerialRef = useRef(0);
+  const lastSnackbarKeyRef = useRef<string | null>(null);
+  const showSnackbar = useCallback((feedback: SnackbarFeedback) => {
+    snackbarSerialRef.current += 1;
+    setActiveSnackbar({
+      id: String(snackbarSerialRef.current),
+      message: feedback.message,
+      tone: feedback.tone,
+      actionLabel: feedback.actionLabel,
+      onAction: feedback.onAction
+    });
+  }, []);
+  const dismissSnackbar = useCallback((id?: string) => {
+    setActiveSnackbar((current) => {
+      if (!current) {
+        return null;
+      }
+
+      if (id && current.id !== id) {
+        return current;
+      }
+
+      return null;
+    });
+  }, []);
 
   const sessionController = useSessionController(supabase);
   const authController = useAuthController(supabase);
@@ -255,135 +312,122 @@ export function usePluckrAppShellModel({
     }
   ];
 
-  const snackbar =
-    authController.authError || sessionController.sessionError
-      ? {
-          message: authController.authError ?? sessionController.sessionError ?? "",
-          tone: "error" as const
-        }
-      : authController.authNotice
-        ? { message: authController.authNotice, tone: "success" as const }
-        : activeWorkspaceScreen === "workspace" &&
-            (organizationController.organizationError ||
-              workspaceController.workspaceError)
-          ? {
-              message:
-                organizationController.organizationError ??
-                workspaceController.workspaceError ??
-                "",
-              tone: "error" as const
-            }
-          : activeWorkspaceScreen === "workspace" &&
-              (organizationController.organizationNotice ||
-                workspaceController.workspaceNotice)
-            ? {
-                message:
-                  organizationController.organizationNotice ??
-                  workspaceController.workspaceNotice ??
-                  "",
-                tone: "success" as const
-              }
-            : activeWorkspaceScreen === "clients" &&
-                clientListController.clientListError
-              ? {
-                  message: clientListController.clientListError,
-                  tone: "error" as const
-                }
-              : activeWorkspaceScreen === "clients" &&
-                  clientListController.clientListNotice
-                ? {
-                    message: clientListController.clientListNotice,
-                    tone: "success" as const
-                  }
-                : activeWorkspaceScreen === "journal" &&
-                    (clientDetailController.clientDetailError ||
-                      clientJournalController.journalError)
-                  ? {
-                      message:
-                        clientDetailController.clientDetailError ??
-                        clientJournalController.journalError ??
-                        "",
-                      tone: "error" as const
-                    }
-                  : activeWorkspaceScreen === "journal" &&
-                      (clientDetailController.clientDetailNotice ||
-                        clientJournalController.journalNotice)
-                    ? {
-                        message:
-                          clientDetailController.clientDetailNotice ??
-                          clientJournalController.journalNotice ??
-                          "",
-                        tone: "success" as const
-                      }
-                    : activeWorkspaceScreen === "consent" && consentError
-                      ? { message: consentError, tone: "error" as const }
-                      : activeWorkspaceScreen === "consent" && consentNotice
-                        ? { message: consentNotice, tone: "success" as const }
-                        : activeWorkspaceScreen === "settings" &&
-                            organizationController.organizationError
-                          ? {
-                              message: organizationController.organizationError,
-                              tone: "error" as const
-                            }
-                          : activeWorkspaceScreen === "settings" &&
-                              organizationController.organizationNotice
-                            ? {
-                                message: organizationController.organizationNotice,
-                                tone: "success" as const
-                              }
-                            : activeWorkspaceScreen === "admin" &&
-                                adminController.adminError
-                              ? {
-                                  message: adminController.adminError,
-                                  tone: "error" as const
-                                }
-                              : activeWorkspaceScreen === "admin" &&
-                                  adminController.adminNotice
-                                ? {
-                                    message: adminController.adminNotice,
-                                    tone: "success" as const
-                                  }
-                                : shouldShowProviderSetupGate &&
-                                    providerProfileController.providerError
-                                  ? {
-                                      message:
-                                        providerProfileController.providerError,
-                                      tone: "error" as const
-                                    }
-                                  : shouldShowProviderSetupGate &&
-                                      providerProfileController.providerNotice
-                                    ? {
-                                        message:
-                                          providerProfileController.providerNotice,
-                                        tone: "success" as const
-                                      }
-                                    : shouldShowOrganizationGate &&
-                                        organizationController.organizationError
-                                      ? {
-                                          message:
-                                            organizationController.organizationError,
-                                          tone: "error" as const
-                                        }
-                                      : shouldShowOrganizationGate &&
-                                          organizationController.organizationNotice
-                                        ? {
-                                            message:
-                                              organizationController.organizationNotice,
-                                            tone: "success" as const
-                                          }
-                                        : clientListController.clientListError
-                                          ? {
-                                              message:
-                                                clientListController.clientListError,
-                                              tone: "error" as const
-                                            }
-                                          : clientListController.clientListNotice
-                                            ? {
-                                                message:
-                                                  clientListController.clientListNotice,
-                                                tone: "success" as const
-                                              }
-                                        : null;
+  const snackbarFeedback =
+    createSnackbarFeedback(
+      "auth",
+      authController.authError ?? sessionController.sessionError,
+      "error"
+    ) ??
+    createSnackbarFeedback("auth", authController.authNotice, "success") ??
+    (activeWorkspaceScreen === "workspace"
+      ? createSnackbarFeedback(
+          "workspace",
+          organizationController.organizationError ??
+            workspaceController.workspaceError,
+          "error"
+        ) ??
+        createSnackbarFeedback(
+          "workspace",
+          organizationController.organizationNotice ??
+            workspaceController.workspaceNotice,
+          "success"
+        )
+      : null) ??
+    (activeWorkspaceScreen === "clients"
+      ? createSnackbarFeedback(
+          "clients",
+          clientListController.clientListError,
+          "error"
+        ) ??
+        createSnackbarFeedback(
+          "clients",
+          clientListController.clientListNotice,
+          "success"
+        )
+      : null) ??
+    (activeWorkspaceScreen === "journal"
+      ? createSnackbarFeedback(
+          "journal",
+          clientDetailController.clientDetailError ??
+            clientJournalController.journalError,
+          "error"
+        ) ??
+        createSnackbarFeedback(
+          "journal",
+          clientDetailController.clientDetailNotice ??
+            clientJournalController.journalNotice,
+          "success"
+        )
+      : null) ??
+    (activeWorkspaceScreen === "consent"
+      ? createSnackbarFeedback("consent", consentError, "error") ??
+        createSnackbarFeedback("consent", consentNotice, "success")
+      : null) ??
+    (activeWorkspaceScreen === "settings"
+      ? createSnackbarFeedback(
+          "settings",
+          organizationController.organizationError,
+          "error"
+        ) ??
+        createSnackbarFeedback(
+          "settings",
+          organizationController.organizationNotice,
+          "success"
+        )
+      : null) ??
+    (activeWorkspaceScreen === "admin"
+      ? createSnackbarFeedback("admin", adminController.adminError, "error") ??
+        createSnackbarFeedback("admin", adminController.adminNotice, "success")
+      : null) ??
+    (shouldShowProviderSetupGate
+      ? createSnackbarFeedback(
+          "provider-setup",
+          providerProfileController.providerError,
+          "error"
+        ) ??
+        createSnackbarFeedback(
+          "provider-setup",
+          providerProfileController.providerNotice,
+          "success"
+        )
+      : null) ??
+    (shouldShowOrganizationGate
+      ? createSnackbarFeedback(
+          "workspace-setup",
+          organizationController.organizationError,
+          "error"
+        ) ??
+        createSnackbarFeedback(
+          "workspace-setup",
+          organizationController.organizationNotice,
+          "success"
+        )
+      : null) ??
+    createSnackbarFeedback(
+      "clients-global",
+      clientListController.clientListError,
+      "error"
+    ) ??
+    createSnackbarFeedback(
+      "clients-global",
+      clientListController.clientListNotice,
+      "success"
+    );
+  const snackbarFeedbackKey = snackbarFeedback?.key ?? null;
+
+  useEffect(() => {
+    if (!snackbarFeedback) {
+      lastSnackbarKeyRef.current = null;
+      return;
+    }
+
+    if (lastSnackbarKeyRef.current === snackbarFeedback.key) {
+      return;
+    }
+
+    lastSnackbarKeyRef.current = snackbarFeedback.key;
+    showSnackbar(snackbarFeedback);
+  }, [showSnackbar, snackbarFeedback, snackbarFeedbackKey]);
 
   async function handleConsentSave() {
     if (!selectedClient || !selectedOrganizationId) {
@@ -472,7 +516,12 @@ export function usePluckrAppShellModel({
     navigationTitle,
     navigationSubtitle,
     utilityActions,
-    snackbar,
+    snackbar: activeSnackbar
+      ? {
+          ...activeSnackbar,
+          onDismiss: dismissSnackbar
+        }
+      : null,
     protectSensitiveScreens,
     isSensitiveScreen,
     authStageProps: {

@@ -6,21 +6,37 @@ import { pluckrAppTheme } from "../tokens/pluckrAppTheme";
 export type PluckrSnackbarTone = "success" | "error" | "warning" | "info";
 
 type Props = {
+  id?: string;
   message: string | null;
   tone?: PluckrSnackbarTone;
   actionLabel?: string;
   onAction?: () => void;
+  onDismiss?: (id?: string) => void;
   durationMs?: number;
 };
 
 export function PluckrSnackbar({
+  id,
   message,
   tone = "info",
   actionLabel,
   onAction,
+  onDismiss,
   durationMs = 3600
 }: Props) {
   const [visible, setVisible] = useState(Boolean(message));
+  const ringStyles = {
+    success: styles.successRing,
+    error: styles.errorRing,
+    warning: styles.warningRing,
+    info: styles.infoRing
+  };
+  const dotStyles = {
+    success: styles.successDot,
+    error: styles.errorDot,
+    warning: styles.warningDot,
+    info: styles.infoDot
+  };
 
   useEffect(() => {
     if (!message) {
@@ -36,20 +52,27 @@ export function PluckrSnackbar({
 
     const timer = setTimeout(() => {
       setVisible(false);
+      onDismiss?.(id);
     }, tone === "error" ? Math.max(durationMs, 4800) : durationMs);
 
     return () => clearTimeout(timer);
-  }, [actionLabel, durationMs, message, onAction, tone]);
+  }, [actionLabel, durationMs, id, message, onAction, onDismiss, tone]);
 
   if (!message || !visible) {
     return null;
   }
 
+  function handleActionPress() {
+    onAction?.();
+    setVisible(false);
+    onDismiss?.(id);
+  }
+
   return (
     <View pointerEvents="box-none" style={styles.overlay}>
       <View style={styles.snackbar}>
-        <View style={[styles.statusRing, styles[`${tone}Ring`]]}>
-          <View style={[styles.statusDot, styles[`${tone}Dot`]]} />
+        <View style={[styles.statusRing, ringStyles[tone]]}>
+          <View style={[styles.statusDot, dotStyles[tone]]} />
         </View>
         <Text numberOfLines={2} style={styles.message}>
           {message}
@@ -58,7 +81,7 @@ export function PluckrSnackbar({
           <Pressable
             accessibilityRole="button"
             hitSlop={8}
-            onPress={onAction}
+            onPress={handleActionPress}
             style={({ pressed }) => [pressed ? styles.pressed : null]}
           >
             <Text style={styles.action}>{actionLabel}</Text>

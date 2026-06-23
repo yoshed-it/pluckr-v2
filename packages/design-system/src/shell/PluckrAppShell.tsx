@@ -52,8 +52,12 @@ type PluckrAppShellModel = {
   navigationSubtitle: string | null;
   utilityActions: React.ComponentProps<typeof PluckrUtilityBar>["actions"];
   snackbar: {
+    id: string;
     message: string;
     tone: PluckrSnackbarTone;
+    actionLabel?: string;
+    onAction?: () => void;
+    onDismiss: (id?: string) => void;
   } | null;
   protectSensitiveScreens: boolean;
   isSensitiveScreen: boolean;
@@ -157,8 +161,12 @@ export function PluckrAppShell({
         )}
       </ScrollView>
       <PluckrSnackbar
+        id={model.snackbar?.id}
         message={model.snackbar?.message ?? null}
         tone={model.snackbar?.tone}
+        actionLabel={model.snackbar?.actionLabel}
+        onAction={model.snackbar?.onAction}
+        onDismiss={model.snackbar?.onDismiss}
       />
       {privacyCurtainVisible &&
       model.isSensitiveScreen &&
