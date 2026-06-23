@@ -845,6 +845,7 @@ export function usePluckrAppShellModel({
           isSavingChart: clientJournalController.isSavingChart,
           hideToolbar: true,
           chartForm: clientJournalController.chartForm,
+          previousChartReference: clientJournalController.previousChartReference,
           availableChartTags: clientJournalController.availableChartTags,
           onBack: handleBackFromJournal,
           onLogout: () => void handleLogout(),

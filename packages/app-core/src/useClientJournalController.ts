@@ -16,7 +16,8 @@ import {
   modalityUsesRf,
   parseProbeName,
   resolveTreatmentAreaState,
-  resolveTreatmentAreaValue
+  resolveTreatmentAreaValue,
+  selectPreviousChartReference
 } from "./charting";
 import {
   dedupeTagLabels,
@@ -374,6 +375,15 @@ export function useClientJournalController(
     return true;
   }
 
+  const previousChartReference = selectPreviousChartReference(
+    charts,
+    resolveTreatmentAreaValue(
+      chartForm.treatmentAreaSelection,
+      chartForm.treatmentAreaOther
+    ),
+    editingChartId
+  );
+
   return {
     charts,
     isLoadingCharts,
@@ -382,6 +392,7 @@ export function useClientJournalController(
     isEditingChart,
     isSavingChart,
     editingChartId,
+    previousChartReference,
     chartForm,
     updateChartForm,
     availableChartTags: mergeTagLibrary(defaultChartTags, chartForm.tags),

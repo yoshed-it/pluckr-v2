@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import {
   chartModalities,
+  type ChartEntryRecord,
   type ChartImageDraft,
   type ClientRecord,
   modalityUsesDc,
@@ -18,6 +19,7 @@ import { PluckrCard } from "../../primitives/Card";
 import { PluckrTextField } from "../../primitives/TextField";
 import { pluckrChartEntryEditorStyles as styles } from "./ChartEntryEditor.styles";
 import { PluckrProbeDrawer } from "./ProbeDrawer";
+import { PreviousChartReference } from "./PreviousChartReference";
 
 type ChartEditorProps = {
   client: ClientRecord;
@@ -38,6 +40,7 @@ type ChartEditorProps = {
     images: ChartImageDraft[];
   };
   availableChartTags: string[];
+  previousChartReference: ChartEntryRecord | null;
   onChartFormChange: (
     key:
       | "modality"
@@ -72,6 +75,7 @@ export function PluckrChartEntryEditor({
   isSavingChart,
   chartForm,
   availableChartTags,
+  previousChartReference,
   onChartFormChange,
   onToggleChartTag,
   onAddCustomChartTag,
@@ -106,6 +110,8 @@ export function PluckrChartEntryEditor({
           <Text style={styles.title}>Chart Entry</Text>
           <Text style={styles.copy}>Fast charting, nothing extra.</Text>
         </View>
+
+        <PreviousChartReference chart={previousChartReference} />
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Modality</Text>

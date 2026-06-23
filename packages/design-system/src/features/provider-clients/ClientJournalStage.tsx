@@ -61,6 +61,7 @@ type PluckrClientJournalStageProps = {
     images: ChartImageDraft[];
   };
   availableChartTags: string[];
+  previousChartReference: ChartEntryRecord | null;
   hideToolbar?: boolean;
   onBack: () => void;
   onLogout: () => void;
@@ -127,6 +128,7 @@ export function PluckrClientJournalStage({
   availableClientTags,
   chartForm,
   availableChartTags,
+  previousChartReference,
   hideToolbar = false,
   onBack,
   onLogout,
@@ -302,6 +304,7 @@ export function PluckrClientJournalStage({
           isSavingChart={isSavingChart}
           chartForm={chartForm}
           availableChartTags={availableChartTags}
+          previousChartReference={previousChartReference}
           onChartFormChange={onChartFormChange}
           onToggleChartTag={onToggleChartTag}
           onAddCustomChartTag={onAddCustomChartTag}
