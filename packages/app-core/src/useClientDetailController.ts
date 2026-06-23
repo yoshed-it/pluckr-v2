@@ -10,8 +10,14 @@ import {
   defaultClientTags,
   mergeTagLibrary
 } from "./tags";
+import {
+  hasClientFormErrors,
+  validateClientIdentityForm,
+  type ClientFormErrors
+} from "./clientValidation";
 
 type ClientDetailFormState = {
+  preferredName: string;
   firstName: string;
   lastName: string;
   pronouns: string;
@@ -22,6 +28,7 @@ type ClientDetailFormState = {
 };
 
 const emptyForm: ClientDetailFormState = {
+  preferredName: "",
   firstName: "",
   lastName: "",
   pronouns: "",
@@ -46,6 +53,10 @@ export function useClientDetailController(
   const [clientDetailNotice, setClientDetailNotice] = useState<string | null>(null);
   const [clientDetailForm, setClientDetailForm] =
     useState<ClientDetailFormState>(emptyForm);
+  const [clientDetailFormErrors, setClientDetailFormErrors] =
+    useState<ClientFormErrors>({});
+  const [hasAttemptedClientDetailSubmit, setHasAttemptedClientDetailSubmit] =
+    useState(false);
 
   useEffect(() => {
     if (!selectedClient) {
@@ -53,13 +64,20 @@ export function useClientDetailController(
       setClientDetailError(null);
       setClientDetailNotice(null);
       setClientDetailForm(emptyForm);
+      setClientDetailFormErrors({});
+      setHasAttemptedClientDetailSubmit(false);
       return;
     }
 
     setIsEditingClient(false);
     setClientDetailError(null);
     setClientDetailNotice(null);
+    setClientDetailFormErrors({});
+    setHasAttemptedClientDetailSubmit(false);
     setClientDetailForm({
+      preferredName:
+        selectedClient.preferred_name ??
+        `${selectedClient.first_name} ${selectedClient.last_name}`.trim(),
       firstName: selectedClient.first_name,
       lastName: selectedClient.last_name,
       pronouns: selectedClient.pronouns ?? "",
@@ -69,6 +87,12 @@ export function useClientDetailController(
       clientTags: selectedClient.client_tags ?? []
     });
   }, [selectedClient]);
+
+  useEffect(() => {
+    if (hasAttemptedClientDetailSubmit) {
+      setClientDetailFormErrors(validateClientIdentityForm(clientDetailForm));
+    }
+  }, [clientDetailForm, hasAttemptedClientDetailSubmit]);
 
   function updateClientDetailForm<K extends keyof ClientDetailFormState>(
     key: K,
@@ -87,7 +111,12 @@ export function useClientDetailController(
 
     setClientDetailError(null);
     setClientDetailNotice(null);
+    setClientDetailFormErrors({});
+    setHasAttemptedClientDetailSubmit(false);
     setClientDetailForm({
+      preferredName:
+        selectedClient.preferred_name ??
+        `${selectedClient.first_name} ${selectedClient.last_name}`.trim(),
       firstName: selectedClient.first_name,
       lastName: selectedClient.last_name,
       pronouns: selectedClient.pronouns ?? "",
@@ -102,8 +131,13 @@ export function useClientDetailController(
   function cancelEditingClient() {
     setIsEditingClient(false);
     setClientDetailError(null);
+    setClientDetailFormErrors({});
+    setHasAttemptedClientDetailSubmit(false);
     if (selectedClient) {
       setClientDetailForm({
+        preferredName:
+          selectedClient.preferred_name ??
+          `${selectedClient.first_name} ${selectedClient.last_name}`.trim(),
         firstName: selectedClient.first_name,
         lastName: selectedClient.last_name,
         pronouns: selectedClient.pronouns ?? "",
@@ -120,8 +154,13 @@ export function useClientDetailController(
       return null;
     }
 
-    if (!clientDetailForm.firstName.trim() || !clientDetailForm.lastName.trim()) {
-      setClientDetailError("First name and last name are required.");
+    setHasAttemptedClientDetailSubmit(true);
+
+    const nextErrors = validateClientIdentityForm(clientDetailForm);
+    setClientDetailFormErrors(nextErrors);
+
+    if (hasClientFormErrors(nextErrors)) {
+      setClientDetailError("Fix the highlighted fields to update this client.");
       return null;
     }
 
@@ -133,6 +172,7 @@ export function useClientDetailController(
       const updatedClient = await updateClient(client, {
         organizationId,
         clientId: selectedClient.id,
+        preferredName: clientDetailForm.preferredName,
         firstName: clientDetailForm.firstName,
         lastName: clientDetailForm.lastName,
         pronouns: clientDetailForm.pronouns,
@@ -143,6 +183,8 @@ export function useClientDetailController(
       });
 
       setClientDetailNotice("Client updated.");
+      setClientDetailFormErrors({});
+      setHasAttemptedClientDetailSubmit(false);
       setIsEditingClient(false);
       return updatedClient;
     } catch (error) {
@@ -193,6 +235,7 @@ export function useClientDetailController(
     clientDetailError,
     clientDetailNotice,
     clientDetailForm,
+    clientDetailFormErrors,
     availableClientTags: mergeTagLibrary(
       defaultClientTags,
       clientDetailForm.clientTags

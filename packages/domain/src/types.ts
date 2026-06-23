@@ -40,6 +40,7 @@ export type ClientRecord = {
   id: string;
   organization_id: string;
   created_by_membership_id: string | null;
+  preferred_name: string | null;
   first_name: string;
   last_name: string;
   pronouns: string | null;
@@ -78,7 +79,10 @@ export type ChartEntryRecord = {
 };
 
 export type RecentChartRecord = ChartEntryRecord & {
-  client: Pick<ClientRecord, "id" | "first_name" | "last_name"> | null;
+  client: Pick<
+    ClientRecord,
+    "id" | "preferred_name" | "first_name" | "last_name"
+  > | null;
 };
 
 export type MembershipWithOrganization = {

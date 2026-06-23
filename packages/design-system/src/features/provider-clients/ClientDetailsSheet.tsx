@@ -10,6 +10,7 @@ import { pluckrClientJournalStageStyles as styles } from "./ClientJournalStage.s
 import { PronounPickerField } from "./PronounPickerField";
 
 type ClientDetailField =
+  | "preferredName"
   | "firstName"
   | "lastName"
   | "pronouns"
@@ -21,6 +22,7 @@ type Props = {
   visible: boolean;
   client: ClientRecord;
   form: {
+    preferredName: string;
     firstName: string;
     lastName: string;
     pronouns: string;
@@ -29,6 +31,9 @@ type Props = {
     notes: string;
     clientTags: string[];
   };
+  formErrors: Partial<
+    Record<"preferredName" | "firstName" | "lastName" | "email" | "phone", string>
+  >;
   availableClientTags: string[];
   isSavingClient: boolean;
   onClose: () => void;
@@ -52,6 +57,7 @@ export function ClientDetailsSheet({
   visible,
   client,
   form,
+  formErrors,
   availableClientTags,
   isSavingClient,
   onClose,
@@ -85,17 +91,33 @@ export function ClientDetailsSheet({
             )}
           </View>
 
+          <PluckrTextField
+            label="Name"
+            placeholder="Name used in daily care"
+            value={form.preferredName}
+            autoCapitalize="words"
+            textContentType="name"
+            error={formErrors.preferredName}
+            onChangeText={(value) => onFieldChange("preferredName", value)}
+          />
+
           <View style={styles.fieldRow}>
             <PluckrTextField
-              label="First Name"
-              placeholder="First name"
+              label="Legal First"
+              placeholder="Legal first name"
               value={form.firstName}
+              autoCapitalize="words"
+              textContentType="givenName"
+              error={formErrors.firstName}
               onChangeText={(value) => onFieldChange("firstName", value)}
             />
             <PluckrTextField
-              label="Last Name"
-              placeholder="Last name"
+              label="Legal Last"
+              placeholder="Legal last name"
               value={form.lastName}
+              autoCapitalize="words"
+              textContentType="familyName"
+              error={formErrors.lastName}
               onChangeText={(value) => onFieldChange("lastName", value)}
             />
           </View>
@@ -107,8 +129,11 @@ export function ClientDetailsSheet({
             />
             <PluckrTextField
               label="Phone"
-              placeholder="Phone"
+              placeholder="555-555-5555"
               value={form.phone}
+              keyboardType="phone-pad"
+              textContentType="telephoneNumber"
+              error={formErrors.phone}
               onChangeText={(value) => onFieldChange("phone", value)}
             />
           </View>
@@ -117,6 +142,11 @@ export function ClientDetailsSheet({
             label="Email"
             placeholder="Email"
             value={form.email}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            error={formErrors.email}
             onChangeText={(value) => onFieldChange("email", value)}
           />
 

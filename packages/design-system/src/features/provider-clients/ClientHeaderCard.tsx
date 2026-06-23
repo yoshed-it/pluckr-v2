@@ -1,6 +1,10 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import type { ClientRecord } from "@pluckr/domain";
+import {
+  getClientDisplayName,
+  getClientInitials,
+  type ClientRecord
+} from "@pluckr/domain";
 
 import { pluckrAppTheme } from "../../tokens/pluckrAppTheme";
 import { PluckrCard } from "../../primitives/Card";
@@ -18,10 +22,6 @@ type Props = {
 };
 
 const visibleClientTagLimit = 2;
-
-function getInitials(client: ClientRecord) {
-  return `${client.first_name.charAt(0)}${client.last_name.charAt(0)}`.trim().toUpperCase();
-}
 
 function formatLastSeen(value: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -52,10 +52,10 @@ export function ClientHeaderCard({
       <View style={styles.topRow}>
         <View style={styles.identityRow}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarLabel}>{getInitials(client)}</Text>
+            <Text style={styles.avatarLabel}>{getClientInitials(client)}</Text>
           </View>
           <ClientIdentityBlock
-            preferredName={`${client.first_name} ${client.last_name}`.trim()}
+            preferredName={getClientDisplayName(client)}
             pronouns={client.pronouns}
             isActive={isActive}
           />

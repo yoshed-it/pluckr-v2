@@ -25,6 +25,7 @@ export type ProviderProfileInput = {
  */
 export type ClientInput = {
   organizationId: string;
+  preferredName?: string | null;
   firstName: string;
   lastName: string;
   pronouns?: string | null;
@@ -38,6 +39,7 @@ export type ClientInput = {
 export type ClientUpdateInput = {
   organizationId: string;
   clientId: string;
+  preferredName?: string | null;
   firstName: string;
   lastName: string;
   pronouns?: string | null;

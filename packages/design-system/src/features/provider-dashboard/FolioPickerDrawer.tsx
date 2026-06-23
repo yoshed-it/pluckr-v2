@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import type { ClientRecord } from "@pluckr/domain";
+import { getClientDisplayName, type ClientRecord } from "@pluckr/domain";
 
 import { PluckrBottomDrawer } from "../../primitives/BottomSheet";
 import { PluckrTextField } from "../../primitives/TextField";
@@ -32,6 +32,7 @@ export function PluckrFolioPickerDrawer({
 
     return clients.filter((client) =>
       [
+        getClientDisplayName(client),
         client.first_name,
         client.last_name,
         client.phone ?? "",
@@ -69,7 +70,7 @@ export function PluckrFolioPickerDrawer({
           >
             <View style={styles.copy}>
               <Text style={styles.name}>
-                {client.first_name} {client.last_name}
+                {getClientDisplayName(client)}
               </Text>
               <Text style={styles.meta}>
                 {client.pronouns || "Client"} •{" "}

@@ -1,13 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, listClients, type ClientRecord } from "@pluckr/supabase";
+import { getClientDisplayName } from "@pluckr/domain";
 import {
   dedupeTagLabels,
   defaultClientTags,
   mergeTagLibrary
 } from "./tags";
+import {
+  hasClientFormErrors,
+  validateClientIdentityForm,
+  type ClientFormErrors
+} from "./clientValidation";
 
 type ClientFormState = {
+  preferredName: string;
   firstName: string;
   lastName: string;
   pronouns: string;
@@ -19,6 +26,7 @@ type ClientFormState = {
 };
 
 const emptyForm: ClientFormState = {
+  preferredName: "",
   firstName: "",
   lastName: "",
   pronouns: "",
@@ -28,15 +36,6 @@ const emptyForm: ClientFormState = {
   clientTags: [],
   consentSigned: false
 };
-
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
-
-function isValidPhone(value: string) {
-  const digits = value.replace(/\D/g, "");
-  return digits.length >= 10 && digits.length <= 15;
-}
 
 /**
  * Owns client list loading, search, and add-client behavior for both apps.
@@ -53,6 +52,9 @@ export function useClientListController(
   const [isCreatingClient, setIsCreatingClient] = useState(false);
   const [isSavingClient, setIsSavingClient] = useState(false);
   const [clientForm, setClientForm] = useState<ClientFormState>(emptyForm);
+  const [clientFormErrors, setClientFormErrors] = useState<ClientFormErrors>({});
+  const [hasAttemptedClientSubmit, setHasAttemptedClientSubmit] =
+    useState(false);
 
   useEffect(() => {
     if (!organizationId) {
@@ -62,11 +64,19 @@ export function useClientListController(
       setClientListNotice(null);
       setIsCreatingClient(false);
       setClientForm(emptyForm);
+      setClientFormErrors({});
+      setHasAttemptedClientSubmit(false);
       return;
     }
 
     void loadClients(organizationId);
   }, [client, organizationId]);
+
+  useEffect(() => {
+    if (hasAttemptedClientSubmit) {
+      setClientFormErrors(validateClientIdentityForm(clientForm));
+    }
+  }, [clientForm, hasAttemptedClientSubmit]);
 
   const filteredClients = useMemo(() => {
     const query = searchText.trim().toLowerCase();
@@ -76,13 +86,15 @@ export function useClientListController(
     }
 
     return clients.filter((record) => {
-      const fullName = `${record.first_name} ${record.last_name}`.toLowerCase();
+      const displayName = getClientDisplayName(record).toLowerCase();
+      const legalName = `${record.first_name} ${record.last_name}`.toLowerCase();
       const pronouns = record.pronouns?.toLowerCase() ?? "";
       const email = record.email?.toLowerCase() ?? "";
       const phone = record.phone?.toLowerCase() ?? "";
 
       return (
-        fullName.includes(query) ||
+        displayName.includes(query) ||
+        legalName.includes(query) ||
         pronouns.includes(query) ||
         email.includes(query) ||
         phone.includes(query)
@@ -109,22 +121,17 @@ export function useClientListController(
 
   async function submitClient() {
     if (!organizationId) {
-      return false;
+      return null;
     }
 
-    if (!clientForm.firstName.trim() || !clientForm.lastName.trim()) {
-      setClientListError("First name and last name are required.");
-      return false;
-    }
+    setHasAttemptedClientSubmit(true);
 
-    if (clientForm.email.trim() && !isValidEmail(clientForm.email.trim())) {
-      setClientListError("Enter a valid email address.");
-      return false;
-    }
+    const nextErrors = validateClientIdentityForm(clientForm);
+    setClientFormErrors(nextErrors);
 
-    if (clientForm.phone.trim() && !isValidPhone(clientForm.phone.trim())) {
-      setClientListError("Enter a valid phone number.");
-      return false;
+    if (hasClientFormErrors(nextErrors)) {
+      setClientListError("Fix the highlighted fields to add this client.");
+      return null;
     }
 
     setIsSavingClient(true);
@@ -134,6 +141,7 @@ export function useClientListController(
     try {
       const createdClient = await createClient(client, {
         organizationId,
+        preferredName: clientForm.preferredName,
         firstName: clientForm.firstName,
         lastName: clientForm.lastName,
         pronouns: clientForm.pronouns,
@@ -146,18 +154,20 @@ export function useClientListController(
 
       setClients((current) => [createdClient, ...current]);
       setClientForm(emptyForm);
+      setClientFormErrors({});
+      setHasAttemptedClientSubmit(false);
       setIsCreatingClient(false);
       setClientListNotice(
-        `${createdClient.first_name} ${createdClient.last_name} was added.`
+        `${getClientDisplayName(createdClient)} was added.`
       );
-      return true;
+      return createdClient;
     } catch (error) {
       setClientListError(
         error instanceof Error
           ? error.message
           : "Unable to save the client right now."
       );
-      return false;
+      return null;
     } finally {
       setIsSavingClient(false);
     }
@@ -176,6 +186,8 @@ export function useClientListController(
   function startCreatingClient() {
     setClientListNotice(null);
     setClientListError(null);
+    setClientFormErrors({});
+    setHasAttemptedClientSubmit(false);
     setIsCreatingClient(true);
   }
 
@@ -183,6 +195,8 @@ export function useClientListController(
     setIsCreatingClient(false);
     setClientListError(null);
     setClientForm(emptyForm);
+    setClientFormErrors({});
+    setHasAttemptedClientSubmit(false);
   }
 
   return {
@@ -195,6 +209,7 @@ export function useClientListController(
     isCreatingClient,
     isSavingClient,
     clientForm,
+    clientFormErrors,
     availableClientTags: mergeTagLibrary(
       defaultClientTags,
       clientForm.clientTags

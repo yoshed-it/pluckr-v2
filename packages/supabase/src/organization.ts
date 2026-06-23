@@ -247,7 +247,7 @@ export async function listRecentCharts(
 ) {
   const { data, error } = await client
     .from("chart_entries")
-    .select("*, client:clients(id, first_name, last_name)")
+    .select("*, client:clients(id, preferred_name, first_name, last_name)")
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: false })
     .limit(8);

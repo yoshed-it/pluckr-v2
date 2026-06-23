@@ -11,14 +11,18 @@ import { pluckrAppTheme } from "../tokens/pluckrAppTheme";
 
 type PluckrTextFieldProps = TextInputProps & {
   label: string;
+  error?: string;
 };
 
 export function PluckrTextField({
   label,
+  error,
   multiline = false,
   style,
   ...inputProps
 }: PluckrTextFieldProps) {
+  const hasError = Boolean(error);
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
@@ -28,10 +32,12 @@ export function PluckrTextField({
         placeholderTextColor={pluckrAppTheme.colors.textMuted}
         style={[
           styles.input,
+          hasError ? styles.inputError : null,
           multiline ? styles.multilineInput : null,
           style as object
         ]}
       />
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 }
@@ -57,8 +63,18 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 22
   },
+  inputError: {
+    borderColor: pluckrAppTheme.colors.critical,
+    backgroundColor: "rgba(200, 106, 91, 0.06)"
+  },
   multilineInput: {
     minHeight: 104,
     textAlignVertical: "top"
+  },
+  errorText: {
+    color: pluckrAppTheme.colors.critical,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "600"
   }
 });

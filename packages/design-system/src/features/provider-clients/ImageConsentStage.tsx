@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, View } from "react-native";
-import type { ClientRecord } from "@pluckr/domain";
+import { getClientDisplayName, type ClientRecord } from "@pluckr/domain";
 
 import {
   PluckrSignaturePad,
@@ -73,7 +73,7 @@ export function PluckrImageConsentStage({
       <PluckrCard>
         <Text style={styles.eyebrow}>Image Consent</Text>
         <Text style={styles.title}>
-          {client.first_name} {client.last_name}
+          {getClientDisplayName(client)}
         </Text>
         <Text style={styles.subtitle}>
           By signing below, the client consents to secure capture and storage of

@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-import type { ClientRecord } from "@pluckr/domain";
+import { getClientDisplayName, type ClientRecord } from "@pluckr/domain";
 
 import { ClientCreateForm } from "./ClientCreateForm";
 import { PluckrSectionHeader } from "../../composite/SectionHeader";
@@ -19,6 +19,7 @@ type PluckrClientListStageProps = {
   isSavingClient: boolean;
   hideToolbar?: boolean;
   clientForm: {
+    preferredName: string;
     firstName: string;
     lastName: string;
     pronouns: string;
@@ -28,6 +29,9 @@ type PluckrClientListStageProps = {
     clientTags: string[];
     consentSigned: boolean;
   };
+  clientFormErrors: Partial<
+    Record<"preferredName" | "firstName" | "lastName" | "email" | "phone", string>
+  >;
   availableClientTags: string[];
   onBack: () => void;
   onLogout: () => void;
@@ -38,6 +42,7 @@ type PluckrClientListStageProps = {
   onFormChange: (
     key:
       | "firstName"
+      | "preferredName"
       | "lastName"
       | "pronouns"
       | "phone"
@@ -73,6 +78,7 @@ export function PluckrClientListStage({
   isSavingClient,
   hideToolbar = false,
   clientForm,
+  clientFormErrors,
   availableClientTags,
   onBack,
   onLogout,
@@ -118,6 +124,7 @@ export function PluckrClientListStage({
         <ClientCreateForm
           isSavingClient={isSavingClient}
           clientForm={clientForm}
+          clientFormErrors={clientFormErrors}
           availableClientTags={availableClientTags}
           onCancelCreate={onCancelCreate}
           onFormChange={onFormChange}
@@ -152,7 +159,7 @@ export function PluckrClientListStage({
                   <View style={styles.clientRow}>
                     <View style={styles.clientCopy}>
                       <Text style={styles.cardTitle}>
-                        {client.first_name} {client.last_name}
+                        {getClientDisplayName(client)}
                       </Text>
                       <View style={styles.rowChips}>
                         {client.pronouns ? (

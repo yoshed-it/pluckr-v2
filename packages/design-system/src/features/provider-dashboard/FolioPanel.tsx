@@ -7,7 +7,7 @@ import {
   Text,
   View
 } from "react-native";
-import type { ClientRecord } from "@pluckr/domain";
+import { getClientDisplayName, type ClientRecord } from "@pluckr/domain";
 
 import { PluckrButton } from "../../primitives/Button";
 import { PluckrCard } from "../../primitives/Card";
@@ -108,7 +108,7 @@ export function PluckrFolioPanel({
                     <Text style={styles.clientBadge}>Active</Text>
                     <PluckrIconButton
                       icon="remove"
-                      accessibilityLabel={`Remove ${client.first_name} ${client.last_name} from folio`}
+                      accessibilityLabel={`Remove ${getClientDisplayName(client)} from folio`}
                       tone="critical"
                       onPress={() => onRemoveClient(client)}
                     />
@@ -116,7 +116,7 @@ export function PluckrFolioPanel({
                   <View style={styles.clientRow}>
                     <View style={styles.clientCopy}>
                       <Text style={styles.clientName}>
-                        {client.first_name} {client.last_name}
+                        {getClientDisplayName(client)}
                       </Text>
                       <Text style={styles.clientMeta}>
                         {client.pronouns || "Client"} • Last seen{" "}
@@ -127,7 +127,7 @@ export function PluckrFolioPanel({
                       <Text style={styles.openHint}>Open chart</Text>
                       <PluckrIconButton
                         icon="open"
-                        accessibilityLabel={`Open ${client.first_name} ${client.last_name}`}
+                        accessibilityLabel={`Open ${getClientDisplayName(client)}`}
                         onPress={() => onOpenClient(client)}
                       />
                     </View>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import type { ClientRecord } from "@pluckr/domain";
+import { getClientDisplayName, type ClientRecord } from "@pluckr/domain";
 
 import { PluckrButton } from "../../primitives/Button";
 import { PluckrCard } from "../../primitives/Card";
@@ -42,9 +42,7 @@ export function PluckrRecentClientsPanel({
                 style={styles.clientRow}
                 onPress={() => onOpenClient(client)}
               >
-                <Text style={styles.clientName}>
-                  {client.first_name} {client.last_name}
-                </Text>
+                <Text style={styles.clientName}>{getClientDisplayName(client)}</Text>
                 <Text numberOfLines={2} style={styles.clientMeta}>
                   {client.notes || "No care summary yet."}
                 </Text>

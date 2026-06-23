@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { ClientRecord } from "@pluckr/domain";
+import { getClientDisplayName, getClientLegalName, type ClientRecord } from "@pluckr/domain";
 import type { OrganizationRole } from "@pluckr/domain";
 import { updateClientConsent } from "@pluckr/supabase";
 
@@ -125,7 +125,7 @@ export function usePluckrAppShellModel({
       activeWorkspaceScreen === "admin");
 
   const clientFullName = selectedClient
-    ? `${selectedClient.first_name} ${selectedClient.last_name}`.trim()
+    ? getClientDisplayName(selectedClient)
     : null;
 
   const shouldShowShellNavigationBar =
@@ -371,6 +371,18 @@ export function usePluckrAppShellModel({
                                               organizationController.organizationNotice,
                                             tone: "success" as const
                                           }
+                                        : clientListController.clientListError
+                                          ? {
+                                              message:
+                                                clientListController.clientListError,
+                                              tone: "error" as const
+                                            }
+                                          : clientListController.clientListNotice
+                                            ? {
+                                                message:
+                                                  clientListController.clientListNotice,
+                                                tone: "success" as const
+                                              }
                                         : null;
 
   async function handleConsentSave() {
@@ -423,9 +435,7 @@ export function usePluckrAppShellModel({
   function handleRequestChartImages() {
     if (!selectedClient?.consent_signed_at) {
       if (selectedClient) {
-        setConsentSignerName(
-          `${selectedClient.first_name} ${selectedClient.last_name}`.trim()
-        );
+        setConsentSignerName(getClientLegalName(selectedClient));
         setConsentSignature(selectedClient.consent_signature_path);
       }
       setConsentError(null);
@@ -566,6 +576,7 @@ export function usePluckrAppShellModel({
       isSavingClient: clientListController.isSavingClient,
       hideToolbar: true,
       clientForm: clientListController.clientForm,
+      clientFormErrors: clientListController.clientFormErrors,
       availableClientTags: clientListController.availableClientTags,
       onBack: () => setActiveWorkspaceScreen("workspace"),
       onLogout: () => void handleLogout(),
@@ -579,8 +590,9 @@ export function usePluckrAppShellModel({
       onToggleClientTag: clientListController.toggleClientTag,
       onAddCustomClientTag: clientListController.addCustomClientTag,
       onSubmitClient: () =>
-        void clientListController.submitClient().then((saved) => {
-          if (saved) {
+        void clientListController.submitClient().then((createdClient) => {
+          if (createdClient) {
+            openClientJournal(createdClient, "clients");
             void workspaceController.refreshWorkspace();
           }
         })
@@ -616,9 +628,7 @@ export function usePluckrAppShellModel({
           onBack: handleBackFromJournal,
           onLogout: () => void handleLogout(),
           onOpenConsent: () => {
-            setConsentSignerName(
-              `${selectedClient.first_name} ${selectedClient.last_name}`.trim()
-            );
+            setConsentSignerName(getClientLegalName(selectedClient));
             setConsentSignature(selectedClient.consent_signature_path);
             setConsentError(null);
             setConsentNotice(null);
@@ -629,6 +639,7 @@ export function usePluckrAppShellModel({
           clientDetailError: clientDetailController.clientDetailError,
           clientDetailNotice: clientDetailController.clientDetailNotice,
           clientDetailForm: clientDetailController.clientDetailForm,
+          clientDetailFormErrors: clientDetailController.clientDetailFormErrors,
           availableClientTags: clientDetailController.availableClientTags,
           onStartEditClient: () => {
             clientJournalController.cancelEditingChart();

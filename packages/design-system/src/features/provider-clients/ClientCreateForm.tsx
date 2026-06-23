@@ -12,6 +12,7 @@ import { PronounPickerField } from "./PronounPickerField";
 type Props = {
   isSavingClient: boolean;
   clientForm: {
+    preferredName: string;
     firstName: string;
     lastName: string;
     pronouns: string;
@@ -21,11 +22,15 @@ type Props = {
     clientTags: string[];
     consentSigned: boolean;
   };
+  clientFormErrors: Partial<
+    Record<"preferredName" | "firstName" | "lastName" | "email" | "phone", string>
+  >;
   availableClientTags: string[];
   onCancelCreate: () => void;
   onFormChange: (
     key:
       | "firstName"
+      | "preferredName"
       | "lastName"
       | "pronouns"
       | "phone"
@@ -42,6 +47,7 @@ type Props = {
 export function ClientCreateForm({
   isSavingClient,
   clientForm,
+  clientFormErrors,
   availableClientTags,
   onCancelCreate,
   onFormChange,
@@ -57,19 +63,34 @@ export function ClientCreateForm({
         <View style={styles.formStack}>
           <PluckrSectionHeader title="New Client" />
           <Text style={styles.formCopy}>
-            Start with the care details you need to open treatment quickly.
+            Add the name providers use day-to-day plus the legal name for records.
           </Text>
+          <PluckrTextField
+            label="Name"
+            placeholder="Name used in daily care"
+            value={clientForm.preferredName}
+            autoCapitalize="words"
+            textContentType="name"
+            error={clientFormErrors.preferredName}
+            onChangeText={(value) => onFormChange("preferredName", value)}
+          />
           <View style={styles.fieldRow}>
             <PluckrTextField
-              label="First Name"
-              placeholder="First Name"
+              label="Legal First"
+              placeholder="Legal first name"
               value={clientForm.firstName}
+              autoCapitalize="words"
+              textContentType="givenName"
+              error={clientFormErrors.firstName}
               onChangeText={(value) => onFormChange("firstName", value)}
             />
             <PluckrTextField
-              label="Last Name"
-              placeholder="Last Name"
+              label="Legal Last"
+              placeholder="Legal last name"
               value={clientForm.lastName}
+              autoCapitalize="words"
+              textContentType="familyName"
+              error={clientFormErrors.lastName}
               onChangeText={(value) => onFormChange("lastName", value)}
             />
           </View>
@@ -79,16 +100,24 @@ export function ClientCreateForm({
               onChange={(value) => onFormChange("pronouns", value)}
             />
             <PluckrTextField
-              label="Phone Number"
-              placeholder="Phone Number"
+              label="Phone"
+              placeholder="555-555-5555"
               value={clientForm.phone}
+              keyboardType="phone-pad"
+              textContentType="telephoneNumber"
+              error={clientFormErrors.phone}
               onChangeText={(value) => onFormChange("phone", value)}
             />
           </View>
           <PluckrTextField
-            label="Email Address"
-            placeholder="Email Address"
+            label="Email"
+            placeholder="client@example.com"
             value={clientForm.email}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            error={clientFormErrors.email}
             onChangeText={(value) => onFormChange("email", value)}
           />
           <Pressable

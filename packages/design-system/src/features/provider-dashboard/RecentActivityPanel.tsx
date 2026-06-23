@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import type { RecentChartRecord } from "@pluckr/domain";
+import { getClientDisplayName, type RecentChartRecord } from "@pluckr/domain";
 
 import { PluckrCard } from "../../primitives/Card";
 import { PluckrSectionHeader } from "../../composite/SectionHeader";
@@ -44,9 +44,7 @@ export function PluckrRecentActivityPanel({
             {charts.map((chart) => (
               <View key={chart.id} style={styles.activityRow}>
                 <Text style={styles.clientName}>
-                  {chart.client
-                    ? `${chart.client.first_name} ${chart.client.last_name}`
-                    : "Client"}
+                  {chart.client ? getClientDisplayName(chart.client) : "Client"}
                 </Text>
                 <Text numberOfLines={2} style={styles.clientMeta}>
                   {chart.treatment_summary || chart.notes || "No summary yet."}

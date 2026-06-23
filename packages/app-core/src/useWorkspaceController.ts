@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getClientDisplayName } from "@pluckr/domain";
 import {
   addClientToDailyFolio,
   loadWorkspaceSnapshot,
@@ -153,7 +154,7 @@ export function useWorkspaceController(
           ? current
           : [...current, nextClient]
       );
-      setWorkspaceNotice(`${nextClient.first_name} added to today's folio.`);
+      setWorkspaceNotice(`${getClientDisplayName(nextClient)} added to today's folio.`);
       return true;
     } catch (error) {
       setWorkspaceError(
@@ -182,7 +183,7 @@ export function useWorkspaceController(
       setDailyFolioClients((current) =>
         current.filter((clientRecord) => clientRecord.id !== nextClient.id)
       );
-      setWorkspaceNotice(`${nextClient.first_name} removed from today's folio.`);
+      setWorkspaceNotice(`${getClientDisplayName(nextClient)} removed from today's folio.`);
       return true;
     } catch (error) {
       setWorkspaceError(

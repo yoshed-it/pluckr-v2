@@ -30,6 +30,7 @@ type PluckrClientJournalStageProps = {
   clientDetailError: string | null;
   clientDetailNotice: string | null;
   clientDetailForm: {
+    preferredName: string;
     firstName: string;
     lastName: string;
     pronouns: string;
@@ -38,6 +39,9 @@ type PluckrClientJournalStageProps = {
     notes: string;
     clientTags: string[];
   };
+  clientDetailFormErrors: Partial<
+    Record<"preferredName" | "firstName" | "lastName" | "email" | "phone", string>
+  >;
   availableClientTags: string[];
   chartForm: {
     modality: string;
@@ -64,6 +68,7 @@ type PluckrClientJournalStageProps = {
   onCancelEditClient: () => void;
   onClientDetailFormChange: (
     key:
+      | "preferredName"
       | "firstName"
       | "lastName"
       | "pronouns"
@@ -117,6 +122,7 @@ export function PluckrClientJournalStage({
   clientDetailError,
   clientDetailNotice,
   clientDetailForm,
+  clientDetailFormErrors,
   availableClientTags,
   chartForm,
   availableChartTags,
@@ -248,6 +254,7 @@ export function PluckrClientJournalStage({
         visible={isEditingClient}
         client={client}
         form={clientDetailForm}
+        formErrors={clientDetailFormErrors}
         availableClientTags={availableClientTags}
         isSavingClient={isSavingClient}
         onClose={onCancelEditClient}

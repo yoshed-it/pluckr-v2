@@ -52,6 +52,7 @@ export async function createClient(
     .insert({
       organization_id: input.organizationId,
       created_by_membership_id: membership?.id ?? null,
+      preferred_name: input.preferredName?.trim() || null,
       first_name: input.firstName.trim(),
       last_name: input.lastName.trim(),
       pronouns: input.pronouns?.trim() || null,
@@ -83,6 +84,7 @@ export async function updateClient(
   const { data, error } = await client
     .from("clients")
     .update({
+      preferred_name: input.preferredName?.trim() || null,
       first_name: input.firstName.trim(),
       last_name: input.lastName.trim(),
       pronouns: input.pronouns?.trim() || null,
