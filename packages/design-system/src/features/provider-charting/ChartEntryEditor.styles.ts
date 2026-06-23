@@ -96,6 +96,7 @@ export const pluckrChartEntryEditorStyles = StyleSheet.create({
   },
   compactField: {
     flex: 1,
+    minWidth: "47%",
     gap: 2,
     minHeight: 58,
     justifyContent: "center",

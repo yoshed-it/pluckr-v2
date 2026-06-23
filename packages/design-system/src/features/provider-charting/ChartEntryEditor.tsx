@@ -117,20 +117,6 @@ export function PluckrChartEntryEditor({
         <PreviousChartReference chart={previousChartReference} />
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Appointment</Text>
-          <SelectionField
-            label="Duration"
-            value={
-              chartForm.appointmentDurationMinutes
-                ? `${chartForm.appointmentDurationMinutes} min`
-                : "Select duration"
-            }
-            hint="Required"
-            onPress={() => setActiveDrawer("duration")}
-          />
-        </View>
-
-        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Modality</Text>
           <View style={styles.modalityRow}>
             {chartModalities.map((modality) => (
@@ -156,37 +142,43 @@ export function PluckrChartEntryEditor({
           </View>
         </View>
 
-        {(modalityUsesRf(chartForm.modality) ||
-          modalityUsesDc(chartForm.modality) ||
-          Boolean(chartForm.modality)) && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Settings</Text>
-            <View style={styles.machineGrid}>
-              {modalityUsesRf(chartForm.modality) ? (
-                <MachineTile
-                  label="RF"
-                  value={chartForm.rfLevel}
-                  unit="V"
-                  onPress={() => setActiveDrawer("rf")}
-                />
-              ) : null}
-              {modalityUsesDc(chartForm.modality) ? (
-                <MachineTile
-                  label="DC"
-                  value={chartForm.dcLevel}
-                  unit="mA"
-                  onPress={() => setActiveDrawer("dc")}
-                />
-              ) : null}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Settings</Text>
+          <View style={styles.machineGrid}>
+            <SelectionField
+              label="Appointment"
+              value={
+                chartForm.appointmentDurationMinutes
+                  ? `${chartForm.appointmentDurationMinutes} min`
+                  : "Select duration"
+              }
+              hint="Duration"
+              onPress={() => setActiveDrawer("duration")}
+            />
+            {modalityUsesRf(chartForm.modality) ? (
               <MachineTile
-                label="Seconds"
-                value={chartForm.treatmentSeconds}
-                unit="sec"
-                onPress={() => setActiveDrawer("time")}
+                label="RF"
+                value={chartForm.rfLevel}
+                unit="V"
+                onPress={() => setActiveDrawer("rf")}
               />
-            </View>
+            ) : null}
+            {modalityUsesDc(chartForm.modality) ? (
+              <MachineTile
+                label="DC"
+                value={chartForm.dcLevel}
+                unit="mA"
+                onPress={() => setActiveDrawer("dc")}
+              />
+            ) : null}
+            <MachineTile
+              label="Time"
+              value={chartForm.treatmentSeconds}
+              unit="sec"
+              onPress={() => setActiveDrawer("time")}
+            />
           </View>
-        )}
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Probe</Text>
@@ -362,7 +354,7 @@ export function PluckrChartEntryEditor({
       />
       <PluckrStepPickerDrawer
         visible={activeDrawer === "time"}
-        title="Insertion Seconds"
+        title="Time"
         subtitle="Scroll to the insertion time."
         value={Number.parseFloat(chartForm.treatmentSeconds) || 3}
         unit="sec"

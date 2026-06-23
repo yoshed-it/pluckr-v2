@@ -75,7 +75,7 @@ export function PluckrChartDetailPanel({
             />
           ) : null}
           {typeof chart.treatment_seconds === "number" ? (
-            <Metric label="Insertion Seconds" value={`${chart.treatment_seconds} sec`} />
+            <Metric label="Time" value={`${chart.treatment_seconds} sec`} />
           ) : null}
           {typeof chart.appointment_duration_minutes === "number" ? (
             <Metric

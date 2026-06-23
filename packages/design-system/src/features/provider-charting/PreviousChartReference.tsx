@@ -101,7 +101,7 @@ function buildSettingItems(chart: ChartEntryRecord) {
       ? { label: "Appt", value: `${chart.appointment_duration_minutes} min` }
       : null,
     typeof chart.treatment_seconds === "number"
-      ? { label: "Seconds", value: `${chart.treatment_seconds}` }
+      ? { label: "Time", value: `${chart.treatment_seconds} sec` }
       : null
   ].filter((item): item is { label: string; value: string } => item !== null);
 }
