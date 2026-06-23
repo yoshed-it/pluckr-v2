@@ -6,66 +6,84 @@ import { pluckrAppTheme } from "../tokens/pluckrAppTheme";
 type Props = {
   tone?: "neutral" | "success" | "error";
   message: string;
+  actionLabel?: string;
+  onAction?: () => void;
 };
 
 export function PluckrNoticeBanner({
   tone = "neutral",
-  message
+  message,
+  actionLabel,
+  onAction
 }: Props) {
   return (
-    <View
-      style={[
-        styles.container,
-        tone === "success"
-          ? styles.success
-          : tone === "error"
-            ? styles.error
-            : styles.neutral
-      ]}
-    >
-      <Text
+    <View style={styles.container}>
+      <View
         style={[
-          styles.label,
+          styles.statusDot,
           tone === "success"
-            ? styles.successLabel
+            ? styles.successDot
             : tone === "error"
-              ? styles.errorLabel
-              : styles.neutralLabel
+              ? styles.errorDot
+              : styles.neutralDot
         ]}
-      >
+      />
+      <Text numberOfLines={2} style={styles.label}>
         {message}
       </Text>
+      {actionLabel && onAction ? (
+        <Text accessibilityRole="button" onPress={onAction} style={styles.action}>
+          {actionLabel}
+        </Text>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: pluckrAppTheme.radii.md,
+    minHeight: 46,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: pluckrAppTheme.spacing.sm,
+    borderRadius: pluckrAppTheme.radii.lg,
     paddingHorizontal: pluckrAppTheme.spacing.md,
-    paddingVertical: pluckrAppTheme.spacing.sm
+    paddingVertical: pluckrAppTheme.spacing.sm,
+    backgroundColor: "#101C2E",
+    shadowColor: "#101C2E",
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 6
+    },
+    elevation: 3
   },
-  neutral: {
-    backgroundColor: pluckrAppTheme.colors.surfaceMuted
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: pluckrAppTheme.radii.full
   },
-  success: {
-    backgroundColor: pluckrAppTheme.colors.successSurface
+  neutralDot: {
+    backgroundColor: pluckrAppTheme.colors.info
   },
-  error: {
-    backgroundColor: pluckrAppTheme.colors.criticalSurface
+  successDot: {
+    backgroundColor: pluckrAppTheme.colors.success
+  },
+  errorDot: {
+    backgroundColor: pluckrAppTheme.colors.critical
   },
   label: {
+    flex: 1,
+    color: "#FFFFFF",
     fontSize: 13,
     lineHeight: 18,
     fontWeight: "600"
   },
-  neutralLabel: {
-    color: pluckrAppTheme.colors.textSecondary
-  },
-  successLabel: {
-    color: pluckrAppTheme.colors.success
-  },
-  errorLabel: {
-    color: pluckrAppTheme.colors.critical
+  action: {
+    color: "#8FC7DF",
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "700"
   }
 });

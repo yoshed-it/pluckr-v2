@@ -8,16 +8,15 @@ import {
   type MembershipWithOrganization
 } from "@pluckr/supabase";
 
-import type { OrganizationSelectionStorage } from "./types";
-
 /**
- * Owns organization selection, organization creation, and persisted
- * selection behavior for both web and mobile.
+ * Owns practice bootstrap and membership loading for both web and mobile.
+ *
+ * Pluckr currently resolves the first attached workspace automatically instead
+ * of exposing workspace switching as part of the daily provider flow.
  */
 export function useOrganizationController(
   client: SupabaseClient,
-  userId: string | undefined,
-  selectionStorage: OrganizationSelectionStorage
+  userId: string | undefined
 ) {
   const [memberships, setMemberships] = useState<MembershipWithOrganization[]>([]);
   const [membershipsLoading, setMembershipsLoading] = useState(false);
@@ -31,9 +30,6 @@ export function useOrganizationController(
   const [organizationSettingsSubmitting, setOrganizationSettingsSubmitting] =
     useState(false);
   const [isJoiningOrganization, setIsJoiningOrganization] = useState(false);
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<
-    string | null
-  >(null);
 
   useEffect(() => {
     if (!userId) {
@@ -48,54 +44,23 @@ export function useOrganizationController(
       setOrganizationSubmitting(false);
       setOrganizationSettingsSubmitting(false);
       setIsJoiningOrganization(false);
-      setSelectedOrganizationId(null);
       return;
     }
 
     void loadMemberships(userId);
-  }, [selectionStorage, userId]);
-
-  useEffect(() => {
-    if (!selectedOrganizationId) {
-      void selectionStorage.clearSelectedOrganizationId();
-      return;
-    }
-
-    if (
-      memberships.some(
-        (record) => record.organization.id === selectedOrganizationId
-      )
-    ) {
-      void selectionStorage.setSelectedOrganizationId(selectedOrganizationId);
-      return;
-    }
-
-    setSelectedOrganizationId(null);
-  }, [memberships, selectedOrganizationId, selectionStorage]);
+  }, [userId]);
 
   async function loadMemberships(nextUserId: string) {
     setMembershipsLoading(true);
     setOrganizationError(null);
 
     try {
-      const nextMemberships = await listMembershipOrganizations(client, nextUserId);
-      const rememberedOrganizationId =
-        await selectionStorage.getSelectedOrganizationId();
-
-      setMemberships(nextMemberships);
-      setSelectedOrganizationId(
-        rememberedOrganizationId &&
-          nextMemberships.some(
-            (record) => record.organization.id === rememberedOrganizationId
-          )
-          ? rememberedOrganizationId
-          : null
-      );
+      setMemberships(await listMembershipOrganizations(client, nextUserId));
     } catch (error) {
       setOrganizationError(
         error instanceof Error
           ? error.message
-          : "Unable to load organizations right now."
+          : "Unable to load workspaces right now."
       );
     } finally {
       setMembershipsLoading(false);
@@ -122,12 +87,11 @@ export function useOrganizationController(
       setIsCreatingOrganization(false);
       setIsJoiningOrganization(false);
       setOrganizationNotice(`${organization.name} is ready.`);
-      setSelectedOrganizationId(organization.id);
     } catch (error) {
       setOrganizationError(
         error instanceof Error
           ? error.message
-          : "Unable to create organization right now."
+          : "Unable to create a workspace right now."
       );
     } finally {
       setOrganizationSubmitting(false);
@@ -174,12 +138,11 @@ export function useOrganizationController(
       setInviteToken("");
       setIsJoiningOrganization(false);
       setOrganizationNotice(`${joined.organization_name} joined successfully.`);
-      setSelectedOrganizationId(joined.organization_id);
     } catch (error) {
       setOrganizationError(
         error instanceof Error
           ? error.message
-          : "Unable to join that organization right now."
+          : "Unable to join that workspace right now."
       );
     } finally {
       setOrganizationSubmitting(false);
@@ -194,12 +157,13 @@ export function useOrganizationController(
     setInviteToken("");
     setOrganizationSettingsSubmitting(false);
     setIsJoiningOrganization(false);
-    setSelectedOrganizationId(null);
   }
 
   async function updateSelectedOrganizationPrivacy(
     protectSensitiveScreens: boolean
   ) {
+    const selectedOrganizationId = memberships[0]?.organization.id ?? null;
+
     if (!selectedOrganizationId) {
       return null;
     }
@@ -254,11 +218,9 @@ export function useOrganizationController(
     inviteToken,
     organizationSubmitting,
     organizationSettingsSubmitting,
-    selectedOrganizationId,
     setOrganizationName,
     setOrganizationDescription,
     setInviteToken,
-    setSelectedOrganizationId,
     startCreatingOrganization,
     cancelCreatingOrganization,
     startJoiningOrganization,

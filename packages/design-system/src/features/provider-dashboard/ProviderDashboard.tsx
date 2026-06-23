@@ -7,7 +7,6 @@ import type {
   WorkspaceSummary
 } from "@pluckr/domain";
 
-import { PluckrNoticeBanner } from "../../primitives/NoticeBanner";
 import { PluckrFolioPanel } from "./FolioPanel";
 import { PluckrFolioPickerDrawer } from "./FolioPickerDrawer";
 import { PluckrProviderHomeHero } from "./ProviderHomeHero";
@@ -60,9 +59,6 @@ export function PluckrProviderHomeStage({
         organizationName={organization.name}
         displayName={membership.display_name}
       />
-
-      {error ? <PluckrNoticeBanner tone="error" message={error} /> : null}
-      {notice ? <PluckrNoticeBanner tone="success" message={notice} /> : null}
 
       <PluckrFolioPanel
         dailyFolioClients={dailyFolioClients}

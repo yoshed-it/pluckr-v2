@@ -4,9 +4,7 @@ import type { ClientRecord } from "@pluckr/domain";
 import type { OrganizationRole } from "@pluckr/domain";
 import { updateClientConsent } from "@pluckr/supabase";
 
-import { createOrganizationSelectionStorage } from "./storage";
 import type { ChartUploadAsset } from "./chartFormState";
-import type { KeyValueStorage } from "./types";
 import { useAdminController } from "./useAdminController";
 import { useAuthController } from "./useAuthController";
 import { useClientDetailController } from "./useClientDetailController";
@@ -29,13 +27,11 @@ type JournalOrigin = "workspace" | "clients";
 
 type UsePluckrAppShellModelProps = {
   supabase: SupabaseClient;
-  storage: KeyValueStorage;
   onRequestChartImages: () => Promise<ChartUploadAsset[]>;
 };
 
 export function usePluckrAppShellModel({
   supabase,
-  storage,
   onRequestChartImages
 }: UsePluckrAppShellModelProps) {
   const [activeWorkspaceScreen, setActiveWorkspaceScreen] =
@@ -48,39 +44,33 @@ export function usePluckrAppShellModel({
   const [consentNotice, setConsentNotice] = useState<string | null>(null);
   const [isSavingConsent, setIsSavingConsent] = useState(false);
   const [showLaunchStage, setShowLaunchStage] = useState(true);
-  const selectionStorage = useState(() =>
-    createOrganizationSelectionStorage(storage)
-  )[0];
 
   const sessionController = useSessionController(supabase);
   const authController = useAuthController(supabase);
   const organizationController = useOrganizationController(
     supabase,
-    sessionController.session?.user.id,
-    selectionStorage
+    sessionController.session?.user.id
   );
-  const selectedMembership = organizationController.memberships.find(
-    (record) =>
-      record.organization.id === organizationController.selectedOrganizationId
-  );
+  const selectedMembership = organizationController.memberships[0];
+  const selectedOrganizationId = selectedMembership?.organization.id ?? null;
   const workspaceController = useWorkspaceController(
     supabase,
     organizationController.memberships,
-    organizationController.selectedOrganizationId,
+    selectedOrganizationId,
     selectedMembership?.membership.id ?? null
   );
   const clientListController = useClientListController(
     supabase,
-    organizationController.selectedOrganizationId
+    selectedOrganizationId
   );
   const clientJournalController = useClientJournalController(
     supabase,
-    organizationController.selectedOrganizationId,
+    selectedOrganizationId,
     selectedClient
   );
   const clientDetailController = useClientDetailController(
     supabase,
-    organizationController.selectedOrganizationId,
+    selectedOrganizationId,
     selectedClient
   );
   const providerProfileController = useProviderProfileController(
@@ -112,7 +102,7 @@ export function usePluckrAppShellModel({
     !sessionController.isBooting &&
     !!sessionController.session?.user &&
     !organizationController.membershipsLoading &&
-    !selectedMembership;
+    organizationController.memberships.length === 0;
 
   const shouldShowProviderSetupGate =
     !showLaunchStage &&
@@ -143,6 +133,7 @@ export function usePluckrAppShellModel({
     !sessionController.isBooting &&
     !!selectedMembership &&
     activeWorkspaceScreen !== "workspace" &&
+    activeWorkspaceScreen !== "journal" &&
     !shouldShowOrganizationGate &&
     !shouldShowProviderSetupGate;
 
@@ -150,11 +141,11 @@ export function usePluckrAppShellModel({
     !showLaunchStage &&
     !sessionController.isBooting &&
     !!selectedMembership &&
+    activeWorkspaceScreen !== "journal" &&
     !shouldShowOrganizationGate &&
     !shouldShowProviderSetupGate;
 
   async function handleLogout() {
-    await selectionStorage.clearSelectedOrganizationId();
     await supabase.auth.signOut();
     setActiveWorkspaceScreen("workspace");
     setSelectedClient(null);
@@ -166,13 +157,6 @@ export function usePluckrAppShellModel({
     authController.resetAfterLogout();
     organizationController.resetAfterLogout();
     workspaceController.resetWorkspaceView();
-  }
-
-  function handleBackToOrganizations() {
-    setSelectedClient(null);
-    setActiveWorkspaceScreen("workspace");
-    setJournalOrigin("workspace");
-    organizationController.setSelectedOrganizationId(null);
   }
 
   function openClientJournal(nextClient: ClientRecord, origin: JournalOrigin) {
@@ -271,8 +255,126 @@ export function usePluckrAppShellModel({
     }
   ];
 
+  const snackbar =
+    authController.authError || sessionController.sessionError
+      ? {
+          message: authController.authError ?? sessionController.sessionError ?? "",
+          tone: "error" as const
+        }
+      : authController.authNotice
+        ? { message: authController.authNotice, tone: "success" as const }
+        : activeWorkspaceScreen === "workspace" &&
+            (organizationController.organizationError ||
+              workspaceController.workspaceError)
+          ? {
+              message:
+                organizationController.organizationError ??
+                workspaceController.workspaceError ??
+                "",
+              tone: "error" as const
+            }
+          : activeWorkspaceScreen === "workspace" &&
+              (organizationController.organizationNotice ||
+                workspaceController.workspaceNotice)
+            ? {
+                message:
+                  organizationController.organizationNotice ??
+                  workspaceController.workspaceNotice ??
+                  "",
+                tone: "success" as const
+              }
+            : activeWorkspaceScreen === "clients" &&
+                clientListController.clientListError
+              ? {
+                  message: clientListController.clientListError,
+                  tone: "error" as const
+                }
+              : activeWorkspaceScreen === "clients" &&
+                  clientListController.clientListNotice
+                ? {
+                    message: clientListController.clientListNotice,
+                    tone: "success" as const
+                  }
+                : activeWorkspaceScreen === "journal" &&
+                    (clientDetailController.clientDetailError ||
+                      clientJournalController.journalError)
+                  ? {
+                      message:
+                        clientDetailController.clientDetailError ??
+                        clientJournalController.journalError ??
+                        "",
+                      tone: "error" as const
+                    }
+                  : activeWorkspaceScreen === "journal" &&
+                      (clientDetailController.clientDetailNotice ||
+                        clientJournalController.journalNotice)
+                    ? {
+                        message:
+                          clientDetailController.clientDetailNotice ??
+                          clientJournalController.journalNotice ??
+                          "",
+                        tone: "success" as const
+                      }
+                    : activeWorkspaceScreen === "consent" && consentError
+                      ? { message: consentError, tone: "error" as const }
+                      : activeWorkspaceScreen === "consent" && consentNotice
+                        ? { message: consentNotice, tone: "success" as const }
+                        : activeWorkspaceScreen === "settings" &&
+                            organizationController.organizationError
+                          ? {
+                              message: organizationController.organizationError,
+                              tone: "error" as const
+                            }
+                          : activeWorkspaceScreen === "settings" &&
+                              organizationController.organizationNotice
+                            ? {
+                                message: organizationController.organizationNotice,
+                                tone: "success" as const
+                              }
+                            : activeWorkspaceScreen === "admin" &&
+                                adminController.adminError
+                              ? {
+                                  message: adminController.adminError,
+                                  tone: "error" as const
+                                }
+                              : activeWorkspaceScreen === "admin" &&
+                                  adminController.adminNotice
+                                ? {
+                                    message: adminController.adminNotice,
+                                    tone: "success" as const
+                                  }
+                                : shouldShowProviderSetupGate &&
+                                    providerProfileController.providerError
+                                  ? {
+                                      message:
+                                        providerProfileController.providerError,
+                                      tone: "error" as const
+                                    }
+                                  : shouldShowProviderSetupGate &&
+                                      providerProfileController.providerNotice
+                                    ? {
+                                        message:
+                                          providerProfileController.providerNotice,
+                                        tone: "success" as const
+                                      }
+                                    : shouldShowOrganizationGate &&
+                                        organizationController.organizationError
+                                      ? {
+                                          message:
+                                            organizationController.organizationError,
+                                          tone: "error" as const
+                                        }
+                                      : shouldShowOrganizationGate &&
+                                          organizationController.organizationNotice
+                                        ? {
+                                            message:
+                                              organizationController.organizationNotice,
+                                            tone: "success" as const
+                                          }
+                                        : null;
+
   async function handleConsentSave() {
-    if (!selectedClient || !organizationController.selectedOrganizationId) {
+    if (!selectedClient || !selectedOrganizationId) {
       return;
     }
 
@@ -292,7 +394,7 @@ export function usePluckrAppShellModel({
 
     try {
       const updatedClient = await updateClientConsent(supabase, {
-        organizationId: organizationController.selectedOrganizationId,
+        organizationId: selectedOrganizationId,
         clientId: selectedClient.id,
         consentSignedAt: new Date().toISOString(),
         consentSignaturePath: consentSignature
@@ -360,6 +462,7 @@ export function usePluckrAppShellModel({
     navigationTitle,
     navigationSubtitle,
     utilityActions,
+    snackbar,
     protectSensitiveScreens,
     isSensitiveScreen,
     authStageProps: {
@@ -385,10 +488,13 @@ export function usePluckrAppShellModel({
     },
     organizationStageProps: {
       memberships: organizationController.memberships,
+      canCreateWorkspace:
+        authController.authMode === "signup" ||
+        sessionController.session?.user.user_metadata.onboarding_intent ===
+          "creator",
       isCreating:
         !organizationController.membershipsLoading &&
-        (organizationController.isCreatingOrganization ||
-          organizationController.memberships.length === 0),
+        organizationController.isCreatingOrganization,
       isJoining: organizationController.isJoiningOrganization,
       organizationName: organizationController.organizationName,
       organizationDescription: organizationController.organizationDescription,
@@ -398,9 +504,8 @@ export function usePluckrAppShellModel({
         organizationController.organizationSubmitting,
       error: organizationController.organizationError,
       notice: organizationController.membershipsLoading
-        ? "Loading your organizations..."
+        ? "Loading your workspace..."
         : organizationController.organizationNotice,
-      onSelectOrganization: organizationController.setSelectedOrganizationId,
       onStartCreate: organizationController.startCreatingOrganization,
       onCancelCreate: organizationController.cancelCreatingOrganization,
       onStartJoin: organizationController.startJoiningOrganization,
@@ -419,7 +524,6 @@ export function usePluckrAppShellModel({
       error: providerProfileController.providerError,
       notice: providerProfileController.providerNotice,
       isSaving: providerProfileController.isSavingProvider,
-      onBack: handleBackToOrganizations,
       onLogout: () => void handleLogout(),
       onFormChange: providerProfileController.updateProviderProfileForm,
       onSubmit: () => void providerProfileController.submitProviderProfile()
@@ -462,6 +566,7 @@ export function usePluckrAppShellModel({
       isSavingClient: clientListController.isSavingClient,
       hideToolbar: true,
       clientForm: clientListController.clientForm,
+      availableClientTags: clientListController.availableClientTags,
       onBack: () => setActiveWorkspaceScreen("workspace"),
       onLogout: () => void handleLogout(),
       onSelectClient: (client: ClientRecord) => {
@@ -471,6 +576,8 @@ export function usePluckrAppShellModel({
       onStartCreate: clientListController.startCreatingClient,
       onCancelCreate: clientListController.cancelCreatingClient,
       onFormChange: clientListController.updateClientForm,
+      onToggleClientTag: clientListController.toggleClientTag,
+      onAddCustomClientTag: clientListController.addCustomClientTag,
       onSubmitClient: () =>
         void clientListController.submitClient().then((saved) => {
           if (saved) {
@@ -531,18 +638,22 @@ export function usePluckrAppShellModel({
           onClientDetailFormChange: clientDetailController.updateClientDetailForm,
           onToggleClientTag: clientDetailController.toggleClientTag,
           onAddCustomClientTag: clientDetailController.addCustomClientTag,
-          onSubmitClientDetails: () =>
-            void clientDetailController
-              .submitClientDetails()
-              .then((updatedClient) => {
-                if (updatedClient) {
-                  setSelectedClient(updatedClient);
-                  void Promise.all([
-                    clientListController.refreshClients(),
-                    workspaceController.refreshWorkspace()
-                  ]);
-                }
-              }),
+          onSubmitClientDetails: async () => {
+            const updatedClient =
+              await clientDetailController.submitClientDetails();
+
+            if (!updatedClient) {
+              return false;
+            }
+
+            setSelectedClient(updatedClient);
+            await Promise.all([
+              clientListController.refreshClients(),
+              workspaceController.refreshWorkspace()
+            ]);
+
+            return true;
+          },
           onArchiveClient: () =>
             void clientDetailController
               .archiveSelectedClient()
@@ -557,6 +668,14 @@ export function usePluckrAppShellModel({
                 }
               }),
           onStartChart: clientJournalController.startCreatingChart,
+          onTakePhoto: () => {
+            clientJournalController.startCreatingChart();
+            void handleRequestChartImages().then((assets) => {
+              if (assets.length > 0) {
+                void clientJournalController.uploadChartAssets(assets);
+              }
+            });
+          },
           onCancelChart: clientJournalController.cancelEditingChart,
           onEditChart: clientJournalController.startEditingChart,
           onDeleteChart: (chart: typeof clientJournalController.charts[number]) =>
@@ -589,13 +708,11 @@ export function usePluckrAppShellModel({
           organization: selectedMembership.organization,
           membership: selectedMembership.membership,
           provider: providerProfileController.provider,
-          membershipsCount: organizationController.memberships.length,
           isUpdatingPrivacy:
             organizationController.organizationSettingsSubmitting,
           error: organizationController.organizationError,
           notice: organizationController.organizationNotice,
           onOpenAdmin: () => setActiveWorkspaceScreen("admin"),
-          onBackToOrganizations: handleBackToOrganizations,
           onToggleProtectSensitiveScreens: (nextValue: boolean) =>
             void organizationController.updateSelectedOrganizationPrivacy(nextValue)
         }

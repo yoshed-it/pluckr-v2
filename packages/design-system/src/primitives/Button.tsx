@@ -49,10 +49,10 @@ export function PluckrButton({
 const styles = StyleSheet.create({
   base: {
     width: "100%",
-    minHeight: 50,
-    paddingVertical: 13,
-    paddingHorizontal: 18,
-    borderRadius: 14,
+    minHeight: 46,
+    paddingVertical: 11,
+    paddingHorizontal: 16,
+    borderRadius: pluckrAppTheme.radii.button,
     alignItems: "center",
     justifyContent: "center"
   },
@@ -60,24 +60,24 @@ const styles = StyleSheet.create({
     backgroundColor: pluckrAppTheme.colors.sageStrong,
     ...Platform.select({
       web: {
-        boxShadow: "0px 4px 8px rgba(15, 23, 42, 0.08)"
+        boxShadow: "0px 8px 18px rgba(10, 111, 102, 0.16)"
       },
       default: {
-        shadowColor: "#0F172A",
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
+        shadowColor: "#0A6F66",
+        shadowOpacity: 0.16,
+        shadowRadius: 12,
         shadowOffset: {
           width: 0,
-          height: 4
+          height: 6
         },
-        elevation: 1
+        elevation: 2
       }
     })
   },
   secondary: {
     borderWidth: 1,
     borderColor: pluckrAppTheme.colors.border,
-    backgroundColor: "rgba(253, 254, 254, 0.72)"
+    backgroundColor: pluckrAppTheme.colors.surface
   },
   disabled: {
     opacity: 0.45
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     opacity: 0.82
   },
   label: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700"
   },
   primaryLabel: {

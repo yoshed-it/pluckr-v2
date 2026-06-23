@@ -9,7 +9,6 @@ import type {
 
 import { PluckrButton } from "../../primitives/Button";
 import { PluckrCard } from "../../primitives/Card";
-import { PluckrNoticeBanner } from "../../primitives/NoticeBanner";
 import { PluckrTextField } from "../../primitives/TextField";
 import { pluckrAppTheme } from "../../pluckrAppTheme";
 
@@ -71,12 +70,9 @@ export function PluckrAdminStage({
         <Text style={styles.eyebrow}>Admin Dashboard</Text>
         <Text style={styles.title}>{organization.name}</Text>
         <Text style={styles.subtitle}>
-          Manage providers and generate invite links for this organization.
+          Manage providers and generate invite links for this workspace.
         </Text>
       </PluckrCard>
-
-      {error ? <PluckrNoticeBanner tone="error" message={error} /> : null}
-      {notice ? <PluckrNoticeBanner tone="success" message={notice} /> : null}
 
       <PluckrCard>
         <Text style={styles.sectionTitle}>Invite Team Member</Text>

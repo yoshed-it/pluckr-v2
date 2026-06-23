@@ -2,6 +2,7 @@
   "name": "pluckr-v2",
   "version": "0.1.0",
   "private": true,
+  "main": "./index.js",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -11,5 +12,8 @@
     "build:web": "npm run build --workspace @pluckr/web",
     "start:mobile": "npm run start --workspace @pluckr/mobile",
     "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.0"
   }
 }

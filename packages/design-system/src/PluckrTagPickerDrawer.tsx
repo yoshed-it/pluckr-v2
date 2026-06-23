@@ -14,6 +14,9 @@ type PluckrTagPickerDrawerProps = {
   onToggleTag: (tagLabel: string) => void;
   onAddCustomTag: (tagLabel: string) => void;
   onClose: () => void;
+  actionLabel?: string;
+  actionDisabled?: boolean;
+  onAction?: () => void;
 };
 
 /**
@@ -29,7 +32,10 @@ export function PluckrTagPickerDrawer({
   availableTags,
   onToggleTag,
   onAddCustomTag,
-  onClose
+  onClose,
+  actionLabel,
+  actionDisabled = false,
+  onAction
 }: PluckrTagPickerDrawerProps) {
   const [customTag, setCustomTag] = useState("");
 
@@ -47,6 +53,9 @@ export function PluckrTagPickerDrawer({
         setCustomTag("");
         onClose();
       }}
+      actionLabel={actionLabel}
+      actionDisabled={actionDisabled}
+      onAction={onAction}
     >
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Selected</Text>

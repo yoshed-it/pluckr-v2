@@ -18,6 +18,7 @@ type PluckrBottomDrawerProps = PropsWithChildren<{
   scrollable?: boolean;
   actionLabel?: string;
   onAction?: () => void;
+  actionDisabled?: boolean;
 }>;
 
 export function PluckrBottomDrawer({
@@ -28,6 +29,7 @@ export function PluckrBottomDrawer({
   scrollable = true,
   actionLabel,
   onAction,
+  actionDisabled = false,
   children
 }: PluckrBottomDrawerProps) {
   return (
@@ -47,7 +49,15 @@ export function PluckrBottomDrawer({
               {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
             </View>
             {actionLabel && onAction ? (
-              <Pressable accessibilityRole="button" onPress={onAction} style={styles.actionButton}>
+              <Pressable
+                accessibilityRole="button"
+                disabled={actionDisabled}
+                onPress={onAction}
+                style={[
+                  styles.actionButton,
+                  actionDisabled ? styles.actionButtonDisabled : null
+                ]}
+              >
                 <Text style={styles.actionLabel}>{actionLabel}</Text>
               </Pressable>
             ) : null}
@@ -120,8 +130,12 @@ const styles = StyleSheet.create({
     minHeight: 36,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: pluckrAppTheme.spacing.sm,
     borderRadius: pluckrAppTheme.radii.full,
     backgroundColor: "rgba(44, 62, 80, 0.04)"
+  },
+  actionButtonDisabled: {
+    opacity: 0.48
   },
   actionLabel: {
     color: pluckrAppTheme.colors.sageStrong,

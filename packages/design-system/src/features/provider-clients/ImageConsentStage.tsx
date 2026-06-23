@@ -81,9 +81,6 @@ export function PluckrImageConsentStage({
         </Text>
       </PluckrCard>
 
-      {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
-      {notice ? <Text style={[styles.message, styles.success]}>{notice}</Text> : null}
-
       <PluckrCard>
         <Text style={styles.sectionTitle}>Consent Information</Text>
         <View style={styles.detailStack}>

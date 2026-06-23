@@ -61,13 +61,12 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
     lineHeight: 24,
     marginTop: pluckrAppTheme.spacing.sm
   },
-  contactStack: {
-    gap: 2,
-    marginTop: pluckrAppTheme.spacing.sm
-  },
   metaRow: {
     gap: pluckrAppTheme.spacing.sm,
     marginTop: pluckrAppTheme.spacing.md
+  },
+  contextMetaRow: {
+    gap: 2
   },
   metaChips: {
     flexDirection: "row",
@@ -281,14 +280,28 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
   },
   emptyStateTitle: {
     color: pluckrAppTheme.colors.textPrimary,
-    fontSize: 20,
-    lineHeight: 28,
+    fontSize: 18,
+    lineHeight: 24,
     fontWeight: "700"
   },
   emptyState: {
     color: pluckrAppTheme.colors.textSecondary,
-    fontSize: 15,
-    lineHeight: 22
+    fontSize: 14,
+    lineHeight: 20
+  },
+  chartSummaryStack: {
+    gap: pluckrAppTheme.spacing.xs
+  },
+  chartFooter: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: pluckrAppTheme.spacing.xs
+  },
+  chartFooterLabel: {
+    color: pluckrAppTheme.colors.sageStrong,
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: "700"
   },
   listStack: {
     gap: pluckrAppTheme.spacing.sm

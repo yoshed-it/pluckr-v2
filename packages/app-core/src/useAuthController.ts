@@ -57,7 +57,8 @@ export function useAuthController(client: SupabaseClient) {
       options: {
         data: {
           display_name: fullName.trim(),
-          full_name: fullName.trim()
+          full_name: fullName.trim(),
+          onboarding_intent: "creator"
         }
       }
     });

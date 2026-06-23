@@ -1,5 +1,5 @@
 import React from "react";
-import type { IconNode, LucideProps } from "lucide-react";
+import type { LucideProps } from "lucide-react-native";
 import {
   Archive,
   BarChart3,
@@ -22,7 +22,7 @@ import {
   UserRound,
   Users,
   Zap
-} from "lucide-react";
+} from "lucide-react-native";
 
 export type PluckrIconName =
   | "settings"
@@ -91,8 +91,6 @@ export function PluckrIcon({
       size={size}
       color={color}
       strokeWidth={strokeWidth}
-      aria-hidden
-      focusable={false}
     />
   );
 }

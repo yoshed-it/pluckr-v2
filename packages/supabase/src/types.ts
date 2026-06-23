@@ -32,6 +32,7 @@ export type ClientInput = {
   email?: string | null;
   notes?: string | null;
   clientTags?: string[];
+  consentSignedAt?: string | null;
 };
 
 export type ClientUpdateInput = {

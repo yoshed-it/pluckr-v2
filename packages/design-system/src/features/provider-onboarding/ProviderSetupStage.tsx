@@ -14,7 +14,6 @@ type PluckrProviderSetupStageProps = {
   error: string | null;
   notice: string | null;
   isSaving: boolean;
-  onBack: () => void;
   onLogout: () => void;
   onFormChange: (key: "fullName" | "phone", value: string) => void;
   onSubmit: () => void;
@@ -27,7 +26,6 @@ export function PluckrProviderSetupStage({
   error,
   notice,
   isSaving,
-  onBack,
   onLogout,
   onFormChange,
   onSubmit
@@ -35,9 +33,7 @@ export function PluckrProviderSetupStage({
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
-        <Text style={styles.link} onPress={onBack}>
-          ← Organizations
-        </Text>
+        <View />
         <Text style={styles.logoutLink} onPress={onLogout}>
           Log Out
         </Text>
@@ -49,9 +45,6 @@ export function PluckrProviderSetupStage({
         logoSource={logoSource}
         compact
       />
-
-      {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
-      {notice ? <Text style={[styles.message, styles.success]}>{notice}</Text> : null}
 
       <PluckrCard>
         <View style={styles.stack}>
@@ -89,11 +82,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between"
-  },
-  link: {
-    color: pluckrAppTheme.colors.sageStrong,
-    fontSize: 15,
-    fontWeight: "600"
   },
   logoutLink: {
     color: pluckrAppTheme.colors.critical,

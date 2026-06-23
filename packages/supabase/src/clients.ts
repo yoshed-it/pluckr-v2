@@ -59,6 +59,7 @@ export async function createClient(
       email: input.email?.trim() || null,
       notes: input.notes?.trim() || null,
       client_tags: input.clientTags ?? [],
+      consent_signed_at: input.consentSignedAt ?? null,
       last_seen_at: new Date().toISOString()
     })
     .select("*")

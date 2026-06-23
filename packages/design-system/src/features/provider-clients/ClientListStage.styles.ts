@@ -44,10 +44,79 @@ export const pluckrClientListStageStyles = StyleSheet.create({
   formStack: {
     gap: pluckrAppTheme.spacing.md
   },
+  fieldRow: {
+    gap: pluckrAppTheme.spacing.sm
+  },
   formCopy: {
     color: pluckrAppTheme.colors.textSecondary,
     fontSize: 14,
     lineHeight: 20
+  },
+  tagSelector: {
+    gap: 2,
+    minHeight: 56,
+    justifyContent: "center",
+    paddingHorizontal: pluckrAppTheme.spacing.sm,
+    paddingVertical: 8,
+    borderRadius: pluckrAppTheme.radii.md,
+    backgroundColor: "rgba(44, 62, 80, 0.04)"
+  },
+  tagSelectorLabel: {
+    color: pluckrAppTheme.colors.sageStrong,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1
+  },
+  tagSelectorValue: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: "700"
+  },
+  tagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: pluckrAppTheme.spacing.xs
+  },
+  tagChip: {
+    alignSelf: "flex-start",
+    color: pluckrAppTheme.colors.sageStrong,
+    backgroundColor: "rgba(127, 183, 133, 0.16)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: pluckrAppTheme.radii.full,
+    overflow: "hidden",
+    fontSize: 11,
+    fontWeight: "700"
+  },
+  segmentRow: {
+    flexDirection: "row",
+    gap: pluckrAppTheme.spacing.sm
+  },
+  segmentButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: pluckrAppTheme.colors.border,
+    borderRadius: pluckrAppTheme.radii.md,
+    backgroundColor: pluckrAppTheme.colors.surfaceMuted,
+    paddingHorizontal: pluckrAppTheme.spacing.sm,
+    paddingVertical: pluckrAppTheme.spacing.sm,
+    alignItems: "center"
+  },
+  segmentButtonActive: {
+    backgroundColor: pluckrAppTheme.colors.sage,
+    borderColor: pluckrAppTheme.colors.sage
+  },
+  segmentLabel: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "600"
+  },
+  segmentLabelActive: {
+    color: "#FFFFFF"
   },
   emptyStateStack: {
     gap: pluckrAppTheme.spacing.md
@@ -77,6 +146,12 @@ export const pluckrClientListStageStyles = StyleSheet.create({
   clientCopy: {
     flex: 1
   },
+  rowChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: pluckrAppTheme.spacing.xs,
+    marginTop: pluckrAppTheme.spacing.xs
+  },
   rowAccessory: {
     alignItems: "center",
     justifyContent: "center"
@@ -98,12 +173,6 @@ export const pluckrClientListStageStyles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     marginTop: pluckrAppTheme.spacing.xs
-  },
-  pronounsText: {
-    color: pluckrAppTheme.colors.textSecondary,
-    fontSize: 12,
-    lineHeight: 16,
-    marginTop: 2
   },
   cardMeta: {
     color: pluckrAppTheme.colors.textSecondary,

@@ -2,11 +2,10 @@ import React from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import type { ClientRecord } from "@pluckr/domain";
 
+import { ClientCreateForm } from "./ClientCreateForm";
 import { PluckrSectionHeader } from "../../composite/SectionHeader";
 import { PluckrButton } from "../../primitives/Button";
 import { PluckrCard } from "../../primitives/Card";
-import { PluckrNoticeBanner } from "../../primitives/NoticeBanner";
-import { PluckrTextField } from "../../primitives/TextField";
 import { pluckrClientListStageStyles as styles } from "./ClientListStage.styles";
 import { pluckrAppTheme } from "../../pluckrAppTheme";
 
@@ -25,8 +24,11 @@ type PluckrClientListStageProps = {
     pronouns: string;
     phone: string;
     email: string;
-    notes: string;
+    careSummary: string;
+    clientTags: string[];
+    consentSigned: boolean;
   };
+  availableClientTags: string[];
   onBack: () => void;
   onLogout: () => void;
   onSelectClient: (client: ClientRecord) => void;
@@ -34,9 +36,19 @@ type PluckrClientListStageProps = {
   onStartCreate: () => void;
   onCancelCreate: () => void;
   onFormChange: (
-    key: "firstName" | "lastName" | "pronouns" | "phone" | "email" | "notes",
+    key:
+      | "firstName"
+      | "lastName"
+      | "pronouns"
+      | "phone"
+      | "email"
+      | "careSummary"
+      | "consentSigned",
     value: string
+      | boolean
   ) => void;
+  onToggleClientTag: (tagLabel: string) => void;
+  onAddCustomClientTag: (tagLabel: string) => void;
   onSubmitClient: () => void;
 };
 
@@ -61,6 +73,7 @@ export function PluckrClientListStage({
   isSavingClient,
   hideToolbar = false,
   clientForm,
+  availableClientTags,
   onBack,
   onLogout,
   onSelectClient,
@@ -68,6 +81,8 @@ export function PluckrClientListStage({
   onStartCreate,
   onCancelCreate,
   onFormChange,
+  onToggleClientTag,
+  onAddCustomClientTag,
   onSubmitClient
 }: PluckrClientListStageProps) {
   return (
@@ -99,67 +114,17 @@ export function PluckrClientListStage({
         </View>
       </PluckrCard>
 
-      {error ? <PluckrNoticeBanner tone="error" message={error} /> : null}
-      {notice ? <PluckrNoticeBanner tone="success" message={notice} /> : null}
-
       {isCreatingClient ? (
-        <PluckrCard>
-          <View style={styles.formStack}>
-            <PluckrSectionHeader title="New Client" />
-            <Text style={styles.formCopy}>
-              Create a new clinical record with the same essentials the Swift
-              app asked for first.
-            </Text>
-            <PluckrTextField
-              label="First Name"
-              placeholder="First Name"
-              value={clientForm.firstName}
-              onChangeText={(value) => onFormChange("firstName", value)}
-            />
-            <PluckrTextField
-              label="Last Name"
-              placeholder="Last Name"
-              value={clientForm.lastName}
-              onChangeText={(value) => onFormChange("lastName", value)}
-            />
-            <PluckrTextField
-              label="Pronouns"
-              placeholder="Pronouns"
-              value={clientForm.pronouns}
-              onChangeText={(value) => onFormChange("pronouns", value)}
-            />
-            <PluckrTextField
-              label="Phone Number"
-              placeholder="Phone Number"
-              value={clientForm.phone}
-              onChangeText={(value) => onFormChange("phone", value)}
-            />
-            <PluckrTextField
-              label="Email Address"
-              placeholder="Email Address"
-              value={clientForm.email}
-              onChangeText={(value) => onFormChange("email", value)}
-            />
-            <PluckrTextField
-              label="Notes"
-              placeholder="Notes (optional)"
-              multiline
-              value={clientForm.notes}
-              onChangeText={(value) => onFormChange("notes", value)}
-            />
-            <PluckrButton
-              label={isSavingClient ? "Saving..." : "Save Client"}
-              disabled={isSavingClient}
-              onPress={() => onSubmitClient()}
-            />
-            <PluckrButton
-              label="Cancel"
-              variant="secondary"
-              disabled={isSavingClient}
-              onPress={() => onCancelCreate()}
-            />
-          </View>
-        </PluckrCard>
+        <ClientCreateForm
+          isSavingClient={isSavingClient}
+          clientForm={clientForm}
+          availableClientTags={availableClientTags}
+          onCancelCreate={onCancelCreate}
+          onFormChange={onFormChange}
+          onToggleClientTag={onToggleClientTag}
+          onAddCustomClientTag={onAddCustomClientTag}
+          onSubmitClient={onSubmitClient}
+        />
       ) : null}
 
       <PluckrCard>
@@ -189,9 +154,19 @@ export function PluckrClientListStage({
                       <Text style={styles.cardTitle}>
                         {client.first_name} {client.last_name}
                       </Text>
-                      {client.pronouns ? (
-                        <Text style={styles.pronounsText}>{client.pronouns}</Text>
-                      ) : null}
+                      <View style={styles.rowChips}>
+                        {client.pronouns ? (
+                          <Text style={styles.tagChip}>{client.pronouns}</Text>
+                        ) : null}
+                        {client.consent_signed_at ? (
+                          <Text style={styles.tagChip}>Consent signed</Text>
+                        ) : null}
+                        {(client.client_tags ?? []).slice(0, 2).map((tag) => (
+                          <Text key={tag} style={styles.tagChip}>
+                            {tag}
+                          </Text>
+                        ))}
+                      </View>
                       <Text style={styles.cardBody}>
                         {client.notes || "No care notes yet."}
                       </Text>

@@ -30,7 +30,6 @@ export function PluckrMobileApp() {
 
   const shellModel = usePluckrAppShellModel({
     supabase,
-    storage: AsyncStorage,
     onRequestChartImages: requestChartImages
   });
   const { privacyCurtainVisible } = usePluckrPrivacyGuard({

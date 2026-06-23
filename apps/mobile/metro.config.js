@@ -11,6 +11,10 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules")
 ];
+config.resolver.extraNodeModules = {
+  react: path.resolve(workspaceRoot, "node_modules/react"),
+  "react-native": path.resolve(workspaceRoot, "node_modules/react-native")
+};
 config.resolver.disableHierarchicalLookup = true;
 
 module.exports = config;

@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, listClients, type ClientRecord } from "@pluckr/supabase";
+import {
+  dedupeTagLabels,
+  defaultClientTags,
+  mergeTagLibrary
+} from "./tags";
 
 type ClientFormState = {
   firstName: string;
@@ -8,7 +13,9 @@ type ClientFormState = {
   pronouns: string;
   phone: string;
   email: string;
-  notes: string;
+  careSummary: string;
+  clientTags: string[];
+  consentSigned: boolean;
 };
 
 const emptyForm: ClientFormState = {
@@ -17,8 +24,19 @@ const emptyForm: ClientFormState = {
   pronouns: "",
   phone: "",
   email: "",
-  notes: ""
+  careSummary: "",
+  clientTags: [],
+  consentSigned: false
 };
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function isValidPhone(value: string) {
+  const digits = value.replace(/\D/g, "");
+  return digits.length >= 10 && digits.length <= 15;
+}
 
 /**
  * Owns client list loading, search, and add-client behavior for both apps.
@@ -99,6 +117,16 @@ export function useClientListController(
       return false;
     }
 
+    if (clientForm.email.trim() && !isValidEmail(clientForm.email.trim())) {
+      setClientListError("Enter a valid email address.");
+      return false;
+    }
+
+    if (clientForm.phone.trim() && !isValidPhone(clientForm.phone.trim())) {
+      setClientListError("Enter a valid phone number.");
+      return false;
+    }
+
     setIsSavingClient(true);
     setClientListError(null);
     setClientListNotice(null);
@@ -111,7 +139,9 @@ export function useClientListController(
         pronouns: clientForm.pronouns,
         phone: clientForm.phone,
         email: clientForm.email,
-        notes: clientForm.notes
+        notes: clientForm.careSummary,
+        clientTags: dedupeTagLabels(clientForm.clientTags),
+        consentSignedAt: clientForm.consentSigned ? new Date().toISOString() : null
       });
 
       setClients((current) => [createdClient, ...current]);
@@ -145,6 +175,7 @@ export function useClientListController(
 
   function startCreatingClient() {
     setClientListNotice(null);
+    setClientListError(null);
     setIsCreatingClient(true);
   }
 
@@ -164,8 +195,39 @@ export function useClientListController(
     isCreatingClient,
     isSavingClient,
     clientForm,
+    availableClientTags: mergeTagLibrary(
+      defaultClientTags,
+      clientForm.clientTags
+    ),
     setSearchText,
     updateClientForm,
+    toggleClientTag: (tagLabel: string) =>
+      setClientForm((current) => {
+        const exists = current.clientTags.some(
+          (tag) => tag.toLowerCase() === tagLabel.toLowerCase()
+        );
+
+        return {
+          ...current,
+          clientTags: exists
+            ? current.clientTags.filter(
+                (tag) => tag.toLowerCase() !== tagLabel.toLowerCase()
+              )
+            : [...current.clientTags, tagLabel]
+        };
+      }),
+    addCustomClientTag: (tagLabel: string) => {
+      const trimmedLabel = tagLabel.trim();
+
+      if (!trimmedLabel) {
+        return;
+      }
+
+      setClientForm((current) => ({
+        ...current,
+        clientTags: dedupeTagLabels([...current.clientTags, trimmedLabel])
+      }));
+    },
     startCreatingClient,
     cancelCreatingClient,
     submitClient,

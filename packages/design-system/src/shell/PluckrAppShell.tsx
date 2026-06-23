@@ -16,12 +16,13 @@ import { PluckrClientListStage } from "../features/provider-clients/ClientListSt
 import { PluckrImageConsentStage } from "../features/provider-clients/ImageConsentStage";
 import { PluckrJournalLoadingStage } from "../PluckrJournalLoadingStage";
 import { PluckrLaunchStage } from "../PluckrLaunchStage";
-import { PluckrNavigationBar } from "../PluckrNavigationBar";
 import { PluckrOrganizationStage } from "../features/provider-onboarding/OrganizationGate";
 import { PluckrProviderHomeStage } from "../features/provider-dashboard/ProviderDashboard";
 import { PluckrProviderSetupStage } from "../features/provider-onboarding/ProviderSetupStage";
 import { PluckrSettingsStage } from "../features/settings/SettingsStage";
+import { TopBar } from "../composite/TopBar";
 import { PluckrUtilityBar } from "../PluckrUtilityBar";
+import { PluckrSnackbar, type PluckrSnackbarTone } from "../primitives/Snackbar";
 import { pluckrAppTheme } from "../tokens/pluckrAppTheme";
 
 export type PluckrPrivacyState = {
@@ -50,6 +51,10 @@ type PluckrAppShellModel = {
   navigationTitle: string;
   navigationSubtitle: string | null;
   utilityActions: React.ComponentProps<typeof PluckrUtilityBar>["actions"];
+  snackbar: {
+    message: string;
+    tone: PluckrSnackbarTone;
+  } | null;
   protectSensitiveScreens: boolean;
   isSensitiveScreen: boolean;
   authStageProps: Omit<
@@ -100,17 +105,19 @@ export function PluckrAppShell({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {model.shouldShowUtilityBar ? (
-          <PluckrUtilityBar
+        {model.shouldShowUtilityBar || model.shouldShowShellNavigationBar ? (
+          <TopBar
+            title={model.navigationTitle}
             backLabel={model.previousScreenLabel}
             onBack={model.navigationBackAction}
-            actions={model.utilityActions}
-          />
-        ) : null}
-        {model.shouldShowShellNavigationBar ? (
-          <PluckrNavigationBar
-            title={model.navigationTitle}
-            subtitle={model.navigationSubtitle}
+            actions={model.utilityActions
+              .filter((action) => Boolean(action.icon))
+              .map((action) => ({
+                icon: action.icon!,
+                label: action.label,
+                onPress: action.onPress,
+                tone: action.tone
+              }))}
           />
         ) : null}
         {model.showLaunchStage ? (
@@ -120,7 +127,7 @@ export function PluckrAppShell({
         ) : model.shouldShowAuth ? (
           <PluckrAuthStage {...model.authStageProps} logoSource={logoSource} />
         ) : model.isHydratingOrganization ? (
-          <PluckrJournalLoadingStage message="Loading your organizations..." />
+          <PluckrJournalLoadingStage message="Loading your workspace..." />
         ) : model.showProviderLoading ? (
           <PluckrJournalLoadingStage message="Loading your provider profile..." />
         ) : model.shouldShowOrganizationGate ? (
@@ -146,9 +153,13 @@ export function PluckrAppShell({
         ) : model.showProviderHomeStage && model.providerHomeStageProps ? (
           <PluckrProviderHomeStage {...model.providerHomeStageProps} />
         ) : (
-          <PluckrJournalLoadingStage message="Refreshing organization context..." />
+          <PluckrJournalLoadingStage message="Refreshing workspace..." />
         )}
       </ScrollView>
+      <PluckrSnackbar
+        message={model.snackbar?.message ?? null}
+        tone={model.snackbar?.tone}
+      />
       {privacyCurtainVisible &&
       model.isSensitiveScreen &&
       model.protectSensitiveScreens ? (

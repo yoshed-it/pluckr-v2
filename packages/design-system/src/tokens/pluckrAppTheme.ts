@@ -1,4 +1,9 @@
-import { getPluckrColors, pluckrRadii, pluckrSpacing } from "./themeTokens";
+import {
+  getPluckrColors,
+  pluckrRadii,
+  pluckrShadows,
+  pluckrSpacing
+} from "./themeTokens";
 
 /**
  * Shared React Native-friendly theme tokens for the rebuilt product screens.
@@ -10,11 +15,23 @@ export const pluckrAppTheme = {
   colors: getPluckrColors("light"),
   radii: pluckrRadii,
   spacing: pluckrSpacing,
+  shadows: pluckrShadows,
   typography: {
-    display: 34,
-    heading: 28,
-    subheading: 20,
-    body: 16,
+    display: 31,
+    heading: 24,
+    subheading: 18,
+    body: 15,
     caption: 12
+  },
+  iconSizes: {
+    sm: 14,
+    md: 18,
+    lg: 22,
+    xl: 26
+  },
+  navigation: {
+    topBarHeight: 42,
+    bottomBarHeight: 78,
+    floatingActionSize: 56
   }
 } as const;

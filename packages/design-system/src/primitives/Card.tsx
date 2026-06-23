@@ -28,31 +28,31 @@ export function PluckrCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: pluckrAppTheme.radii.lg,
+    borderRadius: pluckrAppTheme.radii.card,
     backgroundColor: pluckrAppTheme.colors.surface,
     borderWidth: 0.5,
     borderColor: pluckrAppTheme.colors.border,
     ...Platform.select({
       web: {
-        boxShadow: "0px 6px 14px rgba(15, 23, 42, 0.045)"
+        boxShadow: pluckrAppTheme.shadows.paperSoft
       },
       default: {
-        shadowColor: "#0F172A",
-        shadowOpacity: 0.045,
+        shadowColor: "#132238",
+        shadowOpacity: 0.05,
         shadowRadius: 14,
         shadowOffset: {
           width: 0,
-          height: 6
+          height: 8
         },
         elevation: 1
       }
     })
   },
   regular: {
-    padding: 18
+    padding: 16
   },
   compact: {
-    padding: 16
+    padding: 12
   },
   accent: {
     backgroundColor: pluckrAppTheme.colors.surfaceAccent

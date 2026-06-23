@@ -9,14 +9,24 @@ type PluckrIconButtonProps = {
   accessibilityLabel: string;
   onPress: () => void;
   tone?: "default" | "critical" | "accent";
+  size?: "sm" | "md" | "lg";
 };
 
 export function PluckrIconButton({
   icon,
   accessibilityLabel,
   onPress,
-  tone = "default"
+  tone = "default",
+  size = "md"
 }: PluckrIconButtonProps) {
+  const dimension = size === "sm" ? 32 : size === "lg" ? 42 : 36;
+  const iconSize =
+    size === "sm"
+      ? pluckrAppTheme.iconSizes.sm
+      : size === "lg"
+        ? pluckrAppTheme.iconSizes.lg
+        : pluckrAppTheme.iconSizes.md;
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -25,6 +35,10 @@ export function PluckrIconButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
+        {
+          width: dimension,
+          height: dimension
+        },
         tone === "critical"
           ? styles.critical
           : tone === "accent"
@@ -35,7 +49,7 @@ export function PluckrIconButton({
     >
       <PluckrIcon
         name={icon}
-        size={18}
+        size={iconSize}
         color={
           tone === "critical"
             ? pluckrAppTheme.colors.critical
@@ -50,8 +64,6 @@ export function PluckrIconButton({
 
 const styles = StyleSheet.create({
   base: {
-    width: 32,
-    height: 32,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: pluckrAppTheme.radii.full

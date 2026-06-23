@@ -2,35 +2,35 @@ export type ThemeMode = "light" | "dark";
 
 export const pluckrColors = {
   light: {
-    background: "#F4F7F8",
-    backgroundSoft: "#EDF2F5",
-    surface: "#FDFEFE",
-    surfaceMuted: "#F5F8FA",
-    surfaceAccent: "#F2F7F6",
-    border: "#E2E8F0",
-    divider: "#D7E0E8",
-    textPrimary: "#1E293B",
-    textSecondary: "#334155",
-    textMuted: "#64748B",
-    sage: "#0D9488",
-    sageStrong: "#0F766E",
-    mint: "#CCFBF1",
-    cream: "#F8FAFC",
-    charcoal: "#1E293B",
-    forest: "#15803D",
-    sky: "#0D9488",
-    earth: "#F4A300",
-    success: "#15803D",
-    warning: "#EA580C",
-    critical: "#DC2626",
-    info: "#0D9488",
-    accent: "#F4A300",
-    clinicalMemory: "#F4A300",
-    successSurface: "#EEF8F1",
-    warningSurface: "#FFF2E8",
-    criticalSurface: "#FEF0EE",
-    infoSurface: "#EEF8F7",
-    accentSurface: "#FFF7E5"
+    background: "#FAF9F5",
+    backgroundSoft: "#F5F2EA",
+    surface: "#FFFFFF",
+    surfaceMuted: "#F8F7F2",
+    surfaceAccent: "#F1F6F2",
+    border: "#E4E5DD",
+    divider: "#ECEBE4",
+    textPrimary: "#132238",
+    textSecondary: "#485C6F",
+    textMuted: "#788393",
+    sage: "#0F8A7D",
+    sageStrong: "#0A6F66",
+    mint: "#DDEEE7",
+    cream: "#FFFDF9",
+    charcoal: "#132238",
+    forest: "#2E9C5A",
+    sky: "#0F8A7D",
+    earth: "#D7A85C",
+    success: "#2E9C5A",
+    warning: "#C28A3B",
+    critical: "#C86A5B",
+    info: "#5B8C87",
+    accent: "#E8BF63",
+    clinicalMemory: "#E8BF63",
+    successSurface: "#EAF5EE",
+    warningSurface: "#F7EFE1",
+    criticalSurface: "#F9ECE8",
+    infoSurface: "#EEF6F4",
+    accentSurface: "#F8F1DD"
   },
   dark: {
     background: "#0F172A",
@@ -67,28 +67,31 @@ export const pluckrColors = {
 
 export const pluckrSpacing = {
   xxs: 4,
-  xs: 8,
-  sm: 12,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
-  xxxl: 64
+  xs: 6,
+  sm: 10,
+  md: 14,
+  lg: 18,
+  xl: 24,
+  xxl: 34,
+  xxxl: 48
 } as const;
 
 export const pluckrRadii = {
-  xs: 4,
+  xs: 6,
   sm: 8,
   md: 12,
   lg: 16,
-  xl: 24,
+  xl: 20,
+  card: 18,
+  button: 14,
+  pill: 999,
   full: 999
 } as const;
 
 export const pluckrShadows = {
-  paperSoft: "0 8px 20px rgba(15, 23, 42, 0.045)",
-  paperMedium: "0 12px 24px rgba(15, 23, 42, 0.06)",
-  paperStrong: "0 16px 32px rgba(15, 23, 42, 0.09)"
+  paperSoft: "0 1px 2px rgba(19, 34, 56, 0.06)",
+  paperMedium: "0 6px 18px rgba(19, 34, 56, 0.055)",
+  paperStrong: "0 12px 28px rgba(19, 34, 56, 0.075)"
 } as const;
 
 export const pluckrTypography = {

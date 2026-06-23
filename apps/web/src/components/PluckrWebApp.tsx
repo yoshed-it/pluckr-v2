@@ -14,21 +14,6 @@ const supabasePublishableKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const browserStorage = {
-  getItem: (key: string) =>
-    typeof window === "undefined" ? null : window.localStorage.getItem(key),
-  setItem: (key: string, value: string) => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(key, value);
-    }
-  },
-  removeItem: (key: string) => {
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(key);
-    }
-  }
-};
-
 /**
  * Web wrapper around the shared product shell.
  *
@@ -52,7 +37,6 @@ export function PluckrWebApp() {
 
   const shellModel = usePluckrAppShellModel({
     supabase,
-    storage: browserStorage,
     onRequestChartImages: requestChartImages
   });
 

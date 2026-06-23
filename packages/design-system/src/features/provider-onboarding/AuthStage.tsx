@@ -32,7 +32,7 @@ function getCopy(mode: PluckrAuthMode) {
     case "signup":
       return {
         title: "Create Account",
-        subtitle: "Set up your clinical journal access.",
+        subtitle: "Create your account first, then finish onboarding with your workspace invite.",
         primaryLabel: "Create Account"
       };
     case "forgot":
@@ -44,7 +44,7 @@ function getCopy(mode: PluckrAuthMode) {
     default:
       return {
         title: "Pluckr",
-        subtitle: "Clinical Journal",
+        subtitle: "Provider Workspace",
         primaryLabel: "Sign In"
       };
   }
@@ -128,9 +128,6 @@ export function PluckrAuthStage({
               onChangeText={onConfirmPasswordChange}
             />
           ) : null}
-
-          {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
-          {notice ? <Text style={[styles.message, styles.success]}>{notice}</Text> : null}
 
           <PluckrButton
             label={isSubmitting ? "Working..." : copy.primaryLabel}

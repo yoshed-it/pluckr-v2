@@ -10,14 +10,13 @@ import type { MembershipWithOrganization } from "@pluckr/domain";
 import { PluckrBrandHeader } from "../../composite/BrandHeader";
 import { PluckrButton } from "../../primitives/Button";
 import { PluckrCard } from "../../primitives/Card";
-import { PluckrNoticeBanner } from "../../primitives/NoticeBanner";
 import { PluckrTextField } from "../../primitives/TextField";
-import { PluckrOrganizationCard } from "../../PluckrOrganizationCard";
 import { pluckrAppTheme } from "../../pluckrAppTheme";
 
 type PluckrOrganizationStageProps = {
   logoSource: ImageSourcePropType;
   memberships: MembershipWithOrganization[];
+  canCreateWorkspace: boolean;
   isCreating: boolean;
   isJoining: boolean;
   organizationName: string;
@@ -26,7 +25,6 @@ type PluckrOrganizationStageProps = {
   isSubmitting: boolean;
   error: string | null;
   notice: string | null;
-  onSelectOrganization: (organizationId: string) => void;
   onStartCreate: () => void;
   onCancelCreate: () => void;
   onStartJoin: () => void;
@@ -42,6 +40,7 @@ type PluckrOrganizationStageProps = {
 export function PluckrOrganizationStage({
   logoSource,
   memberships,
+  canCreateWorkspace,
   isCreating,
   isJoining,
   organizationName,
@@ -50,7 +49,6 @@ export function PluckrOrganizationStage({
   isSubmitting,
   error,
   notice,
-  onSelectOrganization,
   onStartCreate,
   onCancelCreate,
   onStartJoin,
@@ -63,37 +61,31 @@ export function PluckrOrganizationStage({
   onLogout
 }: PluckrOrganizationStageProps) {
   const isNewUser = memberships.length === 0;
+  const showInviteAccess = isNewUser || isJoining;
 
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
-        <Text style={styles.kicker}>Organizations</Text>
+        <Text style={styles.kicker}>Workspace Access</Text>
         <Text style={styles.logoutLink} onPress={onLogout}>
           Log Out
         </Text>
       </View>
 
       <PluckrBrandHeader
-        title="Organizations"
-        subtitle={
-          isNewUser
-            ? "Welcome to Pluckr. Create your first organization to get started with clinical charting."
-            : "Choose which organization you'd like to work with."
-        }
-        compact={!isNewUser}
+        title="Workspace Invite"
+        subtitle="Workspace access comes from an invite. Sign in, then enter your invite token to finish onboarding."
+        compact
         logoSource={logoSource}
       />
-
-      {error ? <PluckrNoticeBanner tone="error" message={error} /> : null}
-      {notice ? <PluckrNoticeBanner tone="success" message={notice} /> : null}
 
       {isCreating ? (
         <PluckrCard>
           <View style={styles.stack}>
-            <Text style={styles.sectionTitle}>Organization Details</Text>
+            <Text style={styles.sectionTitle}>Create Workspace</Text>
             <PluckrTextField
-              label="Organization Name"
-              placeholder="Organization Name"
+              label="Workspace Name"
+              placeholder="Workspace Name"
               autoCapitalize="words"
               value={organizationName}
               onChangeText={onOrganizationNameChange}
@@ -106,7 +98,7 @@ export function PluckrOrganizationStage({
               onChangeText={onOrganizationDescriptionChange}
             />
             <PluckrButton
-              label={isSubmitting ? "Creating..." : "Create Organization"}
+              label={isSubmitting ? "Creating..." : "Create Workspace"}
               disabled={!organizationName.trim() || isSubmitting}
               onPress={() => onCreateOrganization()}
             />
@@ -118,10 +110,10 @@ export function PluckrOrganizationStage({
             />
           </View>
         </PluckrCard>
-      ) : isJoining ? (
+      ) : showInviteAccess ? (
         <PluckrCard>
           <View style={styles.stack}>
-            <Text style={styles.sectionTitle}>Join Organization</Text>
+            <Text style={styles.sectionTitle}>Enter Invite Token</Text>
             <PluckrTextField
               label="Invite Token Or Link"
               placeholder="Paste the invite token or full invite link"
@@ -131,61 +123,50 @@ export function PluckrOrganizationStage({
               onChangeText={onInviteTokenChange}
             />
             <PluckrButton
-              label={isSubmitting ? "Joining..." : "Join Organization"}
+              label={isSubmitting ? "Joining..." : "Join Workspace"}
               disabled={!inviteToken.trim() || isSubmitting}
               onPress={() => onJoinOrganization()}
             />
-            <PluckrButton
-              label="Cancel"
-              variant="secondary"
-              disabled={isSubmitting}
-              onPress={() => onCancelJoin()}
-            />
+            {!isNewUser ? (
+              <PluckrButton
+                label="Cancel"
+                variant="secondary"
+                disabled={isSubmitting}
+                onPress={() => onCancelJoin()}
+              />
+            ) : null}
+            <Text style={styles.helperCopy}>
+              Ask the workspace owner or admin to send you an invite if you do not
+              have one yet.
+            </Text>
+            {isNewUser && canCreateWorkspace ? (
+              <PluckrButton
+                label="Create First Workspace"
+                variant="secondary"
+                disabled={isSubmitting}
+                onPress={() => onStartCreate()}
+              />
+            ) : null}
+            {isNewUser && canCreateWorkspace ? (
+              <Text style={styles.helperCopy}>
+                Only create a workspace when you are setting up the practice for
+                the first time.
+              </Text>
+            ) : null}
           </View>
         </PluckrCard>
       ) : (
         <View style={styles.stack}>
-          {memberships.length > 0 ? (
-            <PluckrCard>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Your Organizations</Text>
-                <Text style={styles.countChip}>{memberships.length}</Text>
-              </View>
-              <View style={styles.stack}>
-                {memberships.map((record) => (
-                  <PluckrOrganizationCard
-                    key={record.organization.id}
-                    record={record}
-                    onPress={() => onSelectOrganization(record.organization.id)}
-                  />
-                ))}
-              </View>
-            </PluckrCard>
-          ) : null}
-
           <PluckrCard accent>
             <View style={styles.stack}>
-              <Text style={styles.sectionTitle}>
-                {isNewUser ? "Get Started" : "More Actions"}
-              </Text>
               <PluckrButton
-                label={
-                  isNewUser
-                    ? "Create Your First Organization"
-                    : "Create New Organization"
-                }
-                onPress={() => onStartCreate()}
-              />
-              <PluckrButton
-                label={isNewUser ? "Join Existing Organization" : "Join Organization"}
-                variant="secondary"
+                label="Use Invite"
                 onPress={() => onStartJoin()}
               />
-              {!isNewUser ? (
-                <Text style={styles.helperCopy}>
-                  Paste an invite token or full link to join another clinic.
-                </Text>
-              ) : null}
+              <Text style={styles.helperCopy}>
+                Workspace selection is not part of the daily workflow. Once you are
+                attached, Pluckr will take you straight into your provider dashboard.
+              </Text>
             </View>
           </PluckrCard>
         </View>
@@ -224,26 +205,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20
   },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: pluckrAppTheme.spacing.md
-  },
   sectionTitle: {
     color: pluckrAppTheme.colors.textPrimary,
     fontSize: pluckrAppTheme.typography.subheading,
     lineHeight: 26,
-    fontWeight: "700"
-  },
-  countChip: {
-    color: pluckrAppTheme.colors.sageStrong,
-    backgroundColor: "rgba(127, 183, 133, 0.16)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: pluckrAppTheme.radii.full,
-    overflow: "hidden",
-    fontSize: pluckrAppTheme.typography.caption,
     fontWeight: "700"
   },
   message: {

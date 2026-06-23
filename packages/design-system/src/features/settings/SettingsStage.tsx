@@ -4,19 +4,16 @@ import type { MembershipWithOrganization, ProviderRecord } from "@pluckr/domain"
 
 import { PluckrSectionHeader } from "../../composite/SectionHeader";
 import { PluckrCard } from "../../primitives/Card";
-import { PluckrNoticeBanner } from "../../primitives/NoticeBanner";
 import { pluckrAppTheme } from "../../pluckrAppTheme";
 
 type Props = {
   organization: MembershipWithOrganization["organization"];
   membership: MembershipWithOrganization["membership"];
   provider: ProviderRecord | null;
-  membershipsCount: number;
   isUpdatingPrivacy: boolean;
   error: string | null;
   notice: string | null;
   onOpenAdmin: () => void;
-  onBackToOrganizations: () => void;
   onToggleProtectSensitiveScreens: (nextValue: boolean) => void;
 };
 
@@ -24,12 +21,10 @@ export function PluckrSettingsStage({
   organization,
   membership,
   provider,
-  membershipsCount,
   isUpdatingPrivacy,
   error,
   notice,
   onOpenAdmin,
-  onBackToOrganizations,
   onToggleProtectSensitiveScreens
 }: Props) {
   const canManageTeam =
@@ -37,9 +32,6 @@ export function PluckrSettingsStage({
 
   return (
     <View style={styles.container}>
-      {error ? <PluckrNoticeBanner tone="error" message={error} /> : null}
-      {notice ? <PluckrNoticeBanner tone="success" message={notice} /> : null}
-
       <PluckrCard>
         <PluckrSectionHeader title="Account" />
         <View style={styles.stack}>
@@ -61,21 +53,12 @@ export function PluckrSettingsStage({
       </PluckrCard>
 
       <PluckrCard>
-        <PluckrSectionHeader title="Practice" />
+        <PluckrSectionHeader title="Workspace" />
         <View style={styles.stack}>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Current practice</Text>
+            <Text style={styles.detailLabel}>Current workspace</Text>
             <Text style={styles.detailValue}>{organization.name}</Text>
           </View>
-          {membershipsCount > 1 ? (
-            <Pressable
-              accessibilityRole="button"
-              style={styles.rowButton}
-              onPress={onBackToOrganizations}
-            >
-              <Text style={styles.rowButtonLabel}>Switch practice</Text>
-            </Pressable>
-          ) : null}
         </View>
       </PluckrCard>
 
