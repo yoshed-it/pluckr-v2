@@ -89,7 +89,7 @@ export function PluckrChartEntryEditor({
   onCancelChart
 }: ChartEditorProps) {
   const [activeDrawer, setActiveDrawer] = useState<
-    null | "probe" | "area" | "rf" | "dc" | "time" | "tags"
+    null | "probe" | "area" | "rf" | "dc" | "time" | "duration" | "tags"
   >(null);
 
   const selectedProbe = formatProbeName({
@@ -118,11 +118,15 @@ export function PluckrChartEntryEditor({
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Appointment</Text>
-          <DurationPresetSelector
-            value={chartForm.appointmentDurationMinutes}
-            onChange={(nextValue) =>
-              onChartFormChange("appointmentDurationMinutes", nextValue)
+          <SelectionField
+            label="Duration"
+            value={
+              chartForm.appointmentDurationMinutes
+                ? `${chartForm.appointmentDurationMinutes} min`
+                : "Select duration"
             }
+            hint="Required"
+            onPress={() => setActiveDrawer("duration")}
           />
         </View>
 
@@ -370,6 +374,19 @@ export function PluckrChartEntryEditor({
         }
         onClose={() => setActiveDrawer(null)}
       />
+      <PluckrOptionDrawer
+        visible={activeDrawer === "duration"}
+        title="Appointment Duration"
+        onClose={() => setActiveDrawer(null)}
+        options={appointmentDurationPresets.map((duration) => ({
+          label: `${duration} min`,
+          selected: chartForm.appointmentDurationMinutes === String(duration),
+          onPress: () => {
+            onChartFormChange("appointmentDurationMinutes", String(duration));
+            setActiveDrawer(null);
+          }
+        }))}
+      />
       <PluckrTagPickerDrawer
         visible={activeDrawer === "tags"}
         title="Chart Tags"
@@ -380,49 +397,6 @@ export function PluckrChartEntryEditor({
         onClose={() => setActiveDrawer(null)}
       />
     </PluckrCard>
-  );
-}
-
-function DurationPresetSelector({
-  value,
-  onChange
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <View style={styles.durationPresetGroup}>
-      <View style={styles.durationPresetRow}>
-        {appointmentDurationPresets.map((duration) => {
-          const label = `${duration} min`;
-          const selected = value === String(duration);
-
-          return (
-            <Pressable
-              key={duration}
-              accessibilityLabel={`Appointment duration ${label}`}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              style={[
-                styles.durationPresetChip,
-                selected ? styles.durationPresetChipActive : null
-              ]}
-              onPress={() => onChange(String(duration))}
-            >
-              <Text
-                style={[
-                  styles.durationPresetLabel,
-                  selected ? styles.durationPresetLabelActive : null
-                ]}
-              >
-                {label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-      <Text style={styles.requiredHint}>Required for every chart entry.</Text>
-    </View>
   );
 }
 
