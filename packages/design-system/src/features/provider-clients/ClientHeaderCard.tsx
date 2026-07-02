@@ -32,6 +32,14 @@ function formatLastSeen(value: string) {
   }).format(new Date(value));
 }
 
+function formatClientSince(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).format(new Date(value));
+}
+
 export function ClientHeaderCard({
   client,
   onOpenDetails,
@@ -39,6 +47,7 @@ export function ClientHeaderCard({
   onOpenTagPicker
 }: Props) {
   const lastSeen = formatLastSeen(client.last_seen_at || client.created_at);
+  const clientSince = formatClientSince(client.created_at);
   const isActive = !client.archived_at;
   const clientTags = client.client_tags ?? [];
   const visibleClientTags = clientTags.slice(0, visibleClientTagLimit);
@@ -95,6 +104,7 @@ export function ClientHeaderCard({
         phone={client.phone}
         email={client.email}
         lastSeen={lastSeen}
+        clientSince={clientSince}
       />
     </PluckrCard>
   );

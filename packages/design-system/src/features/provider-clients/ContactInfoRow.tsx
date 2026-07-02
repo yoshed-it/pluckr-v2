@@ -8,6 +8,7 @@ type Props = {
   phone?: string | null;
   email?: string | null;
   lastSeen: string;
+  clientSince: string;
 };
 
 function Item({
@@ -43,13 +44,15 @@ function Item({
 export function ContactInfoRow({
   phone,
   email,
-  lastSeen
+  lastSeen,
+  clientSince
 }: Props) {
   return (
     <View style={styles.stack}>
       <Item icon="phone" primary={phone || "No phone"} secondary="Mobile" />
       <Item icon="mail" primary={email || "No email"} secondary="Email" />
       <Item icon="clock" primary={lastSeen} secondary="Last seen" />
+      <Item icon="clock" primary={clientSince} secondary="Client since" />
     </View>
   );
 }

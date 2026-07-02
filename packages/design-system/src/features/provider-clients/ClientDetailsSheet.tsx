@@ -110,6 +110,9 @@ export function ClientDetailsSheet({
             <Text style={styles.metaCopy}>
               Last seen {formatDateTime(client.last_seen_at || client.created_at)}
             </Text>
+            <Text style={styles.metaCopy}>
+              Client since {formatDate(client.created_at.slice(0, 10))}
+            </Text>
             {client.consent_signed_at ? (
               <Text style={styles.metaCopy}>Image consent signed</Text>
             ) : (
