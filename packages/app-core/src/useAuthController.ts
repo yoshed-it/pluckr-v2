@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { AuthMode } from "./types";
+import type { AuthMode, SignupIntent } from "./types";
 
 /**
  * Keeps auth form state and auth actions out of the UI components.
@@ -11,13 +11,15 @@ export function useAuthController(client: SupabaseClient) {
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authNotice, setAuthNotice] = useState<string | null>(null);
+  const [signupIntent, setSignupIntent] = useState<SignupIntent>("invite");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  function changeAuthMode(mode: AuthMode) {
+  function changeAuthMode(mode: AuthMode, intent: SignupIntent = "invite") {
     setAuthMode(mode);
+    setSignupIntent(mode === "signup" ? intent : "invite");
     setAuthError(null);
     setAuthNotice(null);
   }
@@ -58,7 +60,7 @@ export function useAuthController(client: SupabaseClient) {
         data: {
           display_name: fullName.trim(),
           full_name: fullName.trim(),
-          onboarding_intent: "creator"
+          onboarding_intent: signupIntent
         }
       }
     });
@@ -99,6 +101,7 @@ export function useAuthController(client: SupabaseClient) {
 
   function resetAfterLogout() {
     setAuthMode("signin");
+    setSignupIntent("invite");
     setAuthSubmitting(false);
     setAuthError(null);
     setAuthNotice(null);
@@ -106,6 +109,7 @@ export function useAuthController(client: SupabaseClient) {
 
   return {
     authMode,
+    signupIntent,
     authSubmitting,
     authError,
     authNotice,

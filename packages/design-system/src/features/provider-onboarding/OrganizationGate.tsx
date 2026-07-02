@@ -62,30 +62,32 @@ export function PluckrOrganizationStage({
 }: PluckrOrganizationStageProps) {
   const isNewUser = memberships.length === 0;
   const showInviteAccess = isNewUser || isJoining;
+  const shouldDefaultToCreate = isNewUser && canCreateWorkspace && !isJoining;
+  const showCreateForm = isCreating || shouldDefaultToCreate;
 
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
-        <Text style={styles.kicker}>Workspace Access</Text>
+        <Text style={styles.kicker}>Practice Access</Text>
         <Text style={styles.logoutLink} onPress={onLogout}>
           Log Out
         </Text>
       </View>
 
       <PluckrBrandHeader
-        title="Workspace Invite"
-        subtitle="Workspace access comes from an invite. Sign in, then enter your invite token to finish onboarding."
+        title="Practice Invite"
+        subtitle="Practice access comes from an invite. Sign in, then enter your invite token to finish onboarding."
         compact
         logoSource={logoSource}
       />
 
-      {isCreating ? (
+      {showCreateForm ? (
         <PluckrCard>
           <View style={styles.stack}>
-            <Text style={styles.sectionTitle}>Create Workspace</Text>
+            <Text style={styles.sectionTitle}>Create Practice</Text>
             <PluckrTextField
-              label="Workspace Name"
-              placeholder="Workspace Name"
+              label="Practice Name"
+              placeholder="Practice Name"
               autoCapitalize="words"
               value={organizationName}
               onChangeText={onOrganizationNameChange}
@@ -98,15 +100,17 @@ export function PluckrOrganizationStage({
               onChangeText={onOrganizationDescriptionChange}
             />
             <PluckrButton
-              label={isSubmitting ? "Creating..." : "Create Workspace"}
+              label={isSubmitting ? "Creating..." : "Create Practice"}
               disabled={!organizationName.trim() || isSubmitting}
               onPress={() => onCreateOrganization()}
             />
             <PluckrButton
-              label="Cancel"
+              label={shouldDefaultToCreate ? "Use Invite Instead" : "Cancel"}
               variant="secondary"
               disabled={isSubmitting}
-              onPress={() => onCancelCreate()}
+              onPress={() =>
+                shouldDefaultToCreate ? onStartJoin() : onCancelCreate()
+              }
             />
           </View>
         </PluckrCard>
@@ -135,13 +139,13 @@ export function PluckrOrganizationStage({
                 onPress={() => onCancelJoin()}
               />
             ) : null}
-            <Text style={styles.helperCopy}>
-              Ask the workspace owner or admin to send you an invite if you do not
+              <Text style={styles.helperCopy}>
+              Ask the practice owner or admin to send you an invite if you do not
               have one yet.
             </Text>
             {isNewUser && canCreateWorkspace ? (
               <PluckrButton
-                label="Create First Workspace"
+                label="Create First Practice"
                 variant="secondary"
                 disabled={isSubmitting}
                 onPress={() => onStartCreate()}
@@ -149,7 +153,7 @@ export function PluckrOrganizationStage({
             ) : null}
             {isNewUser && canCreateWorkspace ? (
               <Text style={styles.helperCopy}>
-                Only create a workspace when you are setting up the practice for
+                Only create a practice when you are setting it up for
                 the first time.
               </Text>
             ) : null}
@@ -164,7 +168,7 @@ export function PluckrOrganizationStage({
                 onPress={() => onStartJoin()}
               />
               <Text style={styles.helperCopy}>
-                Workspace selection is not part of the daily workflow. Once you are
+                Practice selection is not part of the daily workflow. Once you are
                 attached, Pluckr will take you straight into your provider dashboard.
               </Text>
             </View>

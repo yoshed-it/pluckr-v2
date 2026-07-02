@@ -5,3 +5,5 @@
  * without mixing view code into backend or data-access code.
  */
 export type AuthMode = "signin" | "signup" | "forgot";
+
+export type SignupIntent = "invite" | "creator";

@@ -214,8 +214,7 @@ export function usePluckrAppShellModel({
     !shouldShowOrganizationGate &&
     !shouldShowProviderSetupGate;
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
+  function resetAfterLogout() {
     setActiveWorkspaceScreen("workspace");
     setSelectedClient(null);
     setJournalOrigin("workspace");
@@ -225,9 +224,33 @@ export function usePluckrAppShellModel({
     setConsentSignature(null);
     setConsentError(null);
     setConsentNotice(null);
+    sessionController.clearSession();
     authController.resetAfterLogout();
     organizationController.resetAfterLogout();
     workspaceController.resetWorkspaceView();
+  }
+
+  async function handleLogout() {
+    resetAfterLogout();
+
+    try {
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+
+      if (error) {
+        showSnackbar({
+          key: "manual:logout-error",
+          message: error.message,
+          tone: "error"
+        });
+      }
+    } catch (error) {
+      showSnackbar({
+        key: "manual:logout-error",
+        message:
+          error instanceof Error ? error.message : "Unable to finish logout.",
+        tone: "error"
+      });
+    }
   }
 
   function handleOpenHomeFromBottomNavigation() {
@@ -645,6 +668,7 @@ export function usePluckrAppShellModel({
     isSensitiveScreen,
     authStageProps: {
       mode: authController.authMode,
+      signupIntent: authController.signupIntent,
       fullName: authController.fullName,
       email: authController.email,
       password: authController.password,
@@ -667,7 +691,6 @@ export function usePluckrAppShellModel({
     organizationStageProps: {
       memberships: organizationController.memberships,
       canCreateWorkspace:
-        authController.authMode === "signup" ||
         sessionController.session?.user.user_metadata.onboarding_intent ===
           "creator",
       isCreating:

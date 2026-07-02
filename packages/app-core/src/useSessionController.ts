@@ -12,6 +12,12 @@ export function useSessionController(client: SupabaseClient) {
   const [isBooting, setIsBooting] = useState(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
 
+  function clearSession() {
+    setSession(null);
+    setSessionError(null);
+    setIsBooting(false);
+  }
+
   useEffect(() => {
     let isActive = true;
 
@@ -53,6 +59,7 @@ export function useSessionController(client: SupabaseClient) {
   return {
     session,
     isBooting,
-    sessionError
+    sessionError,
+    clearSession
   };
 }

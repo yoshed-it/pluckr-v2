@@ -92,6 +92,8 @@ export function PluckrClientListStage({
   onAddCustomClientTag,
   onSubmitClient
 }: PluckrClientListStageProps) {
+  const isSearching = searchText.trim().length > 0;
+
   return (
     <View style={styles.container}>
       {!hideToolbar ? (
@@ -109,6 +111,7 @@ export function PluckrClientListStage({
         <PluckrSectionHeader title="Directory" count={clients.length} />
         <View style={styles.searchRow}>
           <TextInput
+            accessibilityLabel="Search clients"
             placeholder="Search clients..."
             placeholderTextColor={pluckrAppTheme.colors.textSecondary}
             style={styles.searchField}
@@ -148,11 +151,17 @@ export function PluckrClientListStage({
           <Text style={styles.emptyState}>Loading clients...</Text>
         ) : clients.length === 0 ? (
           <View style={styles.emptyStateStack}>
-            <Text style={styles.emptyStateTitle}>No clients yet</Text>
-            <Text style={styles.emptyState}>
-              Add your first client to get started.
+            <Text style={styles.emptyStateTitle}>
+              {isSearching ? "No matching clients" : "No clients yet"}
             </Text>
-            <PluckrButton label="Add Client" onPress={() => onStartCreate()} />
+            <Text style={styles.emptyState}>
+              {isSearching
+                ? "Try a different name, phone, email, or care tag."
+                : "Add your first client to start charting care."}
+            </Text>
+            {!isSearching ? (
+              <PluckrButton label="Add Client" onPress={() => onStartCreate()} />
+            ) : null}
           </View>
         ) : (
           <View style={styles.listStack}>

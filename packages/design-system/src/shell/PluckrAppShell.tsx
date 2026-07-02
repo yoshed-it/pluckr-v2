@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -29,6 +28,7 @@ import { TopBar } from "../composite/TopBar";
 import { PluckrUtilityBar } from "../PluckrUtilityBar";
 import { PluckrSnackbar, type PluckrSnackbarTone } from "../primitives/Snackbar";
 import { pluckrAppTheme } from "../tokens/pluckrAppTheme";
+import { SafeAreaContainer } from "../layout/SafeAreaContainer";
 
 export type PluckrPrivacyState = {
   isSensitiveScreen: boolean;
@@ -111,7 +111,7 @@ export function PluckrAppShell({
   privacyCurtainVisible = false
 }: PluckrAppShellProps) {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaContainer style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -140,7 +140,7 @@ export function PluckrAppShell({
         ) : model.shouldShowAuth ? (
           <PluckrAuthStage {...model.authStageProps} logoSource={logoSource} />
         ) : model.isHydratingOrganization ? (
-          <PluckrJournalLoadingStage message="Loading your workspace..." />
+          <PluckrJournalLoadingStage message="Loading your practice..." />
         ) : model.showProviderLoading ? (
           <PluckrJournalLoadingStage message="Loading your provider profile..." />
         ) : model.shouldShowOrganizationGate ? (
@@ -192,7 +192,7 @@ export function PluckrAppShell({
           </Text>
         </View>
       ) : null}
-    </SafeAreaView>
+    </SafeAreaContainer>
   );
 }
 

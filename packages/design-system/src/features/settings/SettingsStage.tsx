@@ -53,10 +53,10 @@ export function PluckrSettingsStage({
       </PluckrCard>
 
       <PluckrCard>
-        <PluckrSectionHeader title="Workspace" />
+        <PluckrSectionHeader title="Practice" />
         <View style={styles.stack}>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Current workspace</Text>
+            <Text style={styles.detailLabel}>Current practice</Text>
             <Text style={styles.detailValue}>{organization.name}</Text>
           </View>
         </View>

@@ -8,9 +8,11 @@ import { PluckrTextField } from "../../primitives/TextField";
 import { pluckrAppTheme } from "../../pluckrAppTheme";
 
 export type PluckrAuthMode = "signin" | "signup" | "forgot";
+export type PluckrSignupIntent = "invite" | "creator";
 
 type PluckrAuthStageProps = {
   mode: PluckrAuthMode;
+  signupIntent: PluckrSignupIntent;
   logoSource: ImageSourcePropType;
   fullName: string;
   email: string;
@@ -19,7 +21,7 @@ type PluckrAuthStageProps = {
   error: string | null;
   notice: string | null;
   isSubmitting: boolean;
-  onModeChange: (mode: PluckrAuthMode) => void;
+  onModeChange: (mode: PluckrAuthMode, intent?: PluckrSignupIntent) => void;
   onFullNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
@@ -27,14 +29,22 @@ type PluckrAuthStageProps = {
   onSubmit: () => void;
 };
 
-function getCopy(mode: PluckrAuthMode) {
+function getCopy(mode: PluckrAuthMode, signupIntent: PluckrSignupIntent) {
   switch (mode) {
     case "signup":
-      return {
-        title: "Create Account",
-        subtitle: "Create your account first, then finish onboarding with your workspace invite.",
-        primaryLabel: "Create Account"
-      };
+      return signupIntent === "creator"
+        ? {
+            title: "Create Practice",
+            subtitle:
+              "Use this only when you are setting up a new practice for the first time.",
+            primaryLabel: "Create Owner Account"
+          }
+        : {
+            title: "Create Account",
+            subtitle:
+              "Create your account first, then finish onboarding with your practice invite.",
+            primaryLabel: "Create Account"
+          };
     case "forgot":
       return {
         title: "Reset Password",
@@ -52,6 +62,7 @@ function getCopy(mode: PluckrAuthMode) {
 
 export function PluckrAuthStage({
   mode,
+  signupIntent,
   logoSource,
   fullName,
   email,
@@ -67,7 +78,7 @@ export function PluckrAuthStage({
   onConfirmPasswordChange,
   onSubmit
 }: PluckrAuthStageProps) {
-  const copy = getCopy(mode);
+  const copy = getCopy(mode, signupIntent);
   const isSignIn = mode === "signin";
   const isSignUp = mode === "signup";
   const isForgot = mode === "forgot";
@@ -136,12 +147,23 @@ export function PluckrAuthStage({
           />
 
           {isSignIn ? (
-            <View style={styles.inlineActions}>
-              <Text style={styles.link} onPress={() => onModeChange("signup")}>
-                Create Account
-              </Text>
-              <Text style={styles.link} onPress={() => onModeChange("forgot")}>
-                Forgot Password?
+            <View style={styles.actionStack}>
+              <View style={styles.inlineActions}>
+                <Text
+                  style={styles.link}
+                  onPress={() => onModeChange("signup", "invite")}
+                >
+                  Join with invite
+                </Text>
+                <Text style={styles.link} onPress={() => onModeChange("forgot")}>
+                  Forgot Password?
+                </Text>
+              </View>
+              <Text
+                style={styles.centerLinkMuted}
+                onPress={() => onModeChange("signup", "creator")}
+              >
+                Setting up a new practice?
               </Text>
             </View>
           ) : (
@@ -165,6 +187,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: pluckrAppTheme.spacing.md
   },
+  actionStack: {
+    gap: pluckrAppTheme.spacing.sm
+  },
   message: {
     paddingHorizontal: pluckrAppTheme.spacing.xs,
     fontSize: 14,
@@ -186,6 +211,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: pluckrAppTheme.colors.sageStrong,
     fontSize: pluckrAppTheme.typography.body,
+    fontWeight: "600"
+  },
+  centerLinkMuted: {
+    textAlign: "center",
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
     fontWeight: "600"
   }
 });
