@@ -91,13 +91,17 @@ export function useClientListController(
       const pronouns = record.pronouns?.toLowerCase() ?? "";
       const email = record.email?.toLowerCase() ?? "";
       const phone = record.phone?.toLowerCase() ?? "";
+      const tags = (record.client_tags ?? [])
+        .join(" ")
+        .toLowerCase();
 
       return (
         displayName.includes(query) ||
         legalName.includes(query) ||
         pronouns.includes(query) ||
         email.includes(query) ||
-        phone.includes(query)
+        phone.includes(query) ||
+        tags.includes(query)
       );
     });
   }, [clients, searchText]);

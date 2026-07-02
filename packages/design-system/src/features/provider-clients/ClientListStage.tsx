@@ -69,6 +69,8 @@ function formatDateLabel(value: string | null) {
   }).format(new Date(value));
 }
 
+const visibleListTagLimit = 2;
+
 export function PluckrClientListStage({
   clients,
   searchText,
@@ -165,46 +167,60 @@ export function PluckrClientListStage({
           </View>
         ) : (
           <View style={styles.listStack}>
-            {clients.map((client) => (
-              <Pressable
-                key={client.id}
-                accessibilityRole="button"
-                style={styles.cardButton}
-                onPress={() => onSelectClient(client)}
-              >
-                <PluckrCard compact>
-                  <View style={styles.clientRow}>
-                    <View style={styles.clientCopy}>
-                      <Text style={styles.cardTitle}>
-                        {getClientDisplayName(client)}
-                      </Text>
-                      <View style={styles.rowChips}>
-                        {client.pronouns ? (
-                          <Text style={styles.tagChip}>{client.pronouns}</Text>
-                        ) : null}
-                        {client.consent_signed_at ? (
-                          <Text style={styles.tagChip}>Consent signed</Text>
-                        ) : null}
-                        {(client.client_tags ?? []).slice(0, 2).map((tag) => (
-                          <Text key={tag} style={styles.tagChip}>
-                            {tag}
-                          </Text>
-                        ))}
+            {clients.map((client) => {
+              const visibleTags = (client.client_tags ?? []).slice(
+                0,
+                visibleListTagLimit
+              );
+              const hiddenTagCount = Math.max(
+                (client.client_tags ?? []).length - visibleTags.length,
+                0
+              );
+
+              return (
+                <Pressable
+                  key={client.id}
+                  accessibilityRole="button"
+                  style={styles.cardButton}
+                  onPress={() => onSelectClient(client)}
+                >
+                  <PluckrCard compact>
+                    <View style={styles.clientRow}>
+                      <View style={styles.clientCopy}>
+                        <Text style={styles.cardTitle}>
+                          {getClientDisplayName(client)}
+                        </Text>
+                        <View style={styles.rowChips}>
+                          {client.pronouns ? (
+                            <Text style={styles.tagChip}>{client.pronouns}</Text>
+                          ) : null}
+                          {client.consent_signed_at ? (
+                            <Text style={styles.tagChip}>Consent signed</Text>
+                          ) : null}
+                          {visibleTags.map((tag) => (
+                            <Text key={tag} style={styles.tagChip}>
+                              {tag}
+                            </Text>
+                          ))}
+                          {hiddenTagCount > 0 ? (
+                            <Text style={styles.tagChip}>+{hiddenTagCount} tags</Text>
+                          ) : null}
+                        </View>
+                        <Text style={styles.cardBody}>
+                          {client.notes || "No care notes yet."}
+                        </Text>
+                        <Text style={styles.cardMeta}>
+                          Last seen {formatDateLabel(client.last_seen_at)}
+                        </Text>
                       </View>
-                      <Text style={styles.cardBody}>
-                        {client.notes || "No care notes yet."}
-                      </Text>
-                      <Text style={styles.cardMeta}>
-                        Last seen {formatDateLabel(client.last_seen_at)}
-                      </Text>
+                      <View style={styles.rowAccessory}>
+                        <Text style={styles.openGlyph}>›</Text>
+                      </View>
                     </View>
-                    <View style={styles.rowAccessory}>
-                      <Text style={styles.openGlyph}>›</Text>
-                    </View>
-                  </View>
-                </PluckrCard>
-              </Pressable>
-            ))}
+                  </PluckrCard>
+                </Pressable>
+              );
+            })}
           </View>
         )}
       </PluckrCard>

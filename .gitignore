@@ -6,6 +6,7 @@ dist
 build
 .next
 coverage
+.artifacts/
 *.log
 .env
 .env.local
