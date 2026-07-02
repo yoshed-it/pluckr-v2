@@ -600,6 +600,11 @@ export function usePluckrAppShellModel({
       setConsentSignerName("");
       setConsentSignature(null);
       setActiveWorkspaceScreen("journal");
+      showSnackbar({
+        key: "manual:consent-recorded",
+        message: "Image consent recorded.",
+        tone: "success"
+      });
       await Promise.all([
         clientListController.refreshClients(),
         workspaceController.refreshWorkspace()
@@ -865,6 +870,11 @@ export function usePluckrAppShellModel({
                 if (archivedClient) {
                   setSelectedClient(null);
                   setActiveWorkspaceScreen("clients");
+                  showSnackbar({
+                    key: "manual:client-archived",
+                    message: "Client archived.",
+                    tone: "success"
+                  });
                   void Promise.all([
                     clientListController.refreshClients(),
                     workspaceController.refreshWorkspace()

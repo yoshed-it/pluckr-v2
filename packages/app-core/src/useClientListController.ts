@@ -80,6 +80,7 @@ export function useClientListController(
 
   const filteredClients = useMemo(() => {
     const query = searchText.trim().toLowerCase();
+    const queryDigits = query.replace(/\D/g, "");
 
     if (!query) {
       return clients;
@@ -91,6 +92,7 @@ export function useClientListController(
       const pronouns = record.pronouns?.toLowerCase() ?? "";
       const email = record.email?.toLowerCase() ?? "";
       const phone = record.phone?.toLowerCase() ?? "";
+      const phoneDigits = phone.replace(/\D/g, "");
       const tags = (record.client_tags ?? [])
         .join(" ")
         .toLowerCase();
@@ -101,6 +103,7 @@ export function useClientListController(
         pronouns.includes(query) ||
         email.includes(query) ||
         phone.includes(query) ||
+        (queryDigits.length > 0 && phoneDigits.includes(queryDigits)) ||
         tags.includes(query)
       );
     });
