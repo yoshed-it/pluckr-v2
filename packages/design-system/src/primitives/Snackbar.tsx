@@ -69,7 +69,7 @@ export function PluckrSnackbar({
   }
 
   return (
-    <View pointerEvents="box-none" style={styles.overlay}>
+    <View style={styles.overlay}>
       <View style={styles.snackbar}>
         <View style={[styles.statusRing, ringStyles[tone]]}>
           <View style={[styles.statusDot, dotStyles[tone]]} />
@@ -95,6 +95,7 @@ export function PluckrSnackbar({
 const styles = StyleSheet.create({
   overlay: {
     position: "absolute",
+    pointerEvents: "box-none",
     right: pluckrAppTheme.spacing.lg,
     bottom: pluckrAppTheme.navigation.bottomBarHeight + pluckrAppTheme.spacing.md,
     left: pluckrAppTheme.spacing.lg,

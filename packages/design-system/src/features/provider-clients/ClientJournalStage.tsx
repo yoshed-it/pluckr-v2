@@ -73,6 +73,7 @@ type PluckrClientJournalStageProps = {
   availableChartTags: string[];
   previousChartReferencesByAreaId: Record<string, ChartEntryRecord | null>;
   hideToolbar?: boolean;
+  backLabel?: string | null;
   onBack: () => void;
   onLogout: () => void;
   onOpenConsent: () => void;
@@ -148,6 +149,7 @@ export function PluckrClientJournalStage({
   availableChartTags,
   previousChartReferencesByAreaId,
   hideToolbar = false,
+  backLabel,
   onBack,
   onLogout,
   onOpenConsent,
@@ -228,6 +230,7 @@ export function PluckrClientJournalStage({
       <ClientWorkspaceTopBar
         onBack={onBack}
         onMore={() => setShowClientActions(true)}
+        backLabel={backLabel ?? "Clients"}
       />
 
       <ClientHeaderCard

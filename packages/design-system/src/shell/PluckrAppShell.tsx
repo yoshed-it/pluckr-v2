@@ -185,7 +185,7 @@ export function PluckrAppShell({
       {privacyCurtainVisible &&
       model.isSensitiveScreen &&
       model.protectSensitiveScreens ? (
-        <View pointerEvents="none" style={styles.privacyCurtain}>
+        <View style={styles.privacyCurtain}>
           <Text style={styles.privacyCurtainTitle}>Sensitive Screen Hidden</Text>
           <Text style={styles.privacyCurtainCopy}>
             Pluckr concealed this clinical screen to reduce accidental exposure.
@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
     gap: pluckrAppTheme.spacing.md
   },
   privacyCurtain: {
+    pointerEvents: "none",
     position: "absolute",
     top: 0,
     right: 0,

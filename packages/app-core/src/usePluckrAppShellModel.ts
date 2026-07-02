@@ -819,6 +819,7 @@ export function usePluckrAppShellModel({
           isEditingChart: clientJournalController.isEditingChart,
           isSavingChart: clientJournalController.isSavingChart,
           hideToolbar: true,
+          backLabel: previousScreenLabel,
           chartForm: clientJournalController.chartForm,
           previousChartReferencesByAreaId:
             clientJournalController.previousChartReferencesByAreaId,
@@ -856,6 +857,11 @@ export function usePluckrAppShellModel({
             }
 
             setSelectedClient(updatedClient);
+            showSnackbar({
+              key: "manual:client-updated",
+              message: "Client updated.",
+              tone: "success"
+            });
             await Promise.all([
               clientListController.refreshClients(),
               workspaceController.refreshWorkspace()

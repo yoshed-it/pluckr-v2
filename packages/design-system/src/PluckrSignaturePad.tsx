@@ -65,7 +65,7 @@ export function PluckrSignaturePad({
             <Image source={{ uri: value }} style={styles.previewImage} />
           </View>
         ) : (
-          <View pointerEvents="none" style={styles.emptyState}>
+          <View style={styles.emptyState}>
             <Text style={styles.emptyCopy}>
               Type the signature to record consent during the stabilization
               sprint.
@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
     fontFamily: "Georgia"
   },
   emptyState: {
+    pointerEvents: "none",
     minHeight: 96,
     alignItems: "center",
     justifyContent: "center",

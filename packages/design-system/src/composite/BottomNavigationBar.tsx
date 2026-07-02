@@ -33,7 +33,7 @@ export function BottomNavigationBar({
   primaryAction
 }: BottomNavigationBarProps) {
   return (
-    <View pointerEvents="box-none" style={styles.overlay}>
+    <View style={styles.overlay}>
       <View style={styles.bar}>
         {items.slice(0, 2).map((item) => (
           <NavigationItem key={item.key} item={item} />
@@ -102,6 +102,7 @@ function NavigationItem({ item }: { item: BottomNavigationItem }) {
 const styles = StyleSheet.create({
   overlay: {
     position: "absolute",
+    pointerEvents: "box-none",
     right: 0,
     bottom: 0,
     left: 0,

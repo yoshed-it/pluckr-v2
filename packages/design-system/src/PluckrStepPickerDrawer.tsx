@@ -81,7 +81,7 @@ export function PluckrStepPickerDrawer({
       onAction={onClose}
     >
       <View style={styles.wheelShell}>
-        <View pointerEvents="none" style={styles.selectionBand} />
+        <View style={styles.selectionBand} />
         <FlatList
           ref={listRef}
           data={values}
@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
     overflow: "hidden"
   },
   selectionBand: {
+    pointerEvents: "none",
     position: "absolute",
     left: 10,
     right: 10,

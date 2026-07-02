@@ -33,10 +33,20 @@ export function PluckrConfirmDialog({
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
           <View style={styles.actions}>
-            <Pressable style={styles.cancelButton} onPress={onCancel}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
+              style={styles.cancelButton}
+              onPress={onCancel}
+            >
               <Text style={styles.cancelLabel}>Cancel</Text>
             </Pressable>
-            <Pressable style={styles.confirmButton} onPress={onConfirm}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={confirmLabel}
+              style={styles.confirmButton}
+              onPress={onConfirm}
+            >
               <Text style={styles.confirmLabel}>{confirmLabel}</Text>
             </Pressable>
           </View>

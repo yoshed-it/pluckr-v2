@@ -43,19 +43,20 @@ export function PluckrTagPickerDrawer({
     () => new Set(selectedTags.map((tag) => tag.toLowerCase())),
     [selectedTags]
   );
+  const closeDrawer = () => {
+    setCustomTag("");
+    onClose();
+  };
 
   return (
     <PluckrBottomDrawer
       visible={visible}
       title={title}
       subtitle="Tap to select tags or add a custom one."
-      onClose={() => {
-        setCustomTag("");
-        onClose();
-      }}
-      actionLabel={actionLabel}
+      onClose={closeDrawer}
+      actionLabel={actionLabel ?? "✓"}
       actionDisabled={actionDisabled}
-      onAction={onAction}
+      onAction={onAction ?? closeDrawer}
     >
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Selected</Text>
