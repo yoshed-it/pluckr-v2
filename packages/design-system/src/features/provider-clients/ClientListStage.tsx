@@ -3,6 +3,7 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import { getClientDisplayName, type ClientRecord } from "@pluckr/domain";
 
 import { ClientCreateForm } from "./ClientCreateForm";
+import type { AdminContactFieldKey } from "./AdminContactFields";
 import { PluckrSectionHeader } from "../../composite/SectionHeader";
 import { PluckrBottomDrawer } from "../../primitives/BottomSheet";
 import { PluckrButton } from "../../primitives/Button";
@@ -27,6 +28,14 @@ type PluckrClientListStageProps = {
     pronouns: string;
     phone: string;
     email: string;
+    addressLine1: string;
+    addressLine2: string;
+    addressCity: string;
+    addressRegion: string;
+    addressPostalCode: string;
+    emergencyContactName: string;
+    emergencyContactRelationship: string;
+    emergencyContactPhone: string;
     internalNotes: string;
     clientTags: string[];
   };
@@ -58,7 +67,8 @@ type PluckrClientListStageProps = {
       | "pronouns"
       | "phone"
       | "email"
-      | "internalNotes",
+      | "internalNotes"
+      | AdminContactFieldKey,
     value: string
   ) => void;
   onToggleClientTag: (tagLabel: string) => void;

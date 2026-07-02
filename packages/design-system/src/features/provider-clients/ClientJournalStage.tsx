@@ -21,6 +21,7 @@ import { ClientWorkspaceTopBar } from "./ClientWorkspaceTopBar";
 import { QuickActionGrid } from "./QuickActionGrid";
 import { PluckrChartDetailPanel } from "../provider-charting/ChartDetailPanel";
 import { PluckrChartEntryEditor } from "../provider-charting/ChartEntryEditor";
+import type { AdminContactFieldKey } from "./AdminContactFields";
 import { pluckrClientJournalStageStyles as styles } from "./ClientJournalStage.styles";
 
 type PluckrClientJournalStageProps = {
@@ -42,6 +43,14 @@ type PluckrClientJournalStageProps = {
     pronouns: string;
     phone: string;
     email: string;
+    addressLine1: string;
+    addressLine2: string;
+    addressCity: string;
+    addressRegion: string;
+    addressPostalCode: string;
+    emergencyContactName: string;
+    emergencyContactRelationship: string;
+    emergencyContactPhone: string;
     notes: string;
     clientTags: string[];
   };
@@ -87,7 +96,8 @@ type PluckrClientJournalStageProps = {
       | "pronouns"
       | "phone"
       | "email"
-      | "notes",
+      | "notes"
+      | AdminContactFieldKey,
     value: string
   ) => void;
   onToggleClientTag: (tagLabel: string) => void;

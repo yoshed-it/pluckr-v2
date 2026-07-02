@@ -22,6 +22,14 @@ type ClientFormState = {
   pronouns: string;
   phone: string;
   email: string;
+  addressLine1: string;
+  addressLine2: string;
+  addressCity: string;
+  addressRegion: string;
+  addressPostalCode: string;
+  emergencyContactName: string;
+  emergencyContactRelationship: string;
+  emergencyContactPhone: string;
   internalNotes: string;
   clientTags: string[];
 };
@@ -34,6 +42,14 @@ const emptyForm: ClientFormState = {
   pronouns: "",
   phone: "",
   email: "",
+  addressLine1: "",
+  addressLine2: "",
+  addressCity: "",
+  addressRegion: "",
+  addressPostalCode: "",
+  emergencyContactName: "",
+  emergencyContactRelationship: "",
+  emergencyContactPhone: "",
   internalNotes: "",
   clientTags: []
 };
@@ -156,6 +172,14 @@ export function useClientListController(
         pronouns: clientForm.pronouns,
         phone: clientForm.phone,
         email: clientForm.email,
+        addressLine1: clientForm.addressLine1,
+        addressLine2: clientForm.addressLine2,
+        addressCity: clientForm.addressCity,
+        addressRegion: clientForm.addressRegion,
+        addressPostalCode: clientForm.addressPostalCode,
+        emergencyContactName: clientForm.emergencyContactName,
+        emergencyContactRelationship: clientForm.emergencyContactRelationship,
+        emergencyContactPhone: clientForm.emergencyContactPhone,
         notes: clientForm.internalNotes,
         clientTags: dedupeTagLabels(clientForm.clientTags)
       });

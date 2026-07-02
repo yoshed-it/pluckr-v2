@@ -23,6 +23,14 @@ type ClientDetailFormState = {
   pronouns: string;
   phone: string;
   email: string;
+  addressLine1: string;
+  addressLine2: string;
+  addressCity: string;
+  addressRegion: string;
+  addressPostalCode: string;
+  emergencyContactName: string;
+  emergencyContactRelationship: string;
+  emergencyContactPhone: string;
   notes: string;
   clientTags: string[];
 };
@@ -34,9 +42,40 @@ const emptyForm: ClientDetailFormState = {
   pronouns: "",
   phone: "",
   email: "",
+  addressLine1: "",
+  addressLine2: "",
+  addressCity: "",
+  addressRegion: "",
+  addressPostalCode: "",
+  emergencyContactName: "",
+  emergencyContactRelationship: "",
+  emergencyContactPhone: "",
   notes: "",
   clientTags: []
 };
+
+function buildClientDetailForm(client: ClientRecord): ClientDetailFormState {
+  return {
+    preferredName:
+      client.preferred_name ?? `${client.first_name} ${client.last_name}`.trim(),
+    firstName: client.first_name,
+    lastName: client.last_name,
+    pronouns: client.pronouns ?? "",
+    phone: client.phone ?? "",
+    email: client.email ?? "",
+    addressLine1: client.address_line1 ?? "",
+    addressLine2: client.address_line2 ?? "",
+    addressCity: client.address_city ?? "",
+    addressRegion: client.address_region ?? "",
+    addressPostalCode: client.address_postal_code ?? "",
+    emergencyContactName: client.emergency_contact_name ?? "",
+    emergencyContactRelationship:
+      client.emergency_contact_relationship ?? "",
+    emergencyContactPhone: client.emergency_contact_phone ?? "",
+    notes: client.notes ?? "",
+    clientTags: client.client_tags ?? []
+  };
+}
 
 /**
  * Owns client-detail editing state so journal screens can stay presentation
@@ -74,18 +113,7 @@ export function useClientDetailController(
     setClientDetailNotice(null);
     setClientDetailFormErrors({});
     setHasAttemptedClientDetailSubmit(false);
-    setClientDetailForm({
-      preferredName:
-        selectedClient.preferred_name ??
-        `${selectedClient.first_name} ${selectedClient.last_name}`.trim(),
-      firstName: selectedClient.first_name,
-      lastName: selectedClient.last_name,
-      pronouns: selectedClient.pronouns ?? "",
-      phone: selectedClient.phone ?? "",
-      email: selectedClient.email ?? "",
-      notes: selectedClient.notes ?? "",
-      clientTags: selectedClient.client_tags ?? []
-    });
+    setClientDetailForm(buildClientDetailForm(selectedClient));
   }, [selectedClient]);
 
   useEffect(() => {
@@ -113,18 +141,7 @@ export function useClientDetailController(
     setClientDetailNotice(null);
     setClientDetailFormErrors({});
     setHasAttemptedClientDetailSubmit(false);
-    setClientDetailForm({
-      preferredName:
-        selectedClient.preferred_name ??
-        `${selectedClient.first_name} ${selectedClient.last_name}`.trim(),
-      firstName: selectedClient.first_name,
-      lastName: selectedClient.last_name,
-      pronouns: selectedClient.pronouns ?? "",
-      phone: selectedClient.phone ?? "",
-      email: selectedClient.email ?? "",
-      notes: selectedClient.notes ?? "",
-      clientTags: selectedClient.client_tags ?? []
-    });
+    setClientDetailForm(buildClientDetailForm(selectedClient));
     setIsEditingClient(true);
   }
 
@@ -134,18 +151,7 @@ export function useClientDetailController(
     setClientDetailFormErrors({});
     setHasAttemptedClientDetailSubmit(false);
     if (selectedClient) {
-      setClientDetailForm({
-        preferredName:
-          selectedClient.preferred_name ??
-          `${selectedClient.first_name} ${selectedClient.last_name}`.trim(),
-        firstName: selectedClient.first_name,
-        lastName: selectedClient.last_name,
-        pronouns: selectedClient.pronouns ?? "",
-        phone: selectedClient.phone ?? "",
-        email: selectedClient.email ?? "",
-        notes: selectedClient.notes ?? "",
-        clientTags: selectedClient.client_tags ?? []
-      });
+      setClientDetailForm(buildClientDetailForm(selectedClient));
     }
   }
 
@@ -178,6 +184,15 @@ export function useClientDetailController(
         pronouns: clientDetailForm.pronouns,
         phone: clientDetailForm.phone,
         email: clientDetailForm.email,
+        addressLine1: clientDetailForm.addressLine1,
+        addressLine2: clientDetailForm.addressLine2,
+        addressCity: clientDetailForm.addressCity,
+        addressRegion: clientDetailForm.addressRegion,
+        addressPostalCode: clientDetailForm.addressPostalCode,
+        emergencyContactName: clientDetailForm.emergencyContactName,
+        emergencyContactRelationship:
+          clientDetailForm.emergencyContactRelationship,
+        emergencyContactPhone: clientDetailForm.emergencyContactPhone,
         notes: clientDetailForm.notes,
         clientTags: dedupeTagLabels(clientDetailForm.clientTags)
       });

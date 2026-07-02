@@ -47,6 +47,14 @@ export type ClientRecord = {
   phone: string | null;
   email: string | null;
   birth_date: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  address_city: string | null;
+  address_region: string | null;
+  address_postal_code: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_relationship: string | null;
+  emergency_contact_phone: string | null;
   notes: string | null;
   client_tags: string[];
   consent_signed_at: string | null;

@@ -6,6 +6,7 @@ import { PluckrTagPickerDrawer } from "../../PluckrTagPickerDrawer";
 import { PluckrBottomDrawer } from "../../primitives/BottomSheet";
 import { PluckrButton } from "../../primitives/Button";
 import { PluckrTextField } from "../../primitives/TextField";
+import { AdminContactFields, type AdminContactFieldKey } from "./AdminContactFields";
 import { pluckrClientJournalStageStyles as styles } from "./ClientJournalStage.styles";
 import { PronounPickerField } from "./PronounPickerField";
 
@@ -16,7 +17,8 @@ type ClientDetailField =
   | "pronouns"
   | "phone"
   | "email"
-  | "notes";
+  | "notes"
+  | AdminContactFieldKey;
 
 type Props = {
   visible: boolean;
@@ -28,6 +30,14 @@ type Props = {
     pronouns: string;
     phone: string;
     email: string;
+    addressLine1: string;
+    addressLine2: string;
+    addressCity: string;
+    addressRegion: string;
+    addressPostalCode: string;
+    emergencyContactName: string;
+    emergencyContactRelationship: string;
+    emergencyContactPhone: string;
     notes: string;
     clientTags: string[];
   };
@@ -198,6 +208,7 @@ export function ClientDetailsSheet({
               error={formErrors.email}
               onChangeText={(value) => onFieldChange("email", value)}
             />
+            <AdminContactFields form={form} onFieldChange={onFieldChange} />
           </View>
 
           <View style={styles.detailSection}>

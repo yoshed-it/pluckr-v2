@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { PluckrTagPickerDrawer } from "../../PluckrTagPickerDrawer";
 import { PluckrButton } from "../../primitives/Button";
 import { PluckrTextField } from "../../primitives/TextField";
+import { AdminContactFields, type AdminContactFieldKey } from "./AdminContactFields";
 import { pluckrClientListStageStyles as styles } from "./ClientListStage.styles";
 import { PronounPickerField } from "./PronounPickerField";
 
@@ -17,6 +18,14 @@ type Props = {
     pronouns: string;
     phone: string;
     email: string;
+    addressLine1: string;
+    addressLine2: string;
+    addressCity: string;
+    addressRegion: string;
+    addressPostalCode: string;
+    emergencyContactName: string;
+    emergencyContactRelationship: string;
+    emergencyContactPhone: string;
     internalNotes: string;
     clientTags: string[];
   };
@@ -43,7 +52,8 @@ type Props = {
       | "pronouns"
       | "phone"
       | "email"
-      | "internalNotes",
+      | "internalNotes"
+      | AdminContactFieldKey,
     value: string
   ) => void;
   onToggleClientTag: (tagLabel: string) => void;
@@ -158,7 +168,7 @@ export function ClientCreateForm({
           <View>
             <Text style={styles.optionalToggleTitle}>Optional details</Text>
             <Text style={styles.optionalToggleCopy}>
-              Pronouns, tags, and internal notes.
+              Pronouns, address, emergency contact, tags, and notes.
             </Text>
           </View>
           <Text style={styles.optionalToggleIcon}>
@@ -171,6 +181,10 @@ export function ClientCreateForm({
             <PronounPickerField
               value={clientForm.pronouns}
               onChange={(value) => onFormChange("pronouns", value)}
+            />
+            <AdminContactFields
+              form={clientForm}
+              onFieldChange={onFormChange}
             />
             <Pressable
               accessibilityRole="button"
