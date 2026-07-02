@@ -311,10 +311,6 @@ export function PluckrClientJournalStage({
         visible={showClientActions}
         client={client}
         onClose={() => setShowClientActions(false)}
-        onEditDetails={onStartEditClient}
-        onManageTags={() => setShowClientTagPicker(true)}
-        onOpenConsent={onOpenConsent}
-        onTakePhoto={onTakePhoto}
         onArchiveClient={() => setShowArchiveConfirm(true)}
       />
 

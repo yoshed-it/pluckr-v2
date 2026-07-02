@@ -19,10 +19,6 @@ type Props = {
   visible: boolean;
   client: ClientRecord;
   onClose: () => void;
-  onEditDetails: () => void;
-  onManageTags: () => void;
-  onOpenConsent: () => void;
-  onTakePhoto: () => void;
   onArchiveClient: () => void;
 };
 
@@ -30,43 +26,9 @@ export function ClientActionsDrawer({
   visible,
   client,
   onClose,
-  onEditDetails,
-  onManageTags,
-  onOpenConsent,
-  onTakePhoto,
   onArchiveClient
 }: Props) {
   const actions: ClientAction[] = [
-    {
-      key: "details",
-      label: "Edit details",
-      description: "Name, legal name, contact info, and care summary.",
-      icon: "details",
-      onPress: onEditDetails
-    },
-    {
-      key: "tags",
-      label: "Manage tags",
-      description: "Care flags and client context chips.",
-      icon: "add",
-      onPress: onManageTags
-    },
-    {
-      key: "consent",
-      label: client.consent_signed_at
-        ? "Review image consent"
-        : "Sign image consent",
-      description: "Open the consent workflow for clinical photos.",
-      icon: "consent",
-      onPress: onOpenConsent
-    },
-    {
-      key: "photo",
-      label: "Take photo",
-      description: "Capture treatment media for this client.",
-      icon: "camera",
-      onPress: onTakePhoto
-    },
     {
       key: "archive",
       label: "Archive client",
@@ -80,11 +42,18 @@ export function ClientActionsDrawer({
   return (
     <PluckrBottomDrawer
       visible={visible}
-      title="Client actions"
+      title="More"
       subtitle={getClientDisplayName(client)}
       onClose={onClose}
     >
       <View style={styles.stack}>
+        <View style={styles.comingSoonPanel}>
+          <Text style={styles.comingSoonTitle}>More coming soon</Text>
+          <Text style={styles.comingSoonCopy}>
+            Documents, workflows, messages, and deeper client tools will live
+            here as Pluckr grows.
+          </Text>
+        </View>
         {actions.map((action) => (
           <Pressable
             key={action.key}
@@ -136,7 +105,24 @@ export function ClientActionsDrawer({
 
 const styles = StyleSheet.create({
   stack: {
-    gap: pluckrAppTheme.spacing.xs
+    gap: pluckrAppTheme.spacing.sm
+  },
+  comingSoonPanel: {
+    gap: pluckrAppTheme.spacing.xs,
+    paddingHorizontal: pluckrAppTheme.spacing.sm,
+    paddingVertical: pluckrAppTheme.spacing.sm
+  },
+  comingSoonTitle: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: "800"
+  },
+  comingSoonCopy: {
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "600"
   },
   actionRow: {
     flexDirection: "row",

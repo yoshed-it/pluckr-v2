@@ -2,21 +2,13 @@ import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { PluckrOptionDrawer } from "../../PluckrOptionDrawer";
-import { PluckrButton } from "../../primitives/Button";
-import { PluckrTextField } from "../../primitives/TextField";
 import { pluckrAppTheme } from "../../tokens/pluckrAppTheme";
 
 const pronounOptions = [
-  "He / Him",
-  "She / Her",
-  "They / Them",
-  "He / They",
-  "She / They",
-  "They / He",
-  "They / She",
-  "Prefer not to say"
+  "He/Him",
+  "She/Her",
+  "They/Them"
 ];
-const customOptionLabel = "Other / Custom";
 
 type Props = {
   value: string;
@@ -28,27 +20,10 @@ export function PronounPickerField({
   onChange
 }: Props) {
   const [visible, setVisible] = useState(false);
-  const [isCustomEntryVisible, setIsCustomEntryVisible] = useState(false);
-  const [customValue, setCustomValue] = useState("");
   const displayValue = value.trim() || "Select pronouns";
-  const isKnownOption = pronounOptions.includes(value);
 
   function openPicker() {
-    setCustomValue(isKnownOption ? "" : value);
-    setIsCustomEntryVisible(false);
     setVisible(true);
-  }
-
-  function saveCustomValue() {
-    const trimmedValue = customValue.trim();
-
-    if (!trimmedValue) {
-      return;
-    }
-
-    onChange(trimmedValue);
-    setVisible(false);
-    setIsCustomEntryVisible(false);
   }
 
   return (
@@ -67,23 +42,6 @@ export function PronounPickerField({
       <PluckrOptionDrawer
         visible={visible}
         title="Pronouns"
-        header={
-          isCustomEntryVisible ? (
-            <View style={styles.customStack}>
-              <PluckrTextField
-                label="Custom pronouns"
-                placeholder="Enter pronouns"
-                value={customValue}
-                onChangeText={setCustomValue}
-              />
-              <PluckrButton
-                label="Use Custom"
-                disabled={!customValue.trim()}
-                onPress={saveCustomValue}
-              />
-            </View>
-          ) : null
-        }
         options={[
           ...pronounOptions.map((option) => ({
             label: option,
@@ -91,18 +49,8 @@ export function PronounPickerField({
             onPress: () => {
               onChange(option);
               setVisible(false);
-              setIsCustomEntryVisible(false);
             }
-          })),
-          {
-            label: customOptionLabel,
-            description: !isKnownOption && value ? value : "Enter a custom value",
-            selected: !isKnownOption && Boolean(value),
-            onPress: () => {
-              setCustomValue(isKnownOption ? "" : value);
-              setIsCustomEntryVisible(true);
-            }
-          }
+          }))
         ]}
         onClose={() => setVisible(false)}
       />
@@ -137,9 +85,5 @@ const styles = StyleSheet.create({
   placeholder: {
     color: pluckrAppTheme.colors.textMuted,
     fontWeight: "500"
-  },
-  customStack: {
-    gap: pluckrAppTheme.spacing.sm,
-    marginBottom: pluckrAppTheme.spacing.sm
   }
 });

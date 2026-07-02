@@ -212,10 +212,10 @@ export function ClientDetailsSheet({
           </View>
 
           <View style={styles.detailSection}>
-            <Text style={styles.detailSectionTitle}>Care summary</Text>
+            <Text style={styles.detailSectionTitle}>Internal Notes</Text>
             <PluckrTextField
               label="Notes"
-              placeholder="History, care plan, reactions, reminders..."
+              placeholder="Private context for the practice..."
               multiline
               value={form.notes}
               onChangeText={(value) => onFieldChange("notes", value)}
