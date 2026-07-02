@@ -869,6 +869,26 @@ export function usePluckrAppShellModel({
 
             return true;
           },
+          onSubmitClientTags: async () => {
+            const updatedClient = await clientDetailController.submitClientTags();
+
+            if (!updatedClient) {
+              return false;
+            }
+
+            setSelectedClient(updatedClient);
+            showSnackbar({
+              key: "manual:client-tags-updated",
+              message: "Client tags updated.",
+              tone: "success"
+            });
+            await Promise.all([
+              clientListController.refreshClients(),
+              workspaceController.refreshWorkspace()
+            ]);
+
+            return true;
+          },
           onArchiveClient: () =>
             void clientDetailController
               .archiveSelectedClient()

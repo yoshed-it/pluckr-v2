@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   archiveClient,
   updateClient,
+  updateClientTags,
   type ClientRecord
 } from "@pluckr/supabase";
 import {
@@ -214,6 +215,40 @@ export function useClientDetailController(
     }
   }
 
+  async function submitClientTags() {
+    if (!organizationId || !selectedClient) {
+      return null;
+    }
+
+    setIsSavingClient(true);
+    setClientDetailError(null);
+    setClientDetailNotice(null);
+
+    try {
+      const updatedClient = await updateClientTags(client, {
+        organizationId,
+        clientId: selectedClient.id,
+        clientTags: dedupeTagLabels(clientDetailForm.clientTags)
+      });
+
+      setClientDetailNotice("Client tags updated.");
+      setClientDetailForm((current) => ({
+        ...current,
+        clientTags: updatedClient.client_tags ?? []
+      }));
+      return updatedClient;
+    } catch (error) {
+      setClientDetailError(
+        error instanceof Error
+          ? error.message
+          : "Unable to update client tags right now."
+      );
+      return null;
+    } finally {
+      setIsSavingClient(false);
+    }
+  }
+
   async function archiveSelectedClient() {
     if (!organizationId || !selectedClient) {
       return null;
@@ -286,6 +321,7 @@ export function useClientDetailController(
     startEditingClient,
     cancelEditingClient,
     submitClientDetails,
+    submitClientTags,
     archiveSelectedClient
   };
 }

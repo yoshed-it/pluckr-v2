@@ -103,6 +103,7 @@ type PluckrClientJournalStageProps = {
   onToggleClientTag: (tagLabel: string) => void;
   onAddCustomClientTag: (tagLabel: string) => void;
   onSubmitClientDetails: () => boolean | Promise<boolean>;
+  onSubmitClientTags: () => boolean | Promise<boolean>;
   onArchiveClient: () => void;
   onStartChart: () => void;
   onTakePhoto: () => void;
@@ -169,6 +170,7 @@ export function PluckrClientJournalStage({
   onToggleClientTag,
   onAddCustomClientTag,
   onSubmitClientDetails,
+  onSubmitClientTags,
   onArchiveClient,
   onStartChart,
   onTakePhoto,
@@ -205,7 +207,7 @@ export function PluckrClientJournalStage({
   }
 
   async function handleSaveClientTags() {
-    const didSave = await onSubmitClientDetails();
+    const didSave = await onSubmitClientTags();
 
     if (didSave) {
       setShowClientTagPicker(false);

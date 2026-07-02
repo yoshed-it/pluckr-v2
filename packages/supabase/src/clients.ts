@@ -125,6 +125,32 @@ export async function updateClient(
   return data as ClientRecord;
 }
 
+export async function updateClientTags(
+  client: SupabaseClient,
+  input: {
+    organizationId: string;
+    clientId: string;
+    clientTags: string[];
+  }
+) {
+  const { data, error } = await client
+    .from("clients")
+    .update({
+      client_tags: input.clientTags,
+      updated_at: new Date().toISOString()
+    })
+    .eq("organization_id", input.organizationId)
+    .eq("id", input.clientId)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as ClientRecord;
+}
+
 /**
  * Soft-archives a client so the record is preserved while the client list
  * matches the old app's active-only default behavior.
