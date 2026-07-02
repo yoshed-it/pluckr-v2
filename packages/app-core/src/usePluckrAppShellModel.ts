@@ -876,6 +876,7 @@ export function usePluckrAppShellModel({
                 if (archivedClient) {
                   setSelectedClient(null);
                   setActiveWorkspaceScreen("clients");
+                  clientListController.clearClientListNotice();
                   showSnackbar({
                     key: "manual:client-archived",
                     message: "Client archived.",

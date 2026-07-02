@@ -44,6 +44,25 @@ export const pluckrClientListStageStyles = StyleSheet.create({
   formStack: {
     gap: pluckrAppTheme.spacing.md
   },
+  profileAvatarRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: pluckrAppTheme.spacing.md
+  },
+  profileAvatar: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(12, 104, 99, 0.1)"
+  },
+  profileAvatarGlyph: {
+    color: pluckrAppTheme.colors.sage,
+    fontSize: 30,
+    lineHeight: 34,
+    fontWeight: "300"
+  },
   intakeSection: {
     gap: pluckrAppTheme.spacing.sm
   },
@@ -54,9 +73,14 @@ export const pluckrClientListStageStyles = StyleSheet.create({
     fontWeight: "800"
   },
   fieldRow: {
+    flexDirection: "row",
     gap: pluckrAppTheme.spacing.sm
   },
+  fieldColumn: {
+    flex: 1
+  },
   formCopy: {
+    flex: 1,
     color: pluckrAppTheme.colors.textSecondary,
     fontSize: 14,
     lineHeight: 20
@@ -85,6 +109,43 @@ export const pluckrClientListStageStyles = StyleSheet.create({
     color: pluckrAppTheme.colors.textPrimary,
     fontSize: 14,
     lineHeight: 18,
+    fontWeight: "700"
+  },
+  optionalToggle: {
+    minHeight: 58,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: pluckrAppTheme.spacing.md,
+    paddingHorizontal: pluckrAppTheme.spacing.md,
+    paddingVertical: pluckrAppTheme.spacing.sm,
+    borderRadius: pluckrAppTheme.radii.lg,
+    borderWidth: 1,
+    borderColor: pluckrAppTheme.colors.border,
+    backgroundColor: pluckrAppTheme.colors.surfaceMuted
+  },
+  optionalToggleTitle: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "800"
+  },
+  optionalToggleCopy: {
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 2
+  },
+  optionalToggleIcon: {
+    color: pluckrAppTheme.colors.sageStrong,
+    fontSize: 24,
+    lineHeight: 28,
+    fontWeight: "500"
+  },
+  inlineError: {
+    color: pluckrAppTheme.colors.critical,
+    fontSize: 12,
+    lineHeight: 16,
     fontWeight: "700"
   },
   tagRow: {

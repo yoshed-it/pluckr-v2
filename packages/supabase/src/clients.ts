@@ -55,6 +55,7 @@ export async function createClient(
       preferred_name: input.preferredName?.trim() || null,
       first_name: input.firstName.trim(),
       last_name: input.lastName.trim(),
+      birth_date: input.birthDate ?? null,
       pronouns: input.pronouns?.trim() || null,
       phone: input.phone?.trim() || null,
       email: input.email?.trim() || null,

@@ -23,15 +23,24 @@ type PluckrClientListStageProps = {
     preferredName: string;
     firstName: string;
     lastName: string;
+    birthDate: string;
     pronouns: string;
     phone: string;
     email: string;
-    careSummary: string;
+    internalNotes: string;
     clientTags: string[];
-    consentSigned: boolean;
   };
   clientFormErrors: Partial<
-    Record<"preferredName" | "firstName" | "lastName" | "email" | "phone", string>
+    Record<
+      | "preferredName"
+      | "firstName"
+      | "lastName"
+      | "birthDate"
+      | "email"
+      | "phone"
+      | "contact",
+      string
+    >
   >;
   availableClientTags: string[];
   onBack: () => void;
@@ -45,13 +54,12 @@ type PluckrClientListStageProps = {
       | "firstName"
       | "preferredName"
       | "lastName"
+      | "birthDate"
       | "pronouns"
       | "phone"
       | "email"
-      | "careSummary"
-      | "consentSigned",
+      | "internalNotes",
     value: string
-      | boolean
   ) => void;
   onToggleClientTag: (tagLabel: string) => void;
   onAddCustomClientTag: (tagLabel: string) => void;
@@ -128,8 +136,8 @@ export function PluckrClientListStage({
 
       <PluckrBottomDrawer
         visible={isCreatingClient}
-        title="New client intake"
-        subtitle="Capture the care context first. Legal and admin details stay tucked away after setup."
+        title="Add a new client"
+        subtitle="Create the client record. Clinical intake, insurance, photos, and consent live in their own workflows."
         actionLabel="×"
         onAction={onCancelCreate}
         onClose={onCancelCreate}

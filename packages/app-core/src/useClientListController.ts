@@ -9,6 +9,7 @@ import {
 } from "./tags";
 import {
   hasClientFormErrors,
+  normalizeBirthDateInput,
   validateClientIdentityForm,
   type ClientFormErrors
 } from "./clientValidation";
@@ -17,24 +18,24 @@ type ClientFormState = {
   preferredName: string;
   firstName: string;
   lastName: string;
+  birthDate: string;
   pronouns: string;
   phone: string;
   email: string;
-  careSummary: string;
+  internalNotes: string;
   clientTags: string[];
-  consentSigned: boolean;
 };
 
 const emptyForm: ClientFormState = {
   preferredName: "",
   firstName: "",
   lastName: "",
+  birthDate: "",
   pronouns: "",
   phone: "",
   email: "",
-  careSummary: "",
-  clientTags: [],
-  consentSigned: false
+  internalNotes: "",
+  clientTags: []
 };
 
 /**
@@ -151,12 +152,12 @@ export function useClientListController(
         preferredName: clientForm.preferredName,
         firstName: clientForm.firstName,
         lastName: clientForm.lastName,
+        birthDate: normalizeBirthDateInput(clientForm.birthDate),
         pronouns: clientForm.pronouns,
         phone: clientForm.phone,
         email: clientForm.email,
-        notes: clientForm.careSummary,
-        clientTags: dedupeTagLabels(clientForm.clientTags),
-        consentSignedAt: clientForm.consentSigned ? new Date().toISOString() : null
+        notes: clientForm.internalNotes,
+        clientTags: dedupeTagLabels(clientForm.clientTags)
       });
 
       setClients((current) => [createdClient, ...current]);
@@ -253,6 +254,7 @@ export function useClientListController(
     startCreatingClient,
     cancelCreatingClient,
     submitClient,
+    clearClientListNotice: () => setClientListNotice(null),
     refreshClients: () =>
       organizationId ? loadClients(organizationId) : Promise.resolve()
   };

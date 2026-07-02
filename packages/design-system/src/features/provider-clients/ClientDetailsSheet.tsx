@@ -55,6 +55,15 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC"
+  }).format(new Date(`${value}T00:00:00Z`));
+}
+
 export function ClientDetailsSheet({
   visible,
   client,
@@ -144,6 +153,11 @@ export function ClientDetailsSheet({
 
           <View style={styles.detailSection}>
             <Text style={styles.detailSectionTitle}>Legal and contact</Text>
+            {client.birth_date ? (
+              <Text style={styles.metaCopy}>
+                Date of birth {formatDate(client.birth_date)}
+              </Text>
+            ) : null}
             <View style={styles.fieldRow}>
               <PluckrTextField
                 label="Legal First"

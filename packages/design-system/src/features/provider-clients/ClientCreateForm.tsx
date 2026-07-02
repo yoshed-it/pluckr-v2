@@ -13,15 +13,24 @@ type Props = {
     preferredName: string;
     firstName: string;
     lastName: string;
+    birthDate: string;
     pronouns: string;
     phone: string;
     email: string;
-    careSummary: string;
+    internalNotes: string;
     clientTags: string[];
-    consentSigned: boolean;
   };
   clientFormErrors: Partial<
-    Record<"preferredName" | "firstName" | "lastName" | "email" | "phone", string>
+    Record<
+      | "preferredName"
+      | "firstName"
+      | "lastName"
+      | "birthDate"
+      | "email"
+      | "phone"
+      | "contact",
+      string
+    >
   >;
   availableClientTags: string[];
   onCancelCreate: () => void;
@@ -30,12 +39,12 @@ type Props = {
       | "firstName"
       | "preferredName"
       | "lastName"
+      | "birthDate"
       | "pronouns"
       | "phone"
       | "email"
-      | "careSummary"
-      | "consentSigned",
-    value: string | boolean
+      | "internalNotes",
+    value: string
   ) => void;
   onToggleClientTag: (tagLabel: string) => void;
   onAddCustomClientTag: (tagLabel: string) => void;
@@ -54,88 +63,71 @@ export function ClientCreateForm({
   onSubmitClient
 }: Props) {
   const [showClientTagPicker, setShowClientTagPicker] = useState(false);
+  const [showOptionalFields, setShowOptionalFields] = useState(false);
 
   return (
     <>
       <View style={styles.formStack}>
-        <View style={styles.intakeSection}>
-          <Text style={styles.intakeSectionTitle}>Daily care</Text>
+        <View style={styles.profileAvatarRow}>
+          <View style={styles.profileAvatar}>
+            <Text style={styles.profileAvatarGlyph}>+</Text>
+          </View>
           <Text style={styles.formCopy}>
-            Use the name providers should see during treatment. Legal details stay
-            in the record, not the primary workspace.
+            Add only the client identity and contact details needed to start care.
           </Text>
+        </View>
+
+        <View style={styles.intakeSection}>
+          <Text style={styles.intakeSectionTitle}>Required</Text>
           <PluckrTextField
-            label="Name"
-            placeholder="Name used in daily care"
+            label="Preferred Name"
+            placeholder="Name used during care"
             value={clientForm.preferredName}
             autoCapitalize="words"
             textContentType="name"
             error={clientFormErrors.preferredName}
             onChangeText={(value) => onFormChange("preferredName", value)}
           />
-          <PronounPickerField
-            value={clientForm.pronouns}
-            onChange={(value) => onFormChange("pronouns", value)}
-          />
-          <Pressable
-            accessibilityRole="button"
-            style={styles.tagSelector}
-            onPress={() => setShowClientTagPicker(true)}
-          >
-            <Text style={styles.tagSelectorLabel}>Care Tags</Text>
-            <Text style={styles.tagSelectorValue}>
-              {clientForm.clientTags.length > 0
-                ? `${clientForm.clientTags.length} selected`
-                : "Select tags"}
-            </Text>
-          </Pressable>
-          {clientForm.clientTags.length > 0 ? (
-            <View style={styles.tagRow}>
-              {clientForm.clientTags.map((tag) => (
-                <Text key={tag} style={styles.tagChip}>
-                  {tag}
-                </Text>
-              ))}
+          <View style={styles.fieldRow}>
+            <View style={styles.fieldColumn}>
+              <PluckrTextField
+                label="Legal First"
+                placeholder="e.g. John"
+                value={clientForm.firstName}
+                autoCapitalize="words"
+                textContentType="givenName"
+                error={clientFormErrors.firstName}
+                onChangeText={(value) => onFormChange("firstName", value)}
+              />
             </View>
-          ) : null}
+            <View style={styles.fieldColumn}>
+              <PluckrTextField
+                label="Legal Last"
+                placeholder="e.g. Hancock"
+                value={clientForm.lastName}
+                autoCapitalize="words"
+                textContentType="familyName"
+                error={clientFormErrors.lastName}
+                onChangeText={(value) => onFormChange("lastName", value)}
+              />
+            </View>
+          </View>
+          <PluckrTextField
+            label="Date of Birth"
+            placeholder="MM/DD/YYYY"
+            value={clientForm.birthDate}
+            keyboardType="numbers-and-punctuation"
+            error={clientFormErrors.birthDate}
+            onChangeText={(value) => onFormChange("birthDate", value)}
+          />
         </View>
 
         <View style={styles.intakeSection}>
-          <Text style={styles.intakeSectionTitle}>Legal and contact</Text>
-          <View style={styles.fieldRow}>
-            <PluckrTextField
-              label="Legal First"
-              placeholder="Legal first name"
-              value={clientForm.firstName}
-              autoCapitalize="words"
-              textContentType="givenName"
-              error={clientFormErrors.firstName}
-              onChangeText={(value) => onFormChange("firstName", value)}
-            />
-            <PluckrTextField
-              label="Legal Last"
-              placeholder="Legal last name"
-              value={clientForm.lastName}
-              autoCapitalize="words"
-              textContentType="familyName"
-              error={clientFormErrors.lastName}
-              onChangeText={(value) => onFormChange("lastName", value)}
-            />
-          </View>
-          <View style={styles.fieldRow}>
-            <PluckrTextField
-              label="Phone"
-              placeholder="555-555-5555"
-              value={clientForm.phone}
-              keyboardType="phone-pad"
-              textContentType="telephoneNumber"
-              error={clientFormErrors.phone}
-              onChangeText={(value) => onFormChange("phone", value)}
-            />
-          </View>
+          <Text style={styles.intakeSectionTitle}>Contact</Text>
+          <Text style={styles.formCopy}>Mobile phone or email is required.</Text>
           <PluckrTextField
             label="Email"
-            placeholder="client@example.com"
+            placeholder="example@domain.com"
             value={clientForm.email}
             autoCapitalize="none"
             autoCorrect={false}
@@ -144,54 +136,72 @@ export function ClientCreateForm({
             error={clientFormErrors.email}
             onChangeText={(value) => onFormChange("email", value)}
           />
+          <PluckrTextField
+            label="Mobile Phone"
+            placeholder="555-555-5555"
+            value={clientForm.phone}
+            keyboardType="phone-pad"
+            textContentType="telephoneNumber"
+            error={clientFormErrors.phone}
+            onChangeText={(value) => onFormChange("phone", value)}
+          />
+          {clientFormErrors.contact ? (
+            <Text style={styles.inlineError}>{clientFormErrors.contact}</Text>
+          ) : null}
         </View>
 
-        <View style={styles.intakeSection}>
-          <Text style={styles.intakeSectionTitle}>Consent and notes</Text>
-          <View style={styles.segmentRow}>
-            <Pressable
-              accessibilityRole="button"
-              style={[
-                styles.segmentButton,
-                clientForm.consentSigned ? styles.segmentButtonActive : null
-              ]}
-              onPress={() => onFormChange("consentSigned", true)}
-            >
-              <Text
-                style={[
-                  styles.segmentLabel,
-                  clientForm.consentSigned ? styles.segmentLabelActive : null
-                ]}
-              >
-                Consent signed
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              style={[
-                styles.segmentButton,
-                !clientForm.consentSigned ? styles.segmentButtonActive : null
-              ]}
-              onPress={() => onFormChange("consentSigned", false)}
-            >
-              <Text
-                style={[
-                  styles.segmentLabel,
-                  !clientForm.consentSigned ? styles.segmentLabelActive : null
-                ]}
-              >
-                Consent pending
-              </Text>
-            </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          style={styles.optionalToggle}
+          onPress={() => setShowOptionalFields((current) => !current)}
+        >
+          <View>
+            <Text style={styles.optionalToggleTitle}>Optional details</Text>
+            <Text style={styles.optionalToggleCopy}>
+              Pronouns, tags, and internal notes.
+            </Text>
           </View>
-          <PluckrTextField
-            label="Care Summary"
-            placeholder="Primary treatment reason, care flags, reminders..."
-            multiline
-            value={clientForm.careSummary}
-            onChangeText={(value) => onFormChange("careSummary", value)}
-          />
-        </View>
+          <Text style={styles.optionalToggleIcon}>
+            {showOptionalFields ? "−" : "+"}
+          </Text>
+        </Pressable>
+
+        {showOptionalFields ? (
+          <View style={styles.intakeSection}>
+            <PronounPickerField
+              value={clientForm.pronouns}
+              onChange={(value) => onFormChange("pronouns", value)}
+            />
+            <Pressable
+              accessibilityRole="button"
+              style={styles.tagSelector}
+              onPress={() => setShowClientTagPicker(true)}
+            >
+              <Text style={styles.tagSelectorLabel}>Tags</Text>
+              <Text style={styles.tagSelectorValue}>
+                {clientForm.clientTags.length > 0
+                  ? `${clientForm.clientTags.length} selected`
+                  : "Select tags"}
+              </Text>
+            </Pressable>
+            {clientForm.clientTags.length > 0 ? (
+              <View style={styles.tagRow}>
+                {clientForm.clientTags.map((tag) => (
+                  <Text key={tag} style={styles.tagChip}>
+                    {tag}
+                  </Text>
+                ))}
+              </View>
+            ) : null}
+            <PluckrTextField
+              label="Internal Notes"
+              placeholder="Private context for the practice..."
+              multiline
+              value={clientForm.internalNotes}
+              onChangeText={(value) => onFormChange("internalNotes", value)}
+            />
+          </View>
+        ) : null}
 
         <View style={styles.formActionStack}>
           <PluckrButton

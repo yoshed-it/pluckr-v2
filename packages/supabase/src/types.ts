@@ -29,6 +29,7 @@ export type ClientInput = {
   preferredName?: string | null;
   firstName: string;
   lastName: string;
+  birthDate?: string | null;
   pronouns?: string | null;
   phone?: string | null;
   email?: string | null;
