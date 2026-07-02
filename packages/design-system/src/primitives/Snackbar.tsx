@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { pluckrAppTheme } from "../tokens/pluckrAppTheme";
 
@@ -109,14 +109,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: pluckrAppTheme.spacing.md,
     paddingVertical: pluckrAppTheme.spacing.sm,
     backgroundColor: "#101C2E",
-    shadowColor: "#101C2E",
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-    shadowOffset: {
-      width: 0,
-      height: 7
-    },
-    elevation: 4
+    ...Platform.select({
+      web: {
+        boxShadow: "0px 7px 14px rgba(16, 28, 46, 0.18)"
+      },
+      default: {
+        shadowColor: "#101C2E",
+        shadowOpacity: 0.18,
+        shadowRadius: 14,
+        shadowOffset: {
+          width: 0,
+          height: 7
+        },
+        elevation: 4
+      }
+    })
   },
   statusRing: {
     width: 20,

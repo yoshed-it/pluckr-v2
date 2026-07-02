@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 
 import { pluckrAppTheme } from "../tokens/pluckrAppTheme";
 
@@ -50,14 +50,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: pluckrAppTheme.spacing.md,
     paddingVertical: pluckrAppTheme.spacing.sm,
     backgroundColor: "#101C2E",
-    shadowColor: "#101C2E",
-    shadowOpacity: 0.16,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 6
-    },
-    elevation: 3
+    ...Platform.select({
+      web: {
+        boxShadow: "0px 6px 12px rgba(16, 28, 46, 0.16)"
+      },
+      default: {
+        shadowColor: "#101C2E",
+        shadowOpacity: 0.16,
+        shadowRadius: 12,
+        shadowOffset: {
+          width: 0,
+          height: 6
+        },
+        elevation: 3
+      }
+    })
   },
   statusDot: {
     width: 10,

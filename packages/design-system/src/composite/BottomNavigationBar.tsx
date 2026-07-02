@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { PluckrIcon, type PluckrIconName } from "../primitives/Icon";
 import { pluckrAppTheme } from "../tokens/pluckrAppTheme";
@@ -121,14 +121,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: pluckrAppTheme.colors.border,
     backgroundColor: "rgba(255, 255, 255, 0.94)",
-    shadowColor: pluckrAppTheme.colors.textPrimary,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: {
-      width: 0,
-      height: -2
-    },
-    elevation: 8
+    ...Platform.select({
+      web: {
+        boxShadow: "0px -2px 18px rgba(35, 40, 36, 0.08)"
+      },
+      default: {
+        shadowColor: pluckrAppTheme.colors.textPrimary,
+        shadowOpacity: 0.08,
+        shadowRadius: 18,
+        shadowOffset: {
+          width: 0,
+          height: -2
+        },
+        elevation: 8
+      }
+    })
   },
   item: {
     width: 58,
@@ -158,19 +165,33 @@ const styles = StyleSheet.create({
     marginTop: -22,
     borderRadius: pluckrAppTheme.radii.full,
     backgroundColor: pluckrAppTheme.colors.sage,
-    shadowColor: pluckrAppTheme.colors.sage,
-    shadowOpacity: 0.32,
-    shadowRadius: 16,
-    shadowOffset: {
-      width: 0,
-      height: 8
-    },
-    elevation: 9
+    ...Platform.select({
+      web: {
+        boxShadow: "0px 8px 16px rgba(79, 122, 91, 0.32)"
+      },
+      default: {
+        shadowColor: pluckrAppTheme.colors.sage,
+        shadowOpacity: 0.32,
+        shadowRadius: 16,
+        shadowOffset: {
+          width: 0,
+          height: 8
+        },
+        elevation: 9
+      }
+    })
   },
   primaryActionDisabled: {
     backgroundColor: pluckrAppTheme.colors.surfaceMuted,
-    shadowOpacity: 0,
-    elevation: 0
+    ...Platform.select({
+      web: {
+        boxShadow: "none"
+      },
+      default: {
+        shadowOpacity: 0,
+        elevation: 0
+      }
+    })
   },
   pressed: {
     opacity: 0.72
