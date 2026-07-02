@@ -44,6 +44,8 @@ type Props = {
   onArchiveClient: () => void;
 };
 
+const visibleDetailTagLimit = 4;
+
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -68,13 +70,18 @@ export function ClientDetailsSheet({
   onArchiveClient
 }: Props) {
   const [showClientTagPicker, setShowClientTagPicker] = useState(false);
+  const visibleClientTags = form.clientTags.slice(0, visibleDetailTagLimit);
+  const hiddenClientTagCount = Math.max(
+    form.clientTags.length - visibleClientTags.length,
+    0
+  );
 
   return (
     <>
       <PluckrBottomDrawer
         visible={visible}
         title="Client details"
-        subtitle="Contact info, care context, and charting tags."
+        subtitle="Daily care context stays visible. Legal and admin details stay here."
         actionLabel="×"
         onAction={onClose}
         onClose={onClose}
@@ -91,42 +98,72 @@ export function ClientDetailsSheet({
             )}
           </View>
 
-          <PluckrTextField
-            label="Name"
-            placeholder="Name used in daily care"
-            value={form.preferredName}
-            autoCapitalize="words"
-            textContentType="name"
-            error={formErrors.preferredName}
-            onChangeText={(value) => onFieldChange("preferredName", value)}
-          />
-
-          <View style={styles.fieldRow}>
+          <View style={styles.detailSection}>
+            <Text style={styles.detailSectionTitle}>Daily care</Text>
+            <Text style={styles.detailSectionCopy}>
+              This is the client context providers see while charting.
+            </Text>
             <PluckrTextField
-              label="Legal First"
-              placeholder="Legal first name"
-              value={form.firstName}
+              label="Name"
+              placeholder="Name used in daily care"
+              value={form.preferredName}
               autoCapitalize="words"
-              textContentType="givenName"
-              error={formErrors.firstName}
-              onChangeText={(value) => onFieldChange("firstName", value)}
+              textContentType="name"
+              error={formErrors.preferredName}
+              onChangeText={(value) => onFieldChange("preferredName", value)}
             />
-            <PluckrTextField
-              label="Legal Last"
-              placeholder="Legal last name"
-              value={form.lastName}
-              autoCapitalize="words"
-              textContentType="familyName"
-              error={formErrors.lastName}
-              onChangeText={(value) => onFieldChange("lastName", value)}
-            />
-          </View>
-
-          <View style={styles.fieldRow}>
             <PronounPickerField
               value={form.pronouns}
               onChange={(value) => onFieldChange("pronouns", value)}
             />
+            <Pressable
+              accessibilityRole="button"
+              style={styles.tagSelector}
+              onPress={() => setShowClientTagPicker(true)}
+            >
+              <Text style={styles.tagSelectorLabel}>Care Tags</Text>
+              <Text style={styles.tagSelectorValue}>
+                {form.clientTags.length > 0
+                  ? `${form.clientTags.length} selected`
+                  : "Select tags"}
+              </Text>
+            </Pressable>
+            {form.clientTags.length > 0 ? (
+              <View style={styles.tagRow}>
+                {visibleClientTags.map((tag) => (
+                  <Text key={tag} style={styles.metaChip}>
+                    {tag}
+                  </Text>
+                ))}
+                {hiddenClientTagCount > 0 ? (
+                  <Text style={styles.metaChip}>+{hiddenClientTagCount} more</Text>
+                ) : null}
+              </View>
+            ) : null}
+          </View>
+
+          <View style={styles.detailSection}>
+            <Text style={styles.detailSectionTitle}>Legal and contact</Text>
+            <View style={styles.fieldRow}>
+              <PluckrTextField
+                label="Legal First"
+                placeholder="Legal first name"
+                value={form.firstName}
+                autoCapitalize="words"
+                textContentType="givenName"
+                error={formErrors.firstName}
+                onChangeText={(value) => onFieldChange("firstName", value)}
+              />
+              <PluckrTextField
+                label="Legal Last"
+                placeholder="Legal last name"
+                value={form.lastName}
+                autoCapitalize="words"
+                textContentType="familyName"
+                error={formErrors.lastName}
+                onChangeText={(value) => onFieldChange("lastName", value)}
+              />
+            </View>
             <PluckrTextField
               label="Phone"
               placeholder="555-555-5555"
@@ -136,70 +173,52 @@ export function ClientDetailsSheet({
               error={formErrors.phone}
               onChangeText={(value) => onFieldChange("phone", value)}
             />
+            <PluckrTextField
+              label="Email"
+              placeholder="client@example.com"
+              value={form.email}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              error={formErrors.email}
+              onChangeText={(value) => onFieldChange("email", value)}
+            />
           </View>
 
-          <PluckrTextField
-            label="Email"
-            placeholder="Email"
-            value={form.email}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            error={formErrors.email}
-            onChangeText={(value) => onFieldChange("email", value)}
-          />
+          <View style={styles.detailSection}>
+            <Text style={styles.detailSectionTitle}>Care summary</Text>
+            <PluckrTextField
+              label="Notes"
+              placeholder="History, care plan, reactions, reminders..."
+              multiline
+              value={form.notes}
+              onChangeText={(value) => onFieldChange("notes", value)}
+            />
+          </View>
 
-          <Pressable
-            accessibilityRole="button"
-            style={styles.tagSelector}
-            onPress={() => setShowClientTagPicker(true)}
-          >
-            <Text style={styles.tagSelectorLabel}>Client Tags</Text>
-            <Text style={styles.tagSelectorValue}>
-              {form.clientTags.length > 0
-                ? `${form.clientTags.length} selected`
-                : "Select tags"}
-            </Text>
-          </Pressable>
-
-          {form.clientTags.length > 0 ? (
-            <View style={styles.tagRow}>
-              {form.clientTags.map((tag) => (
-                <Text key={tag} style={styles.metaChip}>
-                  {tag}
-                </Text>
-              ))}
+          <View style={styles.detailSection}>
+            <Text style={styles.detailSectionTitle}>Admin</Text>
+            <View style={styles.detailActionRow}>
+              <PluckrButton
+                label={isSavingClient ? "Saving..." : "Save Client"}
+                disabled={isSavingClient}
+                onPress={onSubmit}
+              />
+              <PluckrButton
+                label="Close"
+                variant="secondary"
+                disabled={isSavingClient}
+                onPress={onClose}
+              />
+              <Pressable
+                accessibilityRole="button"
+                style={styles.archiveButton}
+                onPress={onArchiveClient}
+              >
+                <Text style={styles.archiveButtonLabel}>Archive Client</Text>
+              </Pressable>
             </View>
-          ) : null}
-
-          <PluckrTextField
-            label="Care Summary"
-            placeholder="History, care plan, reactions, reminders..."
-            multiline
-            value={form.notes}
-            onChangeText={(value) => onFieldChange("notes", value)}
-          />
-
-          <View style={styles.detailActionRow}>
-            <PluckrButton
-              label={isSavingClient ? "Saving..." : "Save Client"}
-              disabled={isSavingClient}
-              onPress={onSubmit}
-            />
-            <PluckrButton
-              label="Close"
-              variant="secondary"
-              disabled={isSavingClient}
-              onPress={onClose}
-            />
-            <Pressable
-              accessibilityRole="button"
-              style={styles.archiveButton}
-              onPress={onArchiveClient}
-            >
-              <Text style={styles.archiveButtonLabel}>Archive</Text>
-            </Pressable>
           </View>
         </View>
       </PluckrBottomDrawer>

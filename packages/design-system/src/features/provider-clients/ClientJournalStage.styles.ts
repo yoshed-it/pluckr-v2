@@ -117,6 +117,21 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
   detailEditorStack: {
     gap: pluckrAppTheme.spacing.sm
   },
+  detailSection: {
+    gap: pluckrAppTheme.spacing.sm,
+    paddingTop: pluckrAppTheme.spacing.xs
+  },
+  detailSectionTitle: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "800"
+  },
+  detailSectionCopy: {
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 19
+  },
   fieldRow: {
     gap: pluckrAppTheme.spacing.sm
   },
