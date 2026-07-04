@@ -30,6 +30,7 @@ export function PluckrSignaturePad({
   onChange
 }: PluckrSignaturePadProps) {
   const [signatureText, setSignatureText] = useState("");
+  const shouldRenderImagePreview = isSignatureDataUri(value);
 
   useEffect(() => {
     setSignatureText(extractSignatureText(value));
@@ -60,9 +61,13 @@ export function PluckrSignaturePad({
           value={signatureText}
           onChangeText={handleChange}
         />
-        {value ? (
+        {shouldRenderImagePreview ? (
           <View style={styles.previewWrap}>
             <Image source={{ uri: value }} style={styles.previewImage} />
+          </View>
+        ) : signatureText ? (
+          <View style={styles.textPreview}>
+            <Text style={styles.textPreviewValue}>{signatureText}</Text>
           </View>
         ) : (
           <View style={styles.emptyState}>
@@ -78,7 +83,7 @@ export function PluckrSignaturePad({
 }
 
 export function SignaturePreview({ value }: { value: string | null }) {
-  if (!value?.startsWith("data:image/svg+xml;utf8,")) {
+  if (!isSignatureDataUri(value)) {
     return null;
   }
 
@@ -102,7 +107,15 @@ function createSignatureDataUri(signatureText: string) {
 }
 
 function extractSignatureText(value: string | null) {
-  if (!value?.startsWith("data:image/svg+xml;utf8,")) {
+  if (!value) {
+    return "";
+  }
+
+  if (value.startsWith("signature:")) {
+    return decodeURIComponent(value.replace(/^signature:/, ""));
+  }
+
+  if (!isSignatureDataUri(value)) {
     return "";
   }
 
@@ -114,6 +127,10 @@ function extractSignatureText(value: string | null) {
   } catch {
     return "";
   }
+}
+
+function isSignatureDataUri(value: string | null): value is string {
+  return Boolean(value?.startsWith("data:image/svg+xml;utf8,"));
 }
 
 function escapeXml(value: string) {
@@ -201,5 +218,16 @@ const styles = StyleSheet.create({
   previewImage: {
     width: "100%",
     height: "100%"
+  },
+  textPreview: {
+    minHeight: 96,
+    justifyContent: "center",
+    paddingHorizontal: pluckrAppTheme.spacing.md
+  },
+  textPreviewValue: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 28,
+    lineHeight: 36,
+    fontFamily: "Georgia"
   }
 });
