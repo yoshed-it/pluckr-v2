@@ -193,14 +193,6 @@ export function PluckrClientJournalStage({
   const [showClientTagPicker, setShowClientTagPicker] = useState(false);
   const [activeTab, setActiveTab] = useState<ClientWorkspaceTabId>("chartEntries");
 
-  function handleShowCharts() {
-    setActiveTab("chartEntries");
-
-    if (isEditingChart) {
-      onCancelChart();
-    }
-  }
-
   function handleCloseClientTagPicker() {
     setShowClientTagPicker(false);
     onCancelEditClient();
@@ -257,17 +249,11 @@ export function PluckrClientJournalStage({
       <QuickActionGrid
         actions={[
           {
-            key: "charts",
-            label: "Charts",
-            icon: "reports",
-            onPress: handleShowCharts,
-            accent: true
-          },
-          {
             key: "add-chart",
             label: "Add\nEntry",
             icon: "document",
-            onPress: onStartChart
+            onPress: onStartChart,
+            accent: true
           },
           {
             key: "take-photo",
@@ -276,16 +262,16 @@ export function PluckrClientJournalStage({
             onPress: onTakePhoto
           },
           {
-            key: "upload-document",
-            label: "Upload\nDocument",
-            icon: "upload",
-            disabled: true
+            key: "consent",
+            label: client.consent_signed_at ? "Review\nConsent" : "Sign\nConsent",
+            icon: "consent",
+            onPress: onOpenConsent
           },
           {
-            key: "more",
-            label: "More",
-            icon: "more",
-            onPress: () => setShowClientActions(true)
+            key: "details",
+            label: "Details",
+            icon: "details",
+            onPress: onStartEditClient
           }
         ]}
       />
