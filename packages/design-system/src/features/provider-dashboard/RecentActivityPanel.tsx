@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   getChartTreatmentAreas,
   getClientDisplayName,
@@ -14,6 +14,7 @@ type PluckrRecentActivityPanelProps = {
   charts: RecentChartRecord[];
   count: number;
   isLoading: boolean;
+  onOpenChart: (chart: RecentChartRecord) => void;
 };
 
 function formatDateLabel(value: string | null) {
@@ -30,7 +31,8 @@ function formatDateLabel(value: string | null) {
 export function PluckrRecentActivityPanel({
   charts,
   count,
-  isLoading
+  isLoading,
+  onOpenChart
 }: PluckrRecentActivityPanelProps) {
   return (
     <PluckrCard compact>
@@ -46,7 +48,15 @@ export function PluckrRecentActivityPanel({
         ) : (
           <View style={styles.list}>
             {charts.map((chart) => (
-              <View key={chart.id} style={styles.activityRow}>
+              <Pressable
+                key={chart.id}
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.activityRow,
+                  pressed ? styles.activityRowPressed : null
+                ]}
+                onPress={() => onOpenChart(chart)}
+              >
                 <View style={styles.timelineDot} />
                 <View style={styles.activityCopy}>
                   <View style={styles.activityTopRow}>
@@ -70,7 +80,7 @@ export function PluckrRecentActivityPanel({
                     {chart.treatment_summary || chart.notes || "No notes yet."}
                   </Text>
                 </View>
-              </View>
+              </Pressable>
             ))}
           </View>
         )}
@@ -109,6 +119,9 @@ const styles = StyleSheet.create({
     paddingVertical: pluckrAppTheme.spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: pluckrAppTheme.colors.divider
+  },
+  activityRowPressed: {
+    opacity: 0.64
   },
   timelineDot: {
     width: 9,

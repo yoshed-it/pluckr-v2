@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import {
   getPrimaryChartTreatmentArea,
@@ -90,6 +90,7 @@ type PluckrClientJournalStageProps = {
   };
   availableChartTags: string[];
   previousChartReferencesByAreaId: Record<string, ChartEntryRecord | null>;
+  initialSelectedChartId?: string | null;
   hideToolbar?: boolean;
   backLabel?: string | null;
   onBack: () => void;
@@ -148,6 +149,7 @@ type PluckrClientJournalStageProps = {
   onRemoveChartImage: (image: ChartImageDraft) => void;
   onProbeStyleChange: (areaId: string, usingOnePiece: boolean) => void;
   onSubmitChart: () => void;
+  onInitialSelectedChartOpened?: () => void;
 };
 
 export function PluckrClientJournalStage({
@@ -168,6 +170,7 @@ export function PluckrClientJournalStage({
   chartForm,
   availableChartTags,
   previousChartReferencesByAreaId,
+  initialSelectedChartId = null,
   hideToolbar = false,
   backLabel,
   onBack,
@@ -194,7 +197,8 @@ export function PluckrClientJournalStage({
   onPickChartImages,
   onRemoveChartImage,
   onProbeStyleChange,
-  onSubmitChart
+  onSubmitChart,
+  onInitialSelectedChartOpened
 }: PluckrClientJournalStageProps) {
   const [selectedChart, setSelectedChart] = useState<ChartEntryRecord | null>(null);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
@@ -203,6 +207,21 @@ export function PluckrClientJournalStage({
   const [activeTab, setActiveTab] = useState<ClientWorkspaceTabId>("chartEntries");
   const [selectedGalleryItem, setSelectedGalleryItem] =
     useState<ClientGalleryItem | null>(null);
+
+  useEffect(() => {
+    if (!initialSelectedChartId) {
+      return;
+    }
+
+    const chartToOpen = charts.find((chart) => chart.id === initialSelectedChartId);
+
+    if (!chartToOpen) {
+      return;
+    }
+
+    setSelectedChart(chartToOpen);
+    onInitialSelectedChartOpened?.();
+  }, [charts, initialSelectedChartId, onInitialSelectedChartOpened]);
 
   function handleCloseClientTagPicker() {
     setShowClientTagPicker(false);

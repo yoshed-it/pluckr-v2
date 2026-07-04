@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getClientDisplayName, getClientLegalName, type ClientRecord } from "@pluckr/domain";
+import {
+  getClientDisplayName,
+  getClientLegalName,
+  type ClientRecord,
+  type RecentChartRecord
+} from "@pluckr/domain";
 import type { OrganizationRole } from "@pluckr/domain";
 import { updateClientConsent } from "@pluckr/supabase";
 
@@ -70,6 +75,8 @@ export function usePluckrAppShellModel({
   const [activeWorkspaceScreen, setActiveWorkspaceScreen] =
     useState<ActiveWorkspaceScreen>("workspace");
   const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
+  const [pendingChartDetailId, setPendingChartDetailId] =
+    useState<string | null>(null);
   const [journalOrigin, setJournalOrigin] = useState<JournalOrigin>("workspace");
   const [settingsOrigin, setSettingsOrigin] =
     useState<SettingsOrigin>("workspace");
@@ -256,6 +263,7 @@ export function usePluckrAppShellModel({
   function handleOpenHomeFromBottomNavigation() {
     clientJournalController.cancelEditingChart();
     clientDetailController.cancelEditingClient();
+    setPendingChartDetailId(null);
     setSelectedClient(null);
     setJournalOrigin("workspace");
     setActiveWorkspaceScreen("workspace");
@@ -264,6 +272,7 @@ export function usePluckrAppShellModel({
   function handleOpenClientsFromBottomNavigation() {
     clientJournalController.cancelEditingChart();
     clientDetailController.cancelEditingClient();
+    setPendingChartDetailId(null);
     setSelectedClient(null);
     setJournalOrigin("clients");
     setActiveWorkspaceScreen("clients");
@@ -272,6 +281,7 @@ export function usePluckrAppShellModel({
   function openSettings(origin: SettingsOrigin) {
     clientJournalController.cancelEditingChart();
     clientDetailController.cancelEditingClient();
+    setPendingChartDetailId(null);
     setSelectedClient(null);
     setSettingsOrigin(origin);
     setActiveWorkspaceScreen("settings");
@@ -288,6 +298,7 @@ export function usePluckrAppShellModel({
   function handleOpenMoreFromBottomNavigation() {
     clientJournalController.cancelEditingChart();
     clientDetailController.cancelEditingClient();
+    setPendingChartDetailId(null);
     setSelectedClient(null);
     setActiveWorkspaceScreen("more");
   }
@@ -298,7 +309,26 @@ export function usePluckrAppShellModel({
     setActiveWorkspaceScreen("journal");
   }
 
+  function openRecentChart(chart: RecentChartRecord) {
+    const chartClient = workspaceController.workspaceClients.find(
+      (client) => client.id === chart.client_id
+    );
+
+    if (!chartClient) {
+      showSnackbar({
+        key: `manual:chart-client-missing:${chart.id}`,
+        message: "Open the client list to view this chart.",
+        tone: "info"
+      });
+      return;
+    }
+
+    setPendingChartDetailId(chart.id);
+    openClientJournal(chartClient, "workspace");
+  }
+
   function handleBackFromJournal() {
+    setPendingChartDetailId(null);
     setSelectedClient(null);
     setActiveWorkspaceScreen(journalOrigin);
   }
@@ -821,6 +851,7 @@ export function usePluckrAppShellModel({
           hideToolbar: true,
           backLabel: previousScreenLabel,
           chartForm: clientJournalController.chartForm,
+          initialSelectedChartId: pendingChartDetailId,
           previousChartReferencesByAreaId:
             clientJournalController.previousChartReferencesByAreaId,
           availableChartTags: clientJournalController.availableChartTags,
@@ -936,6 +967,7 @@ export function usePluckrAppShellModel({
           onRemoveChartImage: (image: typeof clientJournalController.chartForm.images[number]) =>
             void clientJournalController.removeChartImageDraft(image),
           onProbeStyleChange: clientJournalController.setProbeStyle,
+          onInitialSelectedChartOpened: () => setPendingChartDetailId(null),
           onSubmitChart: () =>
             void clientJournalController.submitChart().then((saved) => {
               if (saved) {
@@ -986,6 +1018,7 @@ export function usePluckrAppShellModel({
           onOpenClient: (client: ClientRecord) => {
             openClientJournal(client, "workspace");
           },
+          onOpenChart: openRecentChart,
           onAddFolioClient: (client: ClientRecord) => {
             void workspaceController.addFolioClient(client);
           },

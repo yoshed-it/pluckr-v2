@@ -28,6 +28,7 @@ type PluckrProviderHomeStageProps = {
   onOpenClients: () => void;
   onSeedDemoData: () => void;
   onOpenClient: (client: ClientRecord) => void;
+  onOpenChart: (chart: RecentChartRecord) => void;
   onAddFolioClient: (client: ClientRecord) => void;
   onRemoveFolioClient: (client: ClientRecord) => void;
 };
@@ -46,6 +47,7 @@ export function PluckrProviderHomeStage({
   onOpenClients,
   onSeedDemoData,
   onOpenClient,
+  onOpenChart,
   onAddFolioClient,
   onRemoveFolioClient
 }: PluckrProviderHomeStageProps) {
@@ -83,6 +85,7 @@ export function PluckrProviderHomeStage({
         charts={recentCharts}
         count={summary.charts}
         isLoading={isLoading}
+        onOpenChart={onOpenChart}
       />
 
       <PluckrFolioPickerDrawer
