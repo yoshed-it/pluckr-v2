@@ -13,13 +13,17 @@ import { pluckrAppTheme } from "./pluckrAppTheme";
 type PluckrFullScreenImageModalProps = {
   visible: boolean;
   imageUrl: string | null;
+  actionLabel?: string;
   onClose: () => void;
+  onAction?: () => void;
 };
 
 export function PluckrFullScreenImageModal({
   visible,
   imageUrl,
-  onClose
+  actionLabel,
+  onClose,
+  onAction
 }: PluckrFullScreenImageModalProps) {
   return (
     <Modal
@@ -31,6 +35,15 @@ export function PluckrFullScreenImageModal({
       <View style={styles.overlay}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={styles.headerRow}>
+          {actionLabel && onAction ? (
+            <Pressable
+              accessibilityRole="button"
+              style={styles.actionButton}
+              onPress={onAction}
+            >
+              <Text style={styles.actionLabel}>{actionLabel}</Text>
+            </Pressable>
+          ) : null}
           <Pressable accessibilityRole="button" style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeLabel}>Close</Text>
           </Pressable>
@@ -59,7 +72,23 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: pluckrAppTheme.spacing.xl,
     right: pluckrAppTheme.spacing.lg,
-    zIndex: 2
+    zIndex: 2,
+    flexDirection: "row",
+    gap: pluckrAppTheme.spacing.xs
+  },
+  actionButton: {
+    minHeight: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    borderRadius: pluckrAppTheme.radii.full,
+    backgroundColor: "rgba(255,255,255,0.92)"
+  },
+  actionLabel: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: "800"
   },
   closeButton: {
     minHeight: 36,

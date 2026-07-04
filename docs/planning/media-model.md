@@ -46,6 +46,9 @@ Future:
 - Support unassigned captures that must be reviewed before becoming permanent.
 - Support consent/document/media categories without duplicating storage.
 - Support body-area/photo comparison metadata.
+- Support non-destructive markup/drawing layers for annotations, treatment
+  mapping, and progress comparison. Markup should be stored as overlay data or
+  derived assets, not by overwriting the original clinical photo.
 - Add audit logs for capture, view, assignment, removal, and export events.
 
 ## Non-Negotiables
@@ -57,4 +60,3 @@ Future:
   truth for browsing media.
 - Do not add computer vision or AI processing until the deterministic media
   ownership model is clear.
-

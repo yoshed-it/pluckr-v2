@@ -25,6 +25,14 @@ import { PluckrChartEntryEditor } from "../provider-charting/ChartEntryEditor";
 import type { AdminContactFieldKey } from "./AdminContactFields";
 import { pluckrClientJournalStageStyles as styles } from "./ClientJournalStage.styles";
 
+type ClientGalleryItem = {
+  id: string;
+  imageUrl: string;
+  chart: ChartEntryRecord;
+  area: string | null;
+  modality: string | null;
+};
+
 type PluckrClientJournalStageProps = {
   client: ClientRecord;
   charts: ChartEntryRecord[];
@@ -193,7 +201,8 @@ export function PluckrClientJournalStage({
   const [showClientActions, setShowClientActions] = useState(false);
   const [showClientTagPicker, setShowClientTagPicker] = useState(false);
   const [activeTab, setActiveTab] = useState<ClientWorkspaceTabId>("chartEntries");
-  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [selectedGalleryItem, setSelectedGalleryItem] =
+    useState<ClientGalleryItem | null>(null);
 
   function handleCloseClientTagPicker() {
     setShowClientTagPicker(false);
@@ -346,7 +355,7 @@ export function PluckrClientJournalStage({
         <ClientPhotoGallery
           charts={charts}
           isLoading={isLoading}
-          onOpenImage={setSelectedImageUrl}
+          onOpenImage={setSelectedGalleryItem}
         />
       ) : (
         <PluckrCard>
@@ -368,9 +377,16 @@ export function PluckrClientJournalStage({
         }}
       />
       <PluckrFullScreenImageModal
-        visible={Boolean(selectedImageUrl)}
-        imageUrl={selectedImageUrl}
-        onClose={() => setSelectedImageUrl(null)}
+        visible={Boolean(selectedGalleryItem)}
+        imageUrl={selectedGalleryItem?.imageUrl ?? null}
+        actionLabel="View Chart"
+        onAction={() => {
+          if (selectedGalleryItem) {
+            setSelectedChart(selectedGalleryItem.chart);
+            setSelectedGalleryItem(null);
+          }
+        }}
+        onClose={() => setSelectedGalleryItem(null)}
       />
     </View>
   );
@@ -383,9 +399,9 @@ function ClientPhotoGallery({
 }: {
   charts: ChartEntryRecord[];
   isLoading: boolean;
-  onOpenImage: (imageUrl: string) => void;
+  onOpenImage: (item: ClientGalleryItem) => void;
 }) {
-  const galleryItems = charts.flatMap((chart) =>
+  const galleryItems: ClientGalleryItem[] = charts.flatMap((chart) =>
     chart.image_urls.map((imageUrl, index) => {
       const primaryArea = getPrimaryChartTreatmentArea(chart);
 
@@ -433,7 +449,7 @@ function ClientPhotoGallery({
             key={item.id}
             accessibilityRole="button"
             style={styles.galleryTile}
-            onPress={() => onOpenImage(item.imageUrl)}
+            onPress={() => onOpenImage(item)}
           >
             <Image
               source={{ uri: item.imageUrl }}
