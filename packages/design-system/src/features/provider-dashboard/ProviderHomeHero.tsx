@@ -19,7 +19,9 @@ export function PluckrProviderHomeHero({
       <Text style={styles.title}>
         {displayName ? `Welcome, ${displayName}` : "Welcome"}
       </Text>
-      <Text style={styles.organizationName}>{organizationName}</Text>
+      <Text style={styles.organizationName}>
+        {`${organizationName} - Ready for today's clinical work`}
+      </Text>
     </View>
   );
 }

@@ -47,16 +47,29 @@ export function PluckrRecentActivityPanel({
           <View style={styles.list}>
             {charts.map((chart) => (
               <View key={chart.id} style={styles.activityRow}>
-                <Text style={styles.clientName}>
-                  {chart.client ? getClientDisplayName(chart.client) : "Client"}
-                </Text>
-                <Text numberOfLines={2} style={styles.clientMeta}>
-                  {chart.treatment_summary || chart.notes || "No summary yet."}
-                </Text>
-                <Text style={styles.activityMeta}>
-                  {formatActivityLabel(chart)} on{" "}
-                  {formatDateLabel(chart.created_at)}
-                </Text>
+                <View style={styles.timelineDot} />
+                <View style={styles.activityCopy}>
+                  <View style={styles.activityTopRow}>
+                    <Text style={styles.clientName}>
+                      {chart.client ? getClientDisplayName(chart.client) : "Client"}
+                    </Text>
+                    <Text style={styles.activityDate}>
+                      {formatDateLabel(chart.created_at)}
+                    </Text>
+                  </View>
+                  <Text style={styles.activityMeta}>
+                    {formatActivityLabel(chart)}
+                    {chart.appointment_duration_minutes
+                      ? ` - ${chart.appointment_duration_minutes} min`
+                      : ""}
+                    {getPhotoCount(chart) > 0
+                      ? ` - ${getPhotoCount(chart)} photo${getPhotoCount(chart) === 1 ? "" : "s"}`
+                      : ""}
+                  </Text>
+                  <Text numberOfLines={2} style={styles.clientMeta}>
+                    {chart.treatment_summary || chart.notes || "No notes yet."}
+                  </Text>
+                </View>
               </View>
             ))}
           </View>
@@ -69,7 +82,13 @@ export function PluckrRecentActivityPanel({
 function formatActivityLabel(chart: RecentChartRecord) {
   const primaryArea = getChartTreatmentAreas(chart)[0] ?? null;
 
-  return primaryArea?.treatment_area || primaryArea?.modality || "Treatment";
+  return [primaryArea?.treatment_area, primaryArea?.modality]
+    .filter(Boolean)
+    .join(" - ") || "Treatment";
+}
+
+function getPhotoCount(chart: RecentChartRecord) {
+  return chart.image_paths?.length ?? chart.image_urls.length;
 }
 
 const styles = StyleSheet.create({
@@ -85,13 +104,32 @@ const styles = StyleSheet.create({
     gap: 0
   },
   activityRow: {
-    gap: 4,
-    paddingHorizontal: 0,
+    flexDirection: "row",
+    gap: pluckrAppTheme.spacing.sm,
     paddingVertical: pluckrAppTheme.spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: pluckrAppTheme.colors.divider
   },
+  timelineDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 999,
+    marginTop: 7,
+    backgroundColor: pluckrAppTheme.colors.sageStrong
+  },
+  activityCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 3
+  },
+  activityTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: pluckrAppTheme.spacing.sm
+  },
   clientName: {
+    flex: 1,
     color: pluckrAppTheme.colors.textPrimary,
     fontSize: 16,
     lineHeight: 22,
@@ -106,6 +144,12 @@ const styles = StyleSheet.create({
     color: pluckrAppTheme.colors.sageStrong,
     fontSize: 12,
     lineHeight: 18,
-    fontWeight: "600"
+    fontWeight: "700"
+  },
+  activityDate: {
+    color: pluckrAppTheme.colors.textMuted,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700"
   }
 });
