@@ -392,6 +392,85 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
   galleryStack: {
     gap: pluckrAppTheme.spacing.sm
   },
+  gallerySubtitle: {
+    color: pluckrAppTheme.colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: "600",
+    marginTop: 2
+  },
+  compareButton: {
+    minHeight: 34,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: pluckrAppTheme.spacing.sm,
+    borderRadius: pluckrAppTheme.radii.full,
+    borderWidth: 1,
+    borderColor: pluckrAppTheme.colors.border,
+    backgroundColor: pluckrAppTheme.colors.surface
+  },
+  compareButtonActive: {
+    borderColor: pluckrAppTheme.colors.sageStrong,
+    backgroundColor: pluckrAppTheme.colors.sageStrong
+  },
+  compareButtonDisabled: {
+    opacity: 0.42
+  },
+  compareButtonLabel: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "800"
+  },
+  compareButtonLabelActive: {
+    color: "#FFFFFF"
+  },
+  compareHint: {
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "700"
+  },
+  comparePanel: {
+    flexDirection: "row",
+    gap: pluckrAppTheme.spacing.sm,
+    padding: pluckrAppTheme.spacing.sm,
+    borderRadius: pluckrAppTheme.radii.xl,
+    borderWidth: 1,
+    borderColor: "rgba(13, 104, 99, 0.14)",
+    backgroundColor: "rgba(237, 246, 241, 0.74)"
+  },
+  compareColumn: {
+    flex: 1,
+    minWidth: 0,
+    gap: 4
+  },
+  compareLabel: {
+    color: pluckrAppTheme.colors.sageStrong,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: "800",
+    letterSpacing: 1,
+    textTransform: "uppercase"
+  },
+  compareImage: {
+    width: "100%",
+    aspectRatio: 0.82,
+    borderRadius: pluckrAppTheme.radii.md,
+    backgroundColor: pluckrAppTheme.colors.surfaceMuted
+  },
+  compareDate: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 13,
+    lineHeight: 17,
+    fontWeight: "800"
+  },
+  compareContext: {
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: "600"
+  },
   galleryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -404,7 +483,12 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: pluckrAppTheme.colors.border,
     backgroundColor: pluckrAppTheme.colors.surface,
+    position: "relative",
     overflow: "hidden"
+  },
+  galleryTileSelected: {
+    borderColor: pluckrAppTheme.colors.sageStrong,
+    borderWidth: 2
   },
   galleryImage: {
     width: "100%",
@@ -427,6 +511,26 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "600"
+  },
+  selectionBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 26,
+    height: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    backgroundColor: pluckrAppTheme.colors.sageStrong
+  },
+  selectionBadgeInactive: {
+    backgroundColor: "rgba(35, 40, 36, 0.64)"
+  },
+  selectionBadgeLabel: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "900"
   },
   entryActions: {
     flexDirection: "row",

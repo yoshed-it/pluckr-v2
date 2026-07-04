@@ -420,6 +420,7 @@ function ClientPhotoGallery({
   isLoading: boolean;
   onOpenImage: (item: ClientGalleryItem) => void;
 }) {
+  const [compareSelection, setCompareSelection] = useState<ClientGalleryItem[]>([]);
   const galleryItems: ClientGalleryItem[] = charts.flatMap((chart) =>
     chart.image_urls.map((imageUrl, index) => {
       const primaryArea = getPrimaryChartTreatmentArea(chart);
@@ -433,6 +434,24 @@ function ClientPhotoGallery({
       };
     })
   );
+  const isCompareMode = compareSelection.length > 0;
+  const canCompare = galleryItems.length >= 2;
+
+  function toggleCompareItem(item: ClientGalleryItem) {
+    setCompareSelection((current) => {
+      const exists = current.some((selection) => selection.id === item.id);
+
+      if (exists) {
+        return current.filter((selection) => selection.id !== item.id);
+      }
+
+      if (current.length >= 2) {
+        return [current[1], item];
+      }
+
+      return [...current, item];
+    });
+  }
 
   if (isLoading) {
     return (
@@ -457,36 +476,126 @@ function ClientPhotoGallery({
   return (
     <View style={styles.galleryStack}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Photos</Text>
-        <Text style={styles.countChip}>
-          {galleryItems.length} {galleryItems.length === 1 ? "photo" : "photos"}
-        </Text>
+        <View>
+          <Text style={styles.sectionTitle}>Photos</Text>
+          <Text style={styles.gallerySubtitle}>
+            Compare progress while keeping every image tied to its chart.
+          </Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          disabled={!canCompare}
+          style={[
+            styles.compareButton,
+            isCompareMode ? styles.compareButtonActive : null,
+            !canCompare ? styles.compareButtonDisabled : null
+          ]}
+          onPress={() => setCompareSelection(isCompareMode ? [] : [galleryItems[0]])}
+        >
+          <Text
+            style={[
+              styles.compareButtonLabel,
+              isCompareMode ? styles.compareButtonLabelActive : null
+            ]}
+          >
+            {isCompareMode ? "Cancel" : "Compare"}
+          </Text>
+        </Pressable>
       </View>
+      {compareSelection.length === 2 ? (
+        <PhotoComparisonPanel items={compareSelection} />
+      ) : isCompareMode ? (
+        <Text style={styles.compareHint}>
+          Select {2 - compareSelection.length} more photo
+          {2 - compareSelection.length === 1 ? "" : "s"} to compare.
+        </Text>
+      ) : null}
       <View style={styles.galleryGrid}>
         {galleryItems.map((item) => (
-          <Pressable
+          <GalleryPhotoTile
             key={item.id}
-            accessibilityRole="button"
-            style={styles.galleryTile}
-            onPress={() => onOpenImage(item)}
-          >
-            <Image
-              source={{ uri: item.imageUrl }}
-              style={styles.galleryImage}
-              resizeMode="cover"
-            />
-            <View style={styles.galleryMeta}>
-              <Text style={styles.galleryDate}>
-                {formatSnapshotDate(item.chart.created_at)}
-              </Text>
-              <Text style={styles.galleryContext} numberOfLines={1}>
-                {[item.area, item.modality].filter(Boolean).join(" • ") ||
-                  "Chart photo"}
-              </Text>
-            </View>
-          </Pressable>
+            item={item}
+            isCompareMode={isCompareMode}
+            selectionIndex={compareSelection.findIndex(
+              (selection) => selection.id === item.id
+            )}
+            onPress={() =>
+              isCompareMode ? toggleCompareItem(item) : onOpenImage(item)
+            }
+          />
         ))}
       </View>
+    </View>
+  );
+}
+
+function GalleryPhotoTile({
+  item,
+  isCompareMode,
+  selectionIndex,
+  onPress
+}: {
+  item: ClientGalleryItem;
+  isCompareMode: boolean;
+  selectionIndex: number;
+  onPress: () => void;
+}) {
+  const isSelected = selectionIndex >= 0;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      style={[styles.galleryTile, isSelected ? styles.galleryTileSelected : null]}
+      onPress={onPress}
+    >
+      <Image
+        source={{ uri: item.imageUrl }}
+        style={styles.galleryImage}
+        resizeMode="cover"
+      />
+      <View style={styles.galleryMeta}>
+        <Text style={styles.galleryDate}>
+          {formatSnapshotDate(item.chart.created_at)}
+        </Text>
+        <Text style={styles.galleryContext} numberOfLines={1}>
+          {[item.area, item.modality].filter(Boolean).join(" - ") ||
+            "Chart photo"}
+        </Text>
+      </View>
+      {isCompareMode ? (
+        <View
+          style={[
+            styles.selectionBadge,
+            isSelected ? null : styles.selectionBadgeInactive
+          ]}
+        >
+          <Text style={styles.selectionBadgeLabel}>
+            {isSelected ? selectionIndex + 1 : "+"}
+          </Text>
+        </View>
+      ) : null}
+    </Pressable>
+  );
+}
+
+function PhotoComparisonPanel({ items }: { items: ClientGalleryItem[] }) {
+  return (
+    <View style={styles.comparePanel}>
+      {items.map((item, index) => (
+        <View key={item.id} style={styles.compareColumn}>
+          <Text style={styles.compareLabel}>{index === 0 ? "Before" : "After"}</Text>
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={styles.compareImage}
+            resizeMode="cover"
+          />
+          <Text style={styles.compareDate}>{formatSnapshotDate(item.chart.created_at)}</Text>
+          <Text numberOfLines={1} style={styles.compareContext}>
+            {[item.area, item.modality].filter(Boolean).join(" - ") ||
+              "Chart photo"}
+          </Text>
+        </View>
+      ))}
     </View>
   );
 }
