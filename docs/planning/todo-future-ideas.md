@@ -11,7 +11,7 @@ not bloat the current implementation slice.
 - improve the add-client flow with better validation, clearer intake fields, and a more intentional mobile/web presentation
 - refine the client workspace around a care-first header strip plus charting history, not a profile-heavy EMR page
 - move deeper client identity and admin details into a future info drawer attached to edit/details actions
-- define the photo assignment model before finalizing Take Photo: client library photos, chart/session photos, consent-linked images, and unassigned captures need clear ownership
+- build the client Photos tab from the [Media Model](./media-model.md): photos should live in the client gallery and be assigned to chart/session context through relationships, not duplicated files
 - separate provider-created client intake from future client-facing intake links so public intake can become a WorkflowRun instead of a one-off form
 - harden auth after the core flow settles: web SSR auth, mobile secure token storage, and owner/admin MFA
 
@@ -34,7 +34,7 @@ not bloat the current implementation slice.
 - smarter chart templates based on treatment area or modality
 - investor/demo mode with curated sample organizations and resettable seed data
 - workflow automations for follow-up reminders, consent renewals, and care-plan nudges
-- media assignment inbox: captured photos start as pending media, then attach to a chart entry, client photo library, body area, document, or consent record before becoming part of permanent clinical history
+- media assignment inbox: captured photos start as pending media, then attach to a chart entry, body area, document, or consent record before becoming part of permanent clinical history
 
 ## Rules For Using This Doc
 

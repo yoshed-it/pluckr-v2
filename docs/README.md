@@ -15,6 +15,7 @@
 - [Swift Parity Checklist](./planning/swift-parity-checklist.md)
 - [Product Backlog](./planning/product-backlog.md)
 - [Architecture Rules](./planning/architecture-rules.md)
+- [Media Model](./planning/media-model.md)
 - [TODO / Future / Ideas](./planning/todo-future-ideas.md)
 
 ## Legacy Reference
