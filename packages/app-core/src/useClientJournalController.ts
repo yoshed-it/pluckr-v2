@@ -423,6 +423,9 @@ export function useClientJournalController(
           }))
         ])
       }));
+      setJournalNotice(
+        uploadedImages.length === 1 ? "Photo attached." : "Photos attached."
+      );
       return true;
     } catch (error) {
       setJournalError(
