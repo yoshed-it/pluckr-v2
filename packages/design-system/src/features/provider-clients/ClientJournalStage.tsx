@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 import {
   getPrimaryChartTreatmentArea,
   type ChartEntryRecord,
@@ -8,6 +8,7 @@ import {
 } from "@pluckr/domain";
 
 import { PluckrConfirmDialog } from "../../PluckrConfirmDialog";
+import { PluckrFullScreenImageModal } from "../../PluckrFullScreenImageModal";
 import { PluckrTagPickerDrawer } from "../../PluckrTagPickerDrawer";
 import { PluckrCard } from "../../primitives/Card";
 import { CareSnapshotStrip } from "./CareSnapshotStrip";
@@ -192,6 +193,7 @@ export function PluckrClientJournalStage({
   const [showClientActions, setShowClientActions] = useState(false);
   const [showClientTagPicker, setShowClientTagPicker] = useState(false);
   const [activeTab, setActiveTab] = useState<ClientWorkspaceTabId>("chartEntries");
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
 
   function handleCloseClientTagPicker() {
     setShowClientTagPicker(false);
@@ -340,6 +342,12 @@ export function PluckrClientJournalStage({
           onStartChart={onStartChart}
           onOpenChart={setSelectedChart}
         />
+      ) : activeTab === "photos" ? (
+        <ClientPhotoGallery
+          charts={charts}
+          isLoading={isLoading}
+          onOpenImage={setSelectedImageUrl}
+        />
       ) : (
         <PluckrCard>
           <Text style={styles.emptyStateTitle}>{getTabLabel(activeTab)}</Text>
@@ -359,6 +367,91 @@ export function PluckrClientJournalStage({
           onArchiveClient();
         }}
       />
+      <PluckrFullScreenImageModal
+        visible={Boolean(selectedImageUrl)}
+        imageUrl={selectedImageUrl}
+        onClose={() => setSelectedImageUrl(null)}
+      />
+    </View>
+  );
+}
+
+function ClientPhotoGallery({
+  charts,
+  isLoading,
+  onOpenImage
+}: {
+  charts: ChartEntryRecord[];
+  isLoading: boolean;
+  onOpenImage: (imageUrl: string) => void;
+}) {
+  const galleryItems = charts.flatMap((chart) =>
+    chart.image_urls.map((imageUrl, index) => {
+      const primaryArea = getPrimaryChartTreatmentArea(chart);
+
+      return {
+        id: `${chart.id}:${chart.image_paths?.[index] ?? imageUrl}`,
+        imageUrl,
+        chart,
+        area: primaryArea?.treatment_area ?? chart.treatment_area,
+        modality: primaryArea?.modality ?? chart.modality
+      };
+    })
+  );
+
+  if (isLoading) {
+    return (
+      <PluckrCard>
+        <Text style={styles.emptyStateTitle}>Photos</Text>
+        <Text style={styles.emptyState}>Loading client photos...</Text>
+      </PluckrCard>
+    );
+  }
+
+  if (galleryItems.length === 0) {
+    return (
+      <PluckrCard>
+        <Text style={styles.emptyStateTitle}>Photos</Text>
+        <Text style={styles.emptyState}>
+          Treatment photos attached to chart entries will appear here.
+        </Text>
+      </PluckrCard>
+    );
+  }
+
+  return (
+    <View style={styles.galleryStack}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Photos</Text>
+        <Text style={styles.countChip}>
+          {galleryItems.length} {galleryItems.length === 1 ? "photo" : "photos"}
+        </Text>
+      </View>
+      <View style={styles.galleryGrid}>
+        {galleryItems.map((item) => (
+          <Pressable
+            key={item.id}
+            accessibilityRole="button"
+            style={styles.galleryTile}
+            onPress={() => onOpenImage(item.imageUrl)}
+          >
+            <Image
+              source={{ uri: item.imageUrl }}
+              style={styles.galleryImage}
+              resizeMode="cover"
+            />
+            <View style={styles.galleryMeta}>
+              <Text style={styles.galleryDate}>
+                {formatSnapshotDate(item.chart.created_at)}
+              </Text>
+              <Text style={styles.galleryContext} numberOfLines={1}>
+                {[item.area, item.modality].filter(Boolean).join(" • ") ||
+                  "Chart photo"}
+              </Text>
+            </View>
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 }

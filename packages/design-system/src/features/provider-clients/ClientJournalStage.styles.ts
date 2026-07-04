@@ -389,6 +389,45 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
     borderRadius: pluckrAppTheme.radii.md,
     backgroundColor: pluckrAppTheme.colors.surfaceMuted
   },
+  galleryStack: {
+    gap: pluckrAppTheme.spacing.sm
+  },
+  galleryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: pluckrAppTheme.spacing.sm
+  },
+  galleryTile: {
+    width: "48%",
+    minWidth: 148,
+    borderRadius: pluckrAppTheme.radii.lg,
+    borderWidth: 1,
+    borderColor: pluckrAppTheme.colors.border,
+    backgroundColor: pluckrAppTheme.colors.surface,
+    overflow: "hidden"
+  },
+  galleryImage: {
+    width: "100%",
+    aspectRatio: 1,
+    backgroundColor: pluckrAppTheme.colors.surfaceMuted
+  },
+  galleryMeta: {
+    gap: 2,
+    paddingHorizontal: pluckrAppTheme.spacing.sm,
+    paddingVertical: pluckrAppTheme.spacing.sm
+  },
+  galleryDate: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "800"
+  },
+  galleryContext: {
+    color: pluckrAppTheme.colors.textSecondary,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "600"
+  },
   entryActions: {
     flexDirection: "row",
     alignItems: "center",
