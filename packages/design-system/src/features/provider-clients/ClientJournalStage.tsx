@@ -16,6 +16,10 @@ import { ClientActionsDrawer } from "./ClientActionsDrawer";
 import { ClientChartEntriesSection } from "./ClientChartEntriesSection";
 import { ClientDetailsSheet } from "./ClientDetailsSheet";
 import { ClientHeaderCard } from "./ClientHeaderCard";
+import {
+  ClientTimelineSection,
+  type ClientTimelinePhotoItem
+} from "./ClientTimelineSection";
 import { ClientWorkspaceTabs, type ClientWorkspaceTabId } from "./ClientWorkspaceTabs";
 import { ClientWorkspaceToolbar } from "./ClientWorkspaceToolbar";
 import { ClientWorkspaceTopBar } from "./ClientWorkspaceTopBar";
@@ -25,13 +29,7 @@ import { PluckrChartEntryEditor } from "../provider-charting/ChartEntryEditor";
 import type { AdminContactFieldKey } from "./AdminContactFields";
 import { pluckrClientJournalStageStyles as styles } from "./ClientJournalStage.styles";
 
-type ClientGalleryItem = {
-  id: string;
-  imageUrl: string;
-  chart: ChartEntryRecord;
-  area: string | null;
-  modality: string | null;
-};
+type ClientGalleryItem = ClientTimelinePhotoItem;
 
 type PluckrClientJournalStageProps = {
   client: ClientRecord;
@@ -378,6 +376,13 @@ export function PluckrClientJournalStage({
         <ClientPhotoGallery
           charts={charts}
           isLoading={isLoading}
+          onOpenImage={setSelectedGalleryItem}
+        />
+      ) : activeTab === "timeline" ? (
+        <ClientTimelineSection
+          charts={charts}
+          isLoading={isLoading}
+          onOpenChart={setSelectedChart}
           onOpenImage={setSelectedGalleryItem}
         />
       ) : (
