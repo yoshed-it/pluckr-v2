@@ -277,6 +277,104 @@ Network Memory:
 - no raw PHI
 - opt-in and compliance-reviewed
 
+## Machine Learning And Python Strategy
+
+Clinical Memory should be machine-learning ready, not machine-learning first.
+
+The earliest valuable versions can be built with deterministic logic, TypeScript,
+and Postgres. This keeps the product explainable, auditable, and easier to make
+HIPAA-conscious while the clinical model is still evolving.
+
+### Phase 1: Deterministic Memory
+
+No Python. No ML.
+
+Use application logic and database queries for:
+
+- last treatment for this client
+- last treatment for this area
+- most common probe by area
+- most common modality by area
+- average appointment duration
+- RF/DC/treatment-seconds trends
+- photo comparison availability
+- recurring tags and notes patterns
+
+This should cover the first major provider value: Pluckr remembers the care
+history and surfaces the right context at the right moment.
+
+### Phase 2: Postgres Analytics
+
+Still no Python required.
+
+Use SQL views, materialized views, or repository-level aggregations for:
+
+- `client_area_memory`
+- `practice_treatment_patterns`
+- `provider_treatment_patterns`
+- trend summaries
+- counts, averages, ranges, and recency
+
+These are explainable and can show source scope directly:
+
+- "Previous for this client"
+- "Common in this practice"
+- "Typical for this provider"
+
+### Phase 3: Python Worker Layer
+
+Python becomes useful when Pluckr needs real data science or computer vision.
+
+Potential uses:
+
+- image comparison and progress analysis
+- body-map/photo-overlay processing
+- treatment outcome clustering
+- model training and evaluation
+- offline analytics jobs
+- de-identified network-level pattern mining
+- feature extraction from photos or structured chart history
+
+Python should not live inside the Expo mobile app or the Next web runtime.
+
+Preferred future shape:
+
+- app writes structured clinical data to Supabase
+- deterministic memory runs in TypeScript/Postgres
+- background workers process eligible records asynchronously
+- workers write derived outputs back to explicit memory/analysis tables
+- UI reads derived summaries through app-core repositories/controllers
+
+### Phase 4: AI/ML Product Layer
+
+AI should only appear after Pluckr has enough reliable structured data and a
+clear product reason.
+
+Possible future features:
+
+- suggested settings with cited source scope
+- healing/progress signals from photos
+- anomaly detection
+- similar case summaries inside one practice
+- de-identified aggregate insights across opted-in practices
+
+Rules:
+
+- suggestions must cite their source
+- providers must stay in control
+- no automatic chart writing
+- no hidden cross-practice data leakage
+- no raw PHI in network models without a formal privacy/legal design
+- photos require explicit consent and special handling
+
+### Architecture Rule
+
+Do not add Python or ML infrastructure until a specific product task requires
+it.
+
+When that time comes, Python should be introduced as a separate worker/service,
+not as a dependency of the mobile app, web app, or shared UI packages.
+
 ## UX Rules
 
 Clinical Memory should feel like a calm clinical assistant, not a chatbot.
