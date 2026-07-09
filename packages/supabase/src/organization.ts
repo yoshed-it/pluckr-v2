@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { ensureDemoChartMedia } from "./demo-media";
 import { listClients } from "./clients";
 import type {
   ChartEntryRecord,
@@ -211,11 +212,18 @@ export async function seedDemoOrganization(
     throw error;
   }
 
-  return data as {
+  const seedResult = data as {
     status: "seeded" | "skipped";
     clients_created?: number;
     charts_created?: number;
     reason?: string;
+  };
+
+  const mediaResult = await ensureDemoChartMedia(client, organizationId);
+
+  return {
+    ...seedResult,
+    photos_seeded: mediaResult.photos_seeded
   };
 }
 
