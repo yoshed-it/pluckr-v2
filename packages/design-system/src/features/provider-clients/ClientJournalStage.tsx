@@ -398,6 +398,14 @@ export function PluckrClientJournalStage({
       <PluckrFullScreenImageModal
         visible={Boolean(selectedGalleryItem)}
         imageUrl={selectedGalleryItem?.imageUrl ?? null}
+        title={
+          selectedGalleryItem
+            ? formatSnapshotDate(selectedGalleryItem.chart.created_at)
+            : undefined
+        }
+        subtitle={
+          selectedGalleryItem ? getGalleryItemContext(selectedGalleryItem) : undefined
+        }
         actionLabel="View Chart"
         onAction={() => {
           if (selectedGalleryItem) {
@@ -420,6 +428,7 @@ function ClientPhotoGallery({
   isLoading: boolean;
   onOpenImage: (item: ClientGalleryItem) => void;
 }) {
+  const [isCompareMode, setIsCompareMode] = useState(false);
   const [compareSelection, setCompareSelection] = useState<ClientGalleryItem[]>([]);
   const galleryItems: ClientGalleryItem[] = charts.flatMap((chart) =>
     chart.image_urls.map((imageUrl, index) => {
@@ -434,7 +443,6 @@ function ClientPhotoGallery({
       };
     })
   );
-  const isCompareMode = compareSelection.length > 0;
   const canCompare = galleryItems.length >= 2;
 
   function toggleCompareItem(item: ClientGalleryItem) {
@@ -490,7 +498,10 @@ function ClientPhotoGallery({
             isCompareMode ? styles.compareButtonActive : null,
             !canCompare ? styles.compareButtonDisabled : null
           ]}
-          onPress={() => setCompareSelection(isCompareMode ? [] : [galleryItems[0]])}
+          onPress={() => {
+            setCompareSelection([]);
+            setIsCompareMode((current) => !current);
+          }}
         >
           <Text
             style={[
@@ -502,13 +513,18 @@ function ClientPhotoGallery({
           </Text>
         </Pressable>
       </View>
+      {isCompareMode ? (
+        <View style={styles.compareStatusRow}>
+          <Text style={styles.compareStatus}>
+            {compareSelection.length}/2 selected
+          </Text>
+          <Text style={styles.compareHint}>
+            Choose two photos to compare progress.
+          </Text>
+        </View>
+      ) : null}
       {compareSelection.length === 2 ? (
         <PhotoComparisonPanel items={compareSelection} />
-      ) : isCompareMode ? (
-        <Text style={styles.compareHint}>
-          Select {2 - compareSelection.length} more photo
-          {2 - compareSelection.length === 1 ? "" : "s"} to compare.
-        </Text>
       ) : null}
       <View style={styles.galleryGrid}>
         {galleryItems.map((item) => (
@@ -570,7 +586,7 @@ function GalleryPhotoTile({
           ]}
         >
           <Text style={styles.selectionBadgeLabel}>
-            {isSelected ? selectionIndex + 1 : "+"}
+            {isSelected ? selectionIndex + 1 : ""}
           </Text>
         </View>
       ) : null}
@@ -581,23 +597,36 @@ function GalleryPhotoTile({
 function PhotoComparisonPanel({ items }: { items: ClientGalleryItem[] }) {
   return (
     <View style={styles.comparePanel}>
-      {items.map((item, index) => (
-        <View key={item.id} style={styles.compareColumn}>
-          <Text style={styles.compareLabel}>{index === 0 ? "Before" : "After"}</Text>
-          <Image
-            source={{ uri: item.imageUrl }}
-            style={styles.compareImage}
-            resizeMode="cover"
-          />
-          <Text style={styles.compareDate}>{formatSnapshotDate(item.chart.created_at)}</Text>
-          <Text numberOfLines={1} style={styles.compareContext}>
-            {[item.area, item.modality].filter(Boolean).join(" - ") ||
-              "Chart photo"}
-          </Text>
-        </View>
-      ))}
+      <View style={styles.comparePanelHeader}>
+        <Text style={styles.comparePanelTitle}>Progress Compare</Text>
+        <Text style={styles.comparePanelMeta}>Before / After</Text>
+      </View>
+      <View style={styles.compareImagesRow}>
+        {items.map((item, index) => (
+          <View key={item.id} style={styles.compareColumn}>
+            <Text style={styles.compareLabel}>
+              {index === 0 ? "Before" : "After"}
+            </Text>
+            <Image
+              source={{ uri: item.imageUrl }}
+              style={styles.compareImage}
+              resizeMode="cover"
+            />
+            <Text style={styles.compareDate}>
+              {formatSnapshotDate(item.chart.created_at)}
+            </Text>
+            <Text numberOfLines={1} style={styles.compareContext}>
+              {getGalleryItemContext(item)}
+            </Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
+}
+
+function getGalleryItemContext(item: ClientGalleryItem) {
+  return [item.area, item.modality].filter(Boolean).join(" - ") || "Chart photo";
 }
 
 function buildCareSnapshotItems(client: ClientRecord, charts: ChartEntryRecord[]) {

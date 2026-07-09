@@ -427,18 +427,51 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
   },
   compareHint: {
     color: pluckrAppTheme.colors.textSecondary,
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: "700"
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "600"
+  },
+  compareStatusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: pluckrAppTheme.spacing.xs,
+    paddingHorizontal: 2
+  },
+  compareStatus: {
+    color: pluckrAppTheme.colors.sageStrong,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "900"
   },
   comparePanel: {
-    flexDirection: "row",
     gap: pluckrAppTheme.spacing.sm,
     padding: pluckrAppTheme.spacing.sm,
     borderRadius: pluckrAppTheme.radii.xl,
     borderWidth: 1,
     borderColor: "rgba(13, 104, 99, 0.14)",
     backgroundColor: "rgba(237, 246, 241, 0.74)"
+  },
+  comparePanelHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: pluckrAppTheme.spacing.sm
+  },
+  comparePanelTitle: {
+    color: pluckrAppTheme.colors.textPrimary,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "900"
+  },
+  comparePanelMeta: {
+    color: pluckrAppTheme.colors.textMuted,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: "700"
+  },
+  compareImagesRow: {
+    flexDirection: "row",
+    gap: pluckrAppTheme.spacing.sm
   },
   compareColumn: {
     flex: 1,
