@@ -147,18 +147,20 @@ async function hasDemoHistory(
   organizationId: string,
   clientId: string
 ) {
-  const { count, error } = await client
+  const { data, error } = await client
     .from("chart_entries")
-    .select("id", { count: "exact", head: true })
+    .select("tags")
     .eq("organization_id", organizationId)
     .eq("client_id", clientId)
-    .contains("tags", [demoHistoryTag]);
+    .limit(80);
 
   if (error) {
     throw error;
   }
 
-  return (count ?? 0) > 0;
+  return (data ?? []).some((chart) =>
+    Array.isArray(chart.tags) ? chart.tags.includes(demoHistoryTag) : false
+  );
 }
 
 async function seedClientHistory(
