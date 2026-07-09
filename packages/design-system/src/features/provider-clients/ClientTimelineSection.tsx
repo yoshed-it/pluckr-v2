@@ -10,6 +10,7 @@ import {
 
 import { PluckrCard } from "../../primitives/Card";
 import { pluckrAppTheme } from "../../tokens/pluckrAppTheme";
+import { ClinicalMemoryTrendPanel } from "./ClinicalMemoryTrendPanel";
 
 export type ClientTimelinePhotoItem = {
   id: string;
@@ -67,6 +68,8 @@ export function ClientTimelineSection({
         </View>
         <Text style={styles.count}>{charts.length}</Text>
       </View>
+
+      <ClinicalMemoryTrendPanel charts={charts} onOpenChart={onOpenChart} />
 
       {charts.map((chart) => {
         const photoItems = buildTimelinePhotoItems(chart);
