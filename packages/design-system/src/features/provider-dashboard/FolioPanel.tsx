@@ -139,6 +139,12 @@ export function PluckrFolioPanel({
                 </Pressable>
               ))}
             </ScrollView>
+            <PluckrButton
+              label={isSeeding ? "Seeding..." : "Refresh Demo Media"}
+              variant="secondary"
+              disabled={isSeeding}
+              onPress={() => onSeedDemoData()}
+            />
           </View>
         )}
       </View>
