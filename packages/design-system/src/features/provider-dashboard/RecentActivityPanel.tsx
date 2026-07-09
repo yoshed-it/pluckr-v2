@@ -60,22 +60,31 @@ export function PluckrRecentActivityPanel({
                 <View style={styles.timelineDot} />
                 <View style={styles.activityCopy}>
                   <View style={styles.activityTopRow}>
-                    <Text style={styles.clientName}>
-                      {chart.client ? getClientDisplayName(chart.client) : "Client"}
-                    </Text>
-                    <Text style={styles.activityDate}>
-                      {formatDateLabel(chart.created_at)}
-                    </Text>
+                    <View style={styles.titleStack}>
+                      <Text style={styles.clientName}>
+                        {chart.client
+                          ? getClientDisplayName(chart.client)
+                          : "Client"}
+                      </Text>
+                      <Text style={styles.activityDate}>
+                        {formatDateLabel(chart.created_at)}
+                      </Text>
+                    </View>
+                    <Text style={styles.openLabel}>Open chart</Text>
                   </View>
-                  <Text style={styles.activityMeta}>
-                    {formatActivityLabel(chart)}
-                    {chart.appointment_duration_minutes
-                      ? ` - ${chart.appointment_duration_minutes} min`
-                      : ""}
-                    {getPhotoCount(chart) > 0
-                      ? ` - ${getPhotoCount(chart)} photo${getPhotoCount(chart) === 1 ? "" : "s"}`
-                      : ""}
-                  </Text>
+                  <View style={styles.chipRow}>
+                    <ActivityChip label={formatActivityLabel(chart)} />
+                    {chart.appointment_duration_minutes ? (
+                      <ActivityChip label={`${chart.appointment_duration_minutes} min`} />
+                    ) : null}
+                    {getPhotoCount(chart) > 0 ? (
+                      <ActivityChip
+                        label={`${getPhotoCount(chart)} photo${
+                          getPhotoCount(chart) === 1 ? "" : "s"
+                        }`}
+                      />
+                    ) : null}
+                  </View>
                   <Text numberOfLines={2} style={styles.clientMeta}>
                     {chart.treatment_summary || chart.notes || "No notes yet."}
                   </Text>
@@ -87,6 +96,10 @@ export function PluckrRecentActivityPanel({
       </View>
     </PluckrCard>
   );
+}
+
+function ActivityChip({ label }: { label: string }) {
+  return <Text style={styles.activityChip}>{label}</Text>;
 }
 
 function formatActivityLabel(chart: RecentChartRecord) {
@@ -141,8 +154,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: pluckrAppTheme.spacing.sm
   },
-  clientName: {
+  titleStack: {
     flex: 1,
+    minWidth: 0
+  },
+  clientName: {
     color: pluckrAppTheme.colors.textPrimary,
     fontSize: 16,
     lineHeight: 22,
@@ -153,10 +169,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20
   },
-  activityMeta: {
+  chipRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6
+  },
+  activityChip: {
+    alignSelf: "flex-start",
     color: pluckrAppTheme.colors.sageStrong,
+    backgroundColor: "rgba(127, 183, 133, 0.14)",
+    borderRadius: pluckrAppTheme.radii.full,
+    overflow: "hidden",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     fontSize: 12,
-    lineHeight: 18,
+    lineHeight: 16,
     fontWeight: "700"
   },
   activityDate: {
@@ -164,5 +191,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "700"
+  },
+  openLabel: {
+    flexShrink: 0,
+    color: pluckrAppTheme.colors.sageStrong,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "800"
   }
 });
