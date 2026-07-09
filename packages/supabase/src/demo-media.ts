@@ -22,6 +22,12 @@ type DemoChartRecord = {
   client_id: string;
 };
 
+type DemoPhotoTarget = {
+  photo: DemoPhotoSeed;
+  clientId: string;
+  chartId: string;
+};
+
 const demoPhotos: DemoPhotoSeed[] = [
   {
     clientEmail: "avery.cruz@example.com",
@@ -70,7 +76,7 @@ export async function ensureDemoChartMedia(
   const typedClients = (demoClients ?? []) as DemoClientRecord[];
 
   if (typedClients.length === 0) {
-    return { photos_seeded: 0 };
+    return seedPhotosForRecentCharts(client, organizationId);
   }
 
   const { data: charts, error: chartsError } = await client
@@ -107,64 +113,126 @@ export async function ensureDemoChartMedia(
       continue;
     }
 
-    const storagePath = [
-      "organizations",
-      organizationId,
-      "clients",
-      demoClient.id,
-      "demo-images",
-      photo.fileName
-    ].join("/");
-
-    const { data: existingImage, error: existingError } = await client
-      .from("chart_images")
-      .select("id")
-      .eq("organization_id", organizationId)
-      .eq("client_id", demoClient.id)
-      .eq("chart_entry_id", chart.id)
-      .eq("storage_path", storagePath)
-      .maybeSingle();
-
-    if (existingError) {
-      throw existingError;
-    }
-
-    if (existingImage) {
-      continue;
-    }
-
-    const { error: uploadError } = await client.storage
-      .from("client-media")
-      .upload(storagePath, decodeBase64Jpeg(photo.base64Jpeg), {
-        contentType: "image/jpeg",
-        upsert: true
-      });
-
-    if (uploadError) {
-      throw uploadError;
-    }
-
-    const takenAt = new Date(
-      Date.now() - photo.takenAtOffsetDays * 24 * 60 * 60 * 1000
-    ).toISOString();
-
-    const { error: insertError } = await client.from("chart_images").insert({
-      organization_id: organizationId,
-      client_id: demoClient.id,
-      chart_entry_id: chart.id,
-      storage_path: storagePath,
-      caption: photo.caption,
-      taken_at: takenAt
+    photosSeeded += await seedDemoPhoto(client, organizationId, {
+      photo,
+      clientId: demoClient.id,
+      chartId: chart.id
     });
-
-    if (insertError) {
-      throw insertError;
-    }
-
-    photosSeeded += 1;
   }
 
   return { photos_seeded: photosSeeded };
+}
+
+async function seedPhotosForRecentCharts(
+  client: SupabaseClient,
+  organizationId: string
+) {
+  const { data: charts, error } = await client
+    .from("chart_entries")
+    .select("id, client_id")
+    .eq("organization_id", organizationId)
+    .order("created_at", { ascending: false })
+    .limit(2);
+
+  if (error) {
+    throw error;
+  }
+
+  const recentCharts = (charts ?? []) as DemoChartRecord[];
+  const primaryChart = recentCharts[0];
+  const secondaryChart = recentCharts[1] ?? primaryChart;
+
+  if (!primaryChart) {
+    return { photos_seeded: 0 };
+  }
+
+  const targets: DemoPhotoTarget[] = [
+    {
+      photo: demoPhotos[0],
+      clientId: primaryChart.client_id,
+      chartId: primaryChart.id
+    },
+    {
+      photo: demoPhotos[1],
+      clientId: primaryChart.client_id,
+      chartId: primaryChart.id
+    },
+    {
+      photo: demoPhotos[2],
+      clientId: secondaryChart.client_id,
+      chartId: secondaryChart.id
+    }
+  ];
+
+  let photosSeeded = 0;
+
+  for (const target of targets) {
+    photosSeeded += await seedDemoPhoto(client, organizationId, target);
+  }
+
+  return { photos_seeded: photosSeeded };
+}
+
+async function seedDemoPhoto(
+  client: SupabaseClient,
+  organizationId: string,
+  target: DemoPhotoTarget
+) {
+  const storagePath = [
+    "organizations",
+    organizationId,
+    "clients",
+    target.clientId,
+    "demo-images",
+    target.photo.fileName
+  ].join("/");
+
+  const { data: existingImage, error: existingError } = await client
+    .from("chart_images")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("client_id", target.clientId)
+    .eq("chart_entry_id", target.chartId)
+    .eq("storage_path", storagePath)
+    .maybeSingle();
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  if (existingImage) {
+    return 0;
+  }
+
+  const { error: uploadError } = await client.storage
+    .from("client-media")
+    .upload(storagePath, decodeBase64Jpeg(target.photo.base64Jpeg), {
+      contentType: "image/jpeg",
+      upsert: true
+    });
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const takenAt = new Date(
+    Date.now() - target.photo.takenAtOffsetDays * 24 * 60 * 60 * 1000
+  ).toISOString();
+
+  const { error: insertError } = await client.from("chart_images").insert({
+    organization_id: organizationId,
+    client_id: target.clientId,
+    chart_entry_id: target.chartId,
+    storage_path: storagePath,
+    caption: target.photo.caption,
+    taken_at: takenAt
+  });
+
+  if (insertError) {
+    throw insertError;
+  }
+
+  return 1;
 }
 
 function decodeBase64Jpeg(value: string) {

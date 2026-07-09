@@ -116,6 +116,8 @@ export function useWorkspaceController(
           ? "Demo photos are ready for gallery and compare."
           : result.status === "seeded"
           ? "Demo clients and charts are ready."
+          : result.reason === "organization already has client records"
+          ? "Demo media is already up to date."
           : result.reason ?? "Demo data was already present."
       );
 
