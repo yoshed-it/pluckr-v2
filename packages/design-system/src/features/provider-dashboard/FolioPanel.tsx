@@ -77,14 +77,18 @@ export function PluckrFolioPanel({
                 : "You don't have any clients yet. Seed demo data or add a client, then build today's folio."}
             </Text>
             <PluckrButton label="Build Today's Folio" onPress={() => onOpenPicker()} />
-            {!hasPracticeClients ? (
-              <PluckrButton
-                label={isSeeding ? "Seeding..." : "Seed Demo Data"}
-                variant="secondary"
-                disabled={isSeeding}
-                onPress={() => onSeedDemoData()}
-              />
-            ) : null}
+            <PluckrButton
+              label={
+                isSeeding
+                  ? "Seeding..."
+                  : hasPracticeClients
+                    ? "Refresh Demo Media"
+                    : "Seed Demo Data"
+              }
+              variant="secondary"
+              disabled={isSeeding}
+              onPress={() => onSeedDemoData()}
+            />
           </View>
         ) : (
           <View style={styles.activeStack}>
