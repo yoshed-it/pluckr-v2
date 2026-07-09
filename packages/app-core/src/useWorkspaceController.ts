@@ -112,7 +112,11 @@ export function useWorkspaceController(
       const result = await seedDemoOrganization(client, selectedOrganizationId);
 
       setWorkspaceNotice(
-        result.photos_seeded > 0
+        result.charts_seeded > 0 && result.photos_seeded > 0
+          ? "Demo chart history and photos are ready."
+          : result.charts_seeded > 0
+          ? "Demo chart history is ready for Clinical Memory."
+          : result.photos_seeded > 0
           ? "Demo photos are ready for gallery and compare."
           : result.status === "seeded"
           ? "Demo clients and charts are ready."

@@ -82,7 +82,7 @@ export function PluckrFolioPanel({
                 isSeeding
                   ? "Seeding..."
                   : hasPracticeClients
-                    ? "Refresh Demo Media"
+                    ? "Refresh Demo Data"
                     : "Seed Demo Data"
               }
               variant="secondary"
@@ -140,7 +140,7 @@ export function PluckrFolioPanel({
               ))}
             </ScrollView>
             <PluckrButton
-              label={isSeeding ? "Seeding..." : "Refresh Demo Media"}
+              label={isSeeding ? "Seeding..." : "Refresh Demo Data"}
               variant="secondary"
               disabled={isSeeding}
               onPress={() => onSeedDemoData()}

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { ensureDemoChartHistory } from "./demo-history";
 import { ensureDemoChartMedia } from "./demo-media";
 import { listClients } from "./clients";
 import type {
@@ -219,10 +220,12 @@ export async function seedDemoOrganization(
     reason?: string;
   };
 
+  const historyResult = await ensureDemoChartHistory(client, organizationId);
   const mediaResult = await ensureDemoChartMedia(client, organizationId);
 
   return {
     ...seedResult,
+    charts_seeded: historyResult.charts_seeded,
     photos_seeded: mediaResult.photos_seeded
   };
 }
