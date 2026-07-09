@@ -16,6 +16,10 @@ type PluckrFullScreenImageModalProps = {
   imageUrl: string | null;
   title?: string;
   subtitle?: string;
+  details?: Array<{
+    label: string;
+    value: string;
+  }>;
   actionLabel?: string;
   onClose: () => void;
   onAction?: () => void;
@@ -26,6 +30,7 @@ export function PluckrFullScreenImageModal({
   imageUrl,
   title,
   subtitle,
+  details = [],
   actionLabel,
   onClose,
   onAction
@@ -72,21 +77,37 @@ export function PluckrFullScreenImageModal({
               {
                 marginTop: safeTop + 42,
                 marginBottom:
-                  actionLabel && onAction ? safeBottom + 58 : safeBottom
+                  details.length > 0 || (actionLabel && onAction)
+                    ? safeBottom + 150
+                    : safeBottom
               }
             ]}
             resizeMode="contain"
           />
         ) : null}
-        {actionLabel && onAction ? (
-          <View style={[styles.footerRow, { bottom: safeBottom }]}>
-            <Pressable
-              accessibilityRole="button"
-              style={styles.actionButton}
-              onPress={onAction}
-            >
-              <Text style={styles.actionLabel}>{actionLabel}</Text>
-            </Pressable>
+        {details.length > 0 || (actionLabel && onAction) ? (
+          <View style={[styles.footerStack, { bottom: safeBottom }]}>
+            {details.length > 0 ? (
+              <View style={styles.detailsPanel}>
+                {details.map((detail) => (
+                  <View key={detail.label} style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>{detail.label}</Text>
+                    <Text numberOfLines={1} style={styles.detailValue}>
+                      {detail.value}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+            {actionLabel && onAction ? (
+              <Pressable
+                accessibilityRole="button"
+                style={styles.actionButton}
+                onPress={onAction}
+              >
+                <Text style={styles.actionLabel}>{actionLabel}</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
       </View>
@@ -145,11 +166,43 @@ const styles = StyleSheet.create({
     width: "100%",
     flex: 1
   },
-  footerRow: {
+  footerStack: {
     position: "absolute",
     left: pluckrAppTheme.spacing.lg,
     right: pluckrAppTheme.spacing.lg,
-    zIndex: 2
+    zIndex: 2,
+    gap: pluckrAppTheme.spacing.sm
+  },
+  detailsPanel: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: pluckrAppTheme.radii.lg,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.10)",
+    gap: 5
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: pluckrAppTheme.spacing.sm
+  },
+  detailLabel: {
+    width: 64,
+    color: "rgba(255,255,255,0.58)",
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.6
+  },
+  detailValue: {
+    flex: 1,
+    minWidth: 0,
+    color: "#FFFFFF",
+    fontSize: 13,
+    lineHeight: 17,
+    fontWeight: "700"
   },
   actionButton: {
     minHeight: 46,

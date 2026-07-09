@@ -139,6 +139,9 @@ export function PluckrChartDetailPanel({
       <PluckrFullScreenImageModal
         visible={Boolean(selectedImageUrl)}
         imageUrl={selectedImageUrl}
+        title={formatDateTime(chart.created_at)}
+        subtitle={getChartPhotoContext(chart)}
+        details={buildChartPhotoDetails(chart)}
         onClose={() => setSelectedImageUrl(null)}
       />
     </View>
@@ -209,6 +212,43 @@ function Metric({ label, value }: { label: string; value: string }) {
       <Text style={styles.metricValue}>{value}</Text>
     </View>
   );
+}
+
+function getChartPhotoContext(chart: ChartEntryRecord) {
+  const primaryArea = getChartTreatmentAreas(chart)[0];
+
+  return [primaryArea?.treatment_area ?? chart.treatment_area, primaryArea?.modality ?? chart.modality]
+    .filter(Boolean)
+    .join(" - ") || "Chart photo";
+}
+
+function buildChartPhotoDetails(chart: ChartEntryRecord) {
+  const primaryArea = getChartTreatmentAreas(chart)[0];
+
+  return [
+    {
+      label: "Date",
+      value: formatDateTime(chart.created_at)
+    },
+    primaryArea?.treatment_area || chart.treatment_area
+      ? {
+          label: "Area",
+          value: primaryArea?.treatment_area ?? chart.treatment_area ?? ""
+        }
+      : null,
+    primaryArea?.modality || chart.modality
+      ? {
+          label: "Mode",
+          value: primaryArea?.modality ?? chart.modality ?? ""
+        }
+      : null,
+    chart.tags.length > 0
+      ? {
+          label: "Tags",
+          value: chart.tags.slice(0, 3).join(", ")
+        }
+      : null
+  ].filter((detail): detail is { label: string; value: string } => detail !== null);
 }
 
 function formatDateTime(value: string) {

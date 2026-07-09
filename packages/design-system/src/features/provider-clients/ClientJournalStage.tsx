@@ -406,6 +406,9 @@ export function PluckrClientJournalStage({
         subtitle={
           selectedGalleryItem ? getGalleryItemContext(selectedGalleryItem) : undefined
         }
+        details={
+          selectedGalleryItem ? buildGalleryPhotoDetails(selectedGalleryItem) : []
+        }
         actionLabel="View Chart"
         onAction={() => {
           if (selectedGalleryItem) {
@@ -627,6 +630,33 @@ function PhotoComparisonPanel({ items }: { items: ClientGalleryItem[] }) {
 
 function getGalleryItemContext(item: ClientGalleryItem) {
   return [item.area, item.modality].filter(Boolean).join(" - ") || "Chart photo";
+}
+
+function buildGalleryPhotoDetails(item: ClientGalleryItem) {
+  return [
+    {
+      label: "Date",
+      value: formatSnapshotDate(item.chart.created_at)
+    },
+    item.area
+      ? {
+          label: "Area",
+          value: item.area
+        }
+      : null,
+    item.modality
+      ? {
+          label: "Mode",
+          value: item.modality
+        }
+      : null,
+    item.chart.tags.length > 0
+      ? {
+          label: "Tags",
+          value: item.chart.tags.slice(0, 3).join(", ")
+        }
+      : null
+  ].filter((detail): detail is { label: string; value: string } => detail !== null);
 }
 
 function buildCareSnapshotItems(client: ClientRecord, charts: ChartEntryRecord[]) {
