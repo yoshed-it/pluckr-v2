@@ -35,6 +35,7 @@ not bloat the current implementation slice.
 - investor/demo mode with curated sample organizations and resettable seed data
 - workflow automations for follow-up reminders, consent renewals, and care-plan nudges
 - media assignment inbox: captured photos start as pending media, then attach to a chart entry, body area, document, or consent record before becoming part of permanent clinical history
+- clinical memory system: see [Clinical Memory](./clinical-memory.md) for the phased plan covering client, area, provider, practice, and future privacy-preserving network memory
 
 ## Rules For Using This Doc
 

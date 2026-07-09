@@ -16,6 +16,7 @@
 - [Product Backlog](./planning/product-backlog.md)
 - [Architecture Rules](./planning/architecture-rules.md)
 - [Media Model](./planning/media-model.md)
+- [Clinical Memory](./planning/clinical-memory.md)
 - [TODO / Future / Ideas](./planning/todo-future-ideas.md)
 
 ## Legacy Reference
