@@ -487,9 +487,9 @@ function ClientPhotoGallery({
   return (
     <View style={styles.galleryStack}>
       <View style={styles.sectionHeader}>
-        <View>
+        <View style={styles.galleryHeaderCopy}>
           <Text style={styles.sectionTitle}>Photos</Text>
-          <Text style={styles.gallerySubtitle}>
+          <Text numberOfLines={2} style={styles.gallerySubtitle}>
             Compare progress while keeping every image tied to its chart.
           </Text>
         </View>

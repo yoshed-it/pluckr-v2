@@ -272,6 +272,7 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: pluckrAppTheme.spacing.sm,
     marginBottom: pluckrAppTheme.spacing.md
   },
   countChip: {
@@ -392,6 +393,10 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
   galleryStack: {
     gap: pluckrAppTheme.spacing.sm
   },
+  galleryHeaderCopy: {
+    flex: 1,
+    minWidth: 0
+  },
   gallerySubtitle: {
     color: pluckrAppTheme.colors.textMuted,
     fontSize: 12,
@@ -400,6 +405,7 @@ export const pluckrClientJournalStageStyles = StyleSheet.create({
     marginTop: 2
   },
   compareButton: {
+    flexShrink: 0,
     minHeight: 34,
     alignItems: "center",
     justifyContent: "center",
