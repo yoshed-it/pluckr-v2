@@ -10,17 +10,19 @@ import { pluckrAppTheme } from "../../tokens/pluckrAppTheme";
 
 type PreviousChartReferenceProps = {
   chart: ChartEntryRecord | null;
+  onOpenChart?: (chart: ChartEntryRecord) => void;
 };
 
 export function PreviousChartReference({
-  chart
+  chart,
+  onOpenChart
 }: PreviousChartReferenceProps) {
   const [expanded, setExpanded] = useState(false);
 
   if (!chart) {
     return (
       <View style={styles.referenceStrip}>
-        <Text style={styles.eyebrow}>Previous Treatment</Text>
+        <Text style={styles.eyebrow}>Clinical Memory</Text>
         <Text style={styles.emptyCopy}>No previous treatment yet.</Text>
       </View>
     );
@@ -82,6 +84,15 @@ export function PreviousChartReference({
               </Text>
             ) : null}
           </View>
+          {onOpenChart ? (
+            <Pressable
+              accessibilityRole="button"
+              style={styles.viewChartButton}
+              onPress={() => onOpenChart(chart)}
+            >
+              <Text style={styles.viewChartLabel}>View prior chart</Text>
+            </Pressable>
+          ) : null}
         </View>
       ) : null}
     </View>
@@ -186,6 +197,20 @@ const styles = StyleSheet.create({
   },
   expandedStack: {
     gap: 6
+  },
+  viewChartButton: {
+    alignSelf: "flex-start",
+    minHeight: 28,
+    justifyContent: "center",
+    paddingHorizontal: 9,
+    borderRadius: pluckrAppTheme.radii.full,
+    backgroundColor: "rgba(13, 104, 99, 0.10)"
+  },
+  viewChartLabel: {
+    color: pluckrAppTheme.colors.sageStrong,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: "900"
   },
   notesPreview: {
     color: pluckrAppTheme.colors.textSecondary,

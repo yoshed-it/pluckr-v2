@@ -360,6 +360,10 @@ export function PluckrClientJournalStage({
           onPickImages={onPickChartImages}
           onRemoveImage={onRemoveChartImage}
           onProbeStyleChange={onProbeStyleChange}
+          onOpenPreviousChart={(chart) => {
+            onCancelChart();
+            setSelectedChart(chart);
+          }}
           onSubmitChart={onSubmitChart}
           onCancelChart={onCancelChart}
         />

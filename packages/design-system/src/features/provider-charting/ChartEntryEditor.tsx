@@ -82,6 +82,7 @@ type ChartEditorProps = {
   onPickImages: () => void;
   onRemoveImage: (image: ChartImageDraft) => void;
   onProbeStyleChange: (areaId: string, usingOnePiece: boolean) => void;
+  onOpenPreviousChart?: (chart: ChartEntryRecord) => void;
   onSubmitChart: () => void;
   onCancelChart: () => void;
 };
@@ -107,6 +108,7 @@ export function PluckrChartEntryEditor({
   onPickImages,
   onRemoveImage,
   onProbeStyleChange,
+  onOpenPreviousChart,
   onSubmitChart,
   onCancelChart
 }: ChartEditorProps) {
@@ -156,6 +158,7 @@ export function PluckrChartEntryEditor({
             }
             onOpenDrawer={setActiveDrawer}
             onFieldChange={onTreatmentAreaFormChange}
+            onOpenPreviousChart={onOpenPreviousChart}
           />
         ))}
 
@@ -387,7 +390,8 @@ function TreatmentAreaSection({
   treatmentAreaCount,
   previousChartReference,
   onOpenDrawer,
-  onFieldChange
+  onFieldChange,
+  onOpenPreviousChart
 }: {
   area: TreatmentAreaForm;
   index: number;
@@ -399,6 +403,7 @@ function TreatmentAreaSection({
     key: TreatmentAreaFormKey,
     value: string
   ) => void;
+  onOpenPreviousChart?: (chart: ChartEntryRecord) => void;
 }) {
   const selectedProbe = formatProbeName({
     shank: area.probeShank,
@@ -442,7 +447,10 @@ function TreatmentAreaSection({
         ) : null}
       </View>
 
-      <PreviousChartReference chart={previousChartReference} />
+      <PreviousChartReference
+        chart={previousChartReference}
+        onOpenChart={onOpenPreviousChart}
+      />
 
       <View style={styles.sectionBody}>
         <Text style={styles.sectionTitleSmall}>Modality</Text>
